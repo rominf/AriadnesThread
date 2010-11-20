@@ -74,7 +74,7 @@ void Map::removeFloor(int i)
     floors.remove(i);
 }
 
-MapFloor* Map::getFloor(int i) const
+MapFloor* Map::floor(int i) const
 {
     return floors.at(i);
 }

@@ -9,7 +9,9 @@ MapFloor::MapFloor(const QRectF &sceneRect, QString floorName,QObject *parent) :
     QBrush *brush = new QBrush(Qt::white);*/
     border = new QGraphicsRectItem(sceneRect, 0, this);
     border->setBrush(QBrush(Qt::white));
+    border->setZValue(-2.0);
     outline = 0;
+    base = 0;
     tempLine = 0;
     tempCircle = new QGraphicsEllipseItem(0, 0, 0, 0);
     addItem(tempCircle);
@@ -123,125 +125,130 @@ void MapFloor::mousePressEvent(QGraphicsSceneMouseEvent *event)
                     addItem(tempPolyline.back());
                     break;
                 }
-            default:{break;} // Ignore other :)
+            default:
+                    break; // Ignore other :)
             }
             break;
         }
+    default:
+        break;
     }
 }
 
 void MapFloor::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    /*switch (event->buttons())
-    {
-    case Qt::NoButton:
-        {*/
+
     /*if (event->scenePos().x() < 0)
         event->setScenePos(QPoint(0, event->scenePos().y()));*/
-    QPointF pos = QPointF(0, 0);
-    if (!validatePos(event->scenePos(), pos))
-        event->setScenePos(pos);
-    pos.setX(0);
-    if (!getPoint(event->scenePos(), pos))
+    switch (event->buttons())
     {
-        pos = event->scenePos();
-    }
-            switch (mode)
+    case Qt::NoButton:
+//        if (mode != Planning)
+//        {
+            QPointF pos = QPointF(0, 0);
+            if (!validatePos(event->scenePos(), pos))
+                event->setScenePos(pos);
+            bool isCtrl = (event->modifiers() == Qt::ControlModifier);
+            Straight straight;
+//        }
+        switch (mode)
+        {
+        case WallAdd:
             {
-            case WallAdd:
+                if (tempLine)
                 {
-                    if (tempLine)
+                    QLineF line(tempLine->line().p1(), pos);
+                    if (!isCtrl)
                     {
-                        QLineF line(tempLine->line().p1(), pos);
-                        if (event->modifiers() != Qt::ControlModifier)
-                        {
-                            if (abs(line.dx()) >= abs(line.dy()))
-                            {
-                                line.setP2(QPointF(line.x2(), line.y1()));
-                            }
-                            else
-                            {
-                                line.setP2(QPointF(line.x1(), line.y2()));
-                            }
-                        }
-                        tempLine->setLine(line);
+                        straight = straighten(line);
+//                        if (line.dx() == 0)
+//                            straight = SaveX;
+//                        else
+//                            straight = SaveY;
                     }
-                    /*else
-                    {
-                        QPointF p;
-                        if (getPoint(event->scenePos(), p))
-                            event->setScenePos(p);
-                    }*/
-                    break;
+                    else
+                        straight = None;
+                    line.setP2(getPoint(line.p2(), straight));
+                    tempLine->setLine(line);
                 }
-            case FloorAdd:
-            case AreaAdd:
+                /*else
                 {
-                    if (!(tempPolyline.isEmpty()))
-                    {
-                        QLineF line(tempPolyline.back()->line().p1(), pos);
-                        if (event->modifiers() != Qt::ControlModifier)
-                        {
-                            // Straightening line, if Shift is pressed
-                            if (abs(line.dx()) >= abs(line.dy()))
-                            {
-                                line.setP2(QPointF(line.x2(), line.y1()));
-                            }
-                            else
-                            {
-                                line.setP2(QPointF(line.x1(), line.y2()));
-                            }
-                        }
-                        tempPolyline.at(tempPolyline.size()-1)->setLine(line);
-                    }
-                    break;
-                }
-            case DoorAdd:
-                {
-                    int x = event->scenePos().toPoint().x();
-                    int y = event->scenePos().toPoint().y();
-                    bool ex = false;
-                    for (int i = 1; (i != 10)&(!ex); ++i)
-                    {
-                        for (int j = x-i; (j != x+i)&(!ex); ++j)
-                        {
-                            if (itemAt(j, y-i) != 0)
-                            {
-                                tempCircle->setRect(j, y-i, 5, 5);
-                                ex = true;
-                                tempCircle->show();
-                            }
-                            if (itemAt(j, y+i) != 0)
-                            {
-                                tempCircle->setRect(j, y+i, 5, 5);
-                                ex = true;
-                                tempCircle->show();
-                            }
-                        }
-                        for (int j = y-i; (j != y+i)&(!ex); ++j)
-                        {
-                            if (itemAt(x-i, j) != 0)
-                            {
-                                tempCircle->setRect(x-i, j, 5, 5);
-                                ex = true;
-                                tempCircle->show();
-                            }
-                            if (itemAt(x+i, j) != 0)
-                            {
-                                tempCircle->setRect(x+i, j, 5, 5);
-                                ex = true;
-                                tempCircle->show();
-                            }
-                        }
-
-                    }
-                    if (!ex & tempCircle->isVisible())
-                    {
-                        tempCircle->hide();
-                    }
-                }
-            default:{break;} // Ignore other :)
+                    QPointF p;
+                    if (getPoint(event->scenePos(), p))
+                        event->setScenePos(p);
+                }*/
+                break;
             }
+        case FloorAdd:
+        case AreaAdd:
+            {
+                if (!(tempPolyline.isEmpty()))
+                {
+                    QLineF line(tempPolyline.back()->line().p1(), pos);
+                    if (!isCtrl)
+                    {
+                        straight = straighten(line);
+//                        if (line.dx() == 0)
+//                            straight = SaveX;
+//                        else
+//                            straight = SaveY;
+                    }
+                    else
+                        straight = None;
+                    line.setP2(getPoint(line.p2(), straight));
+                    tempPolyline.at(tempPolyline.size()-1)->setLine(line);
+                }
+                break;
+            }
+        case DoorAdd:
+            {
+                int x = event->scenePos().toPoint().x();
+                int y = event->scenePos().toPoint().y();
+                bool ex = false;
+                for (int i = 1; (i != 10)&(!ex); ++i)
+                {
+                    for (int j = x-i; (j != x+i)&(!ex); ++j)
+                    {
+                        if (itemAt(j, y-i) != 0)
+                        {
+                            tempCircle->setRect(j, y-i, 5, 5);
+                            ex = true;
+                            tempCircle->show();
+                        }
+                        if (itemAt(j, y+i) != 0)
+                        {
+                            tempCircle->setRect(j, y+i, 5, 5);
+                            ex = true;
+                            tempCircle->show();
+                        }
+                    }
+                    for (int j = y-i; (j != y+i)&(!ex); ++j)
+                    {
+                        if (itemAt(x-i, j) != 0)
+                        {
+                            tempCircle->setRect(x-i, j, 5, 5);
+                            ex = true;
+                            tempCircle->show();
+                        }
+                        if (itemAt(x+i, j) != 0)
+                        {
+                            tempCircle->setRect(x+i, j, 5, 5);
+                            ex = true;
+                            tempCircle->show();
+                        }
+                    }
+
+                }
+                if (!ex & tempCircle->isVisible())
+                {
+                    tempCircle->hide();
+                }
+            }
+        default:
+            break; // Ignore other :)
+        }
+        break;
+    }
 
       /*      break;
        }
@@ -297,6 +304,33 @@ void MapFloor::keyPressEvent(QKeyEvent *event)
     }
 }
 
+void MapFloor::addBase(QPixmap &pixmap)
+{
+    if (!base)
+    {
+        base = new QGraphicsPixmapItem(pixmap);
+        base->setZValue(-1.0);
+        base->setFlags(QGraphicsItem::ItemIsMovable);
+        addItem(base);
+    }
+    else
+        base->setPixmap(pixmap);
+}
+
+MapFloor::Straight MapFloor::straighten(QLineF &line)
+{
+    if (abs(line.dx()) >= abs(line.dy()))
+    {
+        line.setP2(QPointF(line.x2(), line.y1()));
+        return SaveY;
+    }
+    else
+    {
+        line.setP2(QPointF(line.x1(), line.y2()));
+        return SaveX;
+    }
+}
+
 qreal MapFloor::dest(QPointF m, QPointF n)
 {
     return qSqrt(qPow(m.x() - n.x(), 2) + qPow(m.y() - n.y(), 2));
@@ -346,7 +380,7 @@ QPointF MapFloor::getPerpendicularBase(QPointF m, QLineF l)
 }
 
 bool MapFloor::getPointFromLine(QPointF m, QPointF &newPoint,
-                                const QLineF &l, qreal &min)
+                                const QLineF &l, Straight straight, qreal &min)
 {
     QPointF *p = new QPointF();
     *p = getPerpendicularBase(m, l);
@@ -354,7 +388,26 @@ bool MapFloor::getPointFromLine(QPointF m, QPointF &newPoint,
     if ((d < 50) & (d < min))
     {
         min = d;
-        newPoint = *p;
+        switch (straight)
+        {
+        case None:
+            newPoint = *p;
+            break;
+        case SaveX:
+            newPoint.setX(m.x());
+            if (l.dx() == 0)                    // If line is near and parallel
+                newPoint.setY(p->y());
+            else
+                newPoint.setY((l.dy()/l.dx())*(m.x() - l.x1()) + l.y1());
+            break;
+        case SaveY:
+            newPoint.setY(m.y());
+            if (l.dy() == 0)                    // If line is near and parallel
+                newPoint.setX(p->x());
+            else
+                newPoint.setX((l.dx()/l.dy())*(m.y() - l.y1()) + l.x1());
+            break;
+        }
         return true;
     }
     else
@@ -380,12 +433,10 @@ bool MapFloor::getPointFromAreasTops(QPointF m, QPointF &newPoint,
 }
 
 bool MapFloor::getPointFromAreasLines(QPointF m, QPointF &newPoint,
-                      const MapArea &area, qreal &min)
+                      const MapArea &area, Straight straight, qreal &min)
 {
     int size = area.polygon().size();
-    qreal d;
     QLineF *l = new QLineF();
-    QPointF *p = new QPointF();
     for (int i = 0; i != size; ++i)
     {
         l->setPoints(area.polygon().at(i),
@@ -398,15 +449,15 @@ bool MapFloor::getPointFromAreasLines(QPointF m, QPointF &newPoint,
             min = d;
             newPoint = *p;
         }*/
-        getPointFromLine(m, newPoint, *l, min);
+        getPointFromLine(m, newPoint, *l, straight, min);
     }
     return true;
 }
 
-bool MapFloor::getPoint(QPointF m, QPointF &newPoint)
+QPointF MapFloor::getPoint(QPointF m, Straight straight)
 {
     qreal min = 100500.0;   // There must be max real
-
+    QPointF newPoint;
     /*for (int i = 0; i != areas.size(); ++i)
         {
             size = areas.at(i)->polygon().size();
@@ -420,44 +471,44 @@ bool MapFloor::getPoint(QPointF m, QPointF &newPoint)
                 }
             }
         }*/
-    if (outline)
-        if (getPointFromAreasTops(m, newPoint, *outline))
-            return true;
-
-    for (int i = 0; i != areas.size(); ++i)
+    if (straight == None)
     {
-        if (getPointFromAreasTops(m, newPoint, *areas.at(i)))
-            return true;
+        if (outline)
+            if (getPointFromAreasTops(m, newPoint, *outline))
+                return newPoint;
+
+        for (int i = 0; i != areas.size(); ++i)
+        {
+            if (getPointFromAreasTops(m, newPoint, *areas.at(i)))
+                return newPoint;
+        }
+
     }
 
     if (outline)
-        getPointFromAreasLines(m, newPoint, *outline, min);
+        getPointFromAreasLines(m, newPoint, *outline, straight, min);
 
     for (int i = 0; i != areas.size(); ++i)
     {
-        getPointFromAreasLines(m, newPoint, *areas.at(i), min);
+        getPointFromAreasLines(m, newPoint, *areas.at(i), straight, min);
     }
 
     for (int i = 0; i != walls.size(); ++i)
     {
-        getPointFromLine(m, newPoint, walls.at(i)->line(), min);
+        getPointFromLine(m, newPoint, walls.at(i)->line(), straight, min);
     }
 
     if (min == 100500.0)
-        return false;
+        return m;
     else
-        return true;
+        return newPoint;
+
 }
 
 bool MapFloor::validatePos(QPointF pos, QPointF &rightPos)
 {
-    //rightPos = pos;
     rightPos.setX(qMin(qMax(0.0, pos.x()), sceneRect().right()));
     rightPos.setY(qMin(qMax(0.0, pos.y()), sceneRect().bottom()));
-    /*rightPos.setX(pos.x() <= 0? 0:pos.x());
-    rightPos.setX(pos.x() > sceneRect().right()? sceneRect().right():pos.x());
-    rightPos.setY(pos.y() < 0? 0:pos.y());
-    rightPos.setY(pos.y() > sceneRect().bottom()? sceneRect().bottom():pos.y());*/
     return pos == rightPos;
 }
 

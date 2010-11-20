@@ -21,12 +21,14 @@ class MapFloor: public QGraphicsScene
     friend QDataStream &operator>>(QDataStream &input, MapFloor &floor);
 public:
     enum Mode {Idle, Planning, FloorAdd, WallAdd, AreaAdd, DoorAdd, Marking};
+    enum Straight {None, SaveX, SaveY};
 
     explicit MapFloor(const QRectF &sceneRect, QString floorName = "",
                       QObject *parent = 0);
     QString getName() const;
     void setName(const QString &floorName);
     void setMode(Mode m);
+    void addBase(QPixmap &pixmap);
 
 signals:
     void modeChanged(MapFloor::Mode);
@@ -45,26 +47,30 @@ private:
     MapArea *outline;
     QVector<MapArea*> areas;
     QVector<QGraphicsLineItem*> walls;
+    QGraphicsPixmapItem *base;
 
     QGraphicsLineItem *tempLine;
     QVector<QGraphicsLineItem*> tempPolyline;
     QGraphicsEllipseItem *tempCircle;
 
+    bool validatePos(QPointF pos, QPointF &rightPos);
+    Straight straighten(QLineF &line);
     qreal dest(QPointF m, QPointF n);
-    /*void getSides(QPointF m, QLineF l, qreal &a, qreal &b, qreal &c);
-    qreal perpendicularLength(qreal p, qreal a, qreal b, qreal c);
-    qreal dest(QPointF m, QLineF l);*/
     QPointF getPerpendicularBase(QPointF m, QLineF l);
     bool getPointFromLine(QPointF m, QPointF &newPoint,
-                               const QLineF &l, qreal &min);
+                               const QLineF &l, Straight straight, qreal &min);
     bool getPointFromAreasTops(QPointF m, QPointF &newPoint,
                                const MapArea &area);
     bool getPointFromAreasLines(QPointF m, QPointF &newPoint,
-                                const MapArea &area, qreal &min);
-    bool getPoint(QPointF m, QPointF &newPoint);
-    //void getLine(QPointF m, QLineF &l, bool isControlPressed);
+                                const MapArea &area, Straight straight,
+                                qreal &min);
+    QPointF getPoint(QPointF m, Straight straight);
+//    void getLine(QPointF m, QLineF &l, bool isControlPressed);
+//    void getSides(QPointF m, QLineF l, qreal &a, qreal &b, qreal &c);
+//    qreal perpendicularLength(qreal p, qreal a, qreal b, qreal c);
+//    qreal dest(QPointF m, QLineF l);
 
-    bool validatePos(QPointF pos, QPointF &rightPos);
+
     void finalizeFloor();
     void finalizeWall();
     void finalizeArea();

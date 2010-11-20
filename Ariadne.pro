@@ -4,16 +4,16 @@ HEADERS += \
     Common/mapfloor.h \
     Common/maparea.h \
     Common/map.h \
-    MapDesigner/mainwindow.h \
-    MapDesigner/dialogmapsize.h
+    Ariadne/mainwindow.h \
+    Ariadne/dialogmapsize.h
 
 SOURCES += \
     Common/mapfloor.cpp \
     Common/maparea.cpp \
     Common/map.cpp \
-    MapDesigner/mainwindow.cpp \
-    MapDesigner/main.cpp \
-    MapDesigner/dialogmapsize.cpp
+    Ariadne/mainwindow.cpp \
+    Ariadne/main.cpp \
+    Ariadne/dialogmapsize.cpp
 
 RESOURCES += \
     MapIcons.qrc
