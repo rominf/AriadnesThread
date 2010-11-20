@@ -60,15 +60,20 @@ public:
     enum State {stEnable_Visible, stDisable_Visible, stDisable_Unvisible};
     Q_DECLARE_FLAGS(Elements, Element)
 
+/*protected:
+    virtual void keyPressEvent(QKeyEvent *event);*/
+
 private slots:
     void mapNew();                      // Creating map
     void mapOpen();                     // Opening map
     void mapSave();                     // Saving map
     void previousFloor();               // Set visible previous floor
     void nextFloor();                   // Set visible next floor
-    void zoomIn(qreal r = 1.1);
-    void zoomOut(qreal r = 0.9);
-    void FloorNameChange(const QString &); // Set current floor name
+    void zoomOut();
+    void zoomIn();
+    void zoomFit();
+    void addBase();
+    void floorNameChange(const QString &); // Set current floor name
     void addFloor();                    // Adding floor, drawing outline for it
     void addWall();                     // Adding wall
     void addArea();                     // Adding area
@@ -84,6 +89,7 @@ private:
     static const qreal cMSizeX = 300;
     static const qreal cMSizeY = 300;
     static const qreal cPixPerRealM = 10;
+    static const qreal cZoom = 0.1;
     //static const qreal cScale = 1000;
 
     ///////////////////////////////Variables////////////////////////////////////
@@ -107,6 +113,10 @@ private:
     QAction *actSwitchToMarkingMode;
     QAction *actPreviousFloor;
     QAction *actNextFloor;
+    QAction *actZoomOut;
+    QAction *actZoomIn;
+    QAction *actZoomFit;
+    QAction *actAddBase;
     QAction *actAddFloor;
     QAction *actAddWall;
     QAction *actAddArea;

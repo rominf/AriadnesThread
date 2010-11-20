@@ -8,8 +8,9 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     qApp->setWindowIcon(QIcon(":/AppIcon"));
-    qApp->setApplicationName("Проектировщик зданий");
+    qApp->setApplicationName(tr("Ариадна"));
     qApp->setApplicationVersion("1.0");
+    setWindowTitle(qApp->applicationName());
 
     // Create central widget
     {
@@ -32,16 +33,24 @@ MainWindow::MainWindow(QWidget *parent)
     openedFile = "map.bld";
 }
 
-//QDataStream & operator<<(QDataStream & output, const Map &map)
-//{
-//    output << map.getFloor(0)->font();
-//    //floor.setMode(MapFloor::Marking);
-//    return output;
-//}
-
 MainWindow::~MainWindow()
 {
 }
+
+/*void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    switch (event->key())
+    {
+    case Qt::Key_Plus:
+        zoomIn();
+        break;
+    case Qt::Key_Minus:
+        zoomOut();
+        break;
+    default:
+        break;
+    }
+}*/
 
 void MainWindow::createActions()
 {
@@ -80,9 +89,27 @@ void MainWindow::createActions()
                                    this);
     connect(actPreviousFloor, SIGNAL(triggered()), SLOT(previousFloor()));
     actPreviousFloor->setShortcut(Qt::CTRL + Qt::Key_Left);
+
     actNextFloor = new QAction(QIcon(":/Next"), tr("Следующий этаж"), this);
     connect(actNextFloor, SIGNAL(triggered()), SLOT(nextFloor()));
     actNextFloor->setShortcut(Qt::CTRL + Qt::Key_Right);
+
+
+    actZoomOut= new QAction(QIcon(":/ZoomOut"), tr("Уменьшить"), this);
+    connect(actZoomOut, SIGNAL(triggered()), SLOT(zoomOut()));
+    actZoomOut->setShortcut(Qt::CTRL + Qt::Key_Minus);
+
+    actZoomIn = new QAction(QIcon(":/ZoomIn"), tr("Увеличить"), this);
+    connect(actZoomIn, SIGNAL(triggered()), SLOT(zoomIn()));
+    actZoomIn->setShortcut(Qt::CTRL + Qt::Key_Plus);
+
+    actZoomFit = new QAction(QIcon(":/ZoomFit"), tr("Вместить"), this);
+    connect(actZoomFit, SIGNAL(triggered()), SLOT(zoomFit()));
+    actZoomFit->setShortcut(Qt::CTRL + Qt::Key_Asterisk);
+
+    actAddBase = new QAction(QIcon(":/AddBase"), tr("Добавить подложку"), this);
+    connect(actAddBase, SIGNAL(triggered()), SLOT(addBase()));
+    actAddBase->setShortcut(Qt::CTRL + Qt::Key_B);
 
 
     actAddFloor = new QAction(QIcon(":/AddFloor"), tr("Добавить этаж"), this);
@@ -152,6 +179,10 @@ void MainWindow::createToolBars()
     cbxFloorSelect->setInsertPolicy(QComboBox::NoInsert);
     tbrView->addWidget(cbxFloorSelect);
     tbrView->addAction(actNextFloor);
+    tbrView->addAction(actZoomOut);
+    tbrView->addAction(actZoomIn);
+    tbrView->addAction(actZoomFit);
+    tbrView->addAction(actAddBase);
 
     /*tbrFloorNameChange = new QToolBar(tr("Изменить название этажа"));
     addToolBar(Qt::BottomToolBarArea, tbrFloorNameChange);
@@ -201,6 +232,7 @@ void MainWindow::createGraphics()
     setState(eFile | eMode | eView | eFloorNameChange | eAdd | eHelp,
              stEnable_Visible);
     setState(eDock, stDisable_Unvisible);
+    //setFocus();
     switchMode(MapFloor::Planning);
 }
 
@@ -244,6 +276,12 @@ void MainWindow::setState(Elements elem, State st)
         actPreviousFloor->setVisible(vs);
         actNextFloor->setEnabled(en);
         actNextFloor->setVisible(vs);
+        actZoomOut->setEnabled(en);
+        actZoomOut->setVisible(vs);
+        actZoomIn->setEnabled(en);
+        actZoomIn->setVisible(vs);
+        actZoomFit->setEnabled(en);
+        actZoomFit->setVisible(vs);
 
         /*menu->menuAction()->setEnabled(vs);
         menuMode->menuAction()->setVisible(vs);*/
@@ -338,7 +376,7 @@ void MainWindow::mapOpen()
             setActiveFloor(curFloor);
             view->fitInView(view->sceneRect(), Qt::KeepAspectRatio);
             for (int j = 0; j != map->floorsNumber(); ++j)
-                cbxFloorSelect->addItem(map->getFloor(j)->getName());
+                cbxFloorSelect->addItem(map->floor(j)->getName());
             openedFile = f.fileName();
         }
         else
@@ -372,19 +410,35 @@ void MainWindow::nextFloor()
     setActiveFloor(curFloor + 1);
 }
 
-void MainWindow::zoomIn(qreal r)
+void MainWindow::zoomOut()
 {
-    view->scale(r, r);
+    view->scale(1 - cZoom, 1 - cZoom);
 }
 
-void MainWindow::zoomOut(qreal r)
+void MainWindow::zoomIn()
 {
-    view->scale(r, r);
+    view->scale(1 + cZoom, 1 + cZoom);
 }
 
-void MainWindow::FloorNameChange(const QString &floorName)
+void MainWindow::zoomFit()
 {
-    map->getFloor(curFloor)->setName(floorName);
+    view->fitInView(view->sceneRect(), Qt::KeepAspectRatio);
+}
+
+void MainWindow::addBase()
+{
+    QString str = QFileDialog::getOpenFileName(
+            this, tr("Выбирете подложку"), "", tr("Изображения(*.jpg *.bmp)"));
+    if (!str.isNull())
+    {
+        QPixmap pixmap(str);
+        map->floor(curFloor)->addBase(pixmap);
+    }
+}
+
+void MainWindow::floorNameChange(const QString &floorName)
+{
+    map->floor(curFloor)->setName(floorName);
     cbxFloorSelect->setItemText(curFloor, floorName);
 }
 
@@ -464,7 +518,7 @@ void MainWindow::switchMode(MapFloor::Mode m)
     }
     if (map->floorsNumber() != 0)
     {
-        map->getFloor(curFloor)->setMode(mode = m);
+        map->floor(curFloor)->setMode(mode = m);
     }
 }
 
@@ -480,29 +534,22 @@ void MainWindow::setActiveFloor(int i)
         curFloor = i;
         cbxFloorSelect->setCurrentIndex(i);
         //ldtFloorNameChange->setText(map->getFloor(i)->getName());
-        view->setScene(map->getFloor(i));
-        connect(map->getFloor(i), SIGNAL(modeChanged(MapFloor::Mode)),
+        view->setScene(map->floor(i));
+        connect(map->floor(i), SIGNAL(modeChanged(MapFloor::Mode)),
                 SLOT(switchMode(MapFloor::Mode)));
+        setFocus();
     }
 }
 
 void MainWindow::about()
 {
-    /*QString *s = new QString("<b>"+qApp->applicationName()+" "
-                            +qApp->applicationVersion()+" (альфа)</b><br>"+
-                            "\""+qApp->applicationName()+
-                            "\" является частью программного комлекса"
-                            " \"Карты зданий\". Эта программа создает карты для "
-                            "последующего их отображения в программе "
-                            "\"Навигатор\".<br>&copy;Роман Инфлянскас. "
-                            "2010 г.");*/
+    QMessageBox::about(this, tr("О программе"), "<b>" + qApp->applicationName()
+                       + " " + qApp->applicationVersion() + "</b>" + "<br>" +
+                       tr("Программа для для перевода пользователем "
+                          "поэтажного плана здания в собственный векторный "
+                          "формат, добавления информации об объектах, "
+                          "автоматизированного создания и редактирования "
+                          "графа здания."));
 
-    QMessageBox::about(this, tr("О программе"),
-                       tr("<b>Проектировщик зданий 1.0 (альфа)</b><br>"
-                       "\"Проектировщик зданий\" является частью программного комлекса"
-                       " \"Карты зданий\". Эта программа создает карты для "
-                       "последующего их отображения в программе "
-                       "\"Навигатор\".<br>&copy;Роман Инфлянскас. "
-                       "2010 г."));
 
 }

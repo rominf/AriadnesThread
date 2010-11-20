@@ -18,7 +18,7 @@ public:
     int floorsNumber();
     void insertFloor(int i, QString floorName = "");
     void removeFloor(int i);
-    MapFloor* getFloor(int i) const;
+    MapFloor* floor(int i) const;
 
 signals:
 
