@@ -1,0 +1,19 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="Save">Icons/disk-black.png</file>
+        <file alias="New">Icons/document.png</file>
+        <file alias="Open">Icons/folder-horizontal-open.png</file>
+        <file alias="AddDoor">Icons/door.png</file>
+        <file alias="AddWall">Icons/wall.png</file>
+        <file alias="AddFloor">Icons/layers-arrange.png</file>
+        <file alias="AddArea">Icons/layer-select.png</file>
+        <file>Icons/hammer-left.png</file>
+        <file>Icons/pencil.png</file>
+        <file alias="MarkingMode">Icons/tag.png</file>
+        <file>Icons/ruler--pencil.png</file>
+        <file alias="PlanningMode">Icons/pencil-ruler.png</file>
+        <file alias="AppIcon">Icons/starthere.png</file>
+        <file alias="Previous">Icons/arrow-180.png</file>
+        <file alias="Next">Icons/arrow.png</file>
+    </qresource>
+</RCC>
