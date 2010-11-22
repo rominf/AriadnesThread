@@ -20,6 +20,13 @@ class MapFloor: public QGraphicsScene
     friend QDataStream &operator<<(QDataStream &output, const MapFloor &floor);
     friend QDataStream &operator>>(QDataStream &input, MapFloor &floor);
 public:
+    /*static const qreal cCursorCircleR;
+    static const qreal cMagnetDestToLine;
+    static const qreal cMagnetDestToTop;*/
+    #define cCursorCircleR 20.0
+    #define cMagnetDestToLine 50.0
+    #define cMagnetDestToTop 20.0
+
     enum Mode {Idle, Planning, FloorAdd, WallAdd, AreaAdd, DoorAdd, Marking};
     enum Straight {None, SaveX, SaveY};
 
@@ -41,17 +48,19 @@ protected:
 
 private:
     Mode mode;
-
     QString name;
     QGraphicsRectItem *border;
     MapArea *outline;
     QVector<MapArea*> areas;
     QVector<QGraphicsLineItem*> walls;
     QGraphicsPixmapItem *base;
+    bool isCrossLinesActive;
 
     QGraphicsLineItem *tempLine;
     QVector<QGraphicsLineItem*> tempPolyline;
-    QGraphicsEllipseItem *tempCircle;
+    QGraphicsLineItem *crossLineHorizontal;
+    QGraphicsLineItem *crossLineVertical;
+    QGraphicsEllipseItem *cursorCircle;
 
     bool validatePos(QPointF pos, QPointF &rightPos);
     Straight straighten(QLineF &line);
@@ -70,6 +79,7 @@ private:
 //    qreal perpendicularLength(qreal p, qreal a, qreal b, qreal c);
 //    qreal dest(QPointF m, QLineF l);
 
+    void removeLastFromTempPolyline();
 
     void finalizeFloor();
     void finalizeWall();
