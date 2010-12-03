@@ -12,6 +12,9 @@ MainWindow::MainWindow(QWidget *parent)
     qApp->setApplicationVersion("1.0");
     setWindowTitle(qApp->applicationName());
 
+    map = 0;
+    view = 0;
+
     // Create central widget
     {
     wgtCentral = new QWidget;
@@ -97,15 +100,15 @@ void MainWindow::createActions()
 
     actZoomOut= new QAction(QIcon(":/ZoomOut"), tr("Уменьшить"), this);
     connect(actZoomOut, SIGNAL(triggered()), SLOT(zoomOut()));
-    actZoomOut->setShortcut(Qt::CTRL + Qt::Key_Minus);
+    actZoomOut->setShortcut(/*Qt::CTRL + */Qt::Key_Minus);
 
     actZoomIn = new QAction(QIcon(":/ZoomIn"), tr("Увеличить"), this);
     connect(actZoomIn, SIGNAL(triggered()), SLOT(zoomIn()));
-    actZoomIn->setShortcut(Qt::CTRL + Qt::Key_Plus);
+    actZoomIn->setShortcut(/*Qt::CTRL + */Qt::Key_Plus);
 
     actZoomFit = new QAction(QIcon(":/ZoomFit"), tr("Вместить"), this);
     connect(actZoomFit, SIGNAL(triggered()), SLOT(zoomFit()));
-    actZoomFit->setShortcut(Qt::CTRL + Qt::Key_Asterisk);
+    actZoomFit->setShortcut(/*Qt::CTRL + */Qt::Key_Asterisk);
 
     actAddBase = new QAction(QIcon(":/AddBase"), tr("Добавить подложку"), this);
     connect(actAddBase, SIGNAL(triggered()), SLOT(addBase()));
@@ -224,16 +227,25 @@ void MainWindow::createDock()
 
 void MainWindow::createGraphics()
 {
-    view = new QGraphicsView();
-    view->setMouseTracking(true);
-    view->setBackgroundBrush(QBrush(Qt::gray));
-    vblwgtCentral->addWidget(view);
-    view->show();
-    setState(eFile | eMode | eView | eFloorNameChange | eAdd | eHelp,
-             stEnable_Visible);
-    setState(eDock, stDisable_Unvisible);
-    //setFocus();
-    switchMode(MapFloor::Planning);
+    if (!view)
+    {
+        view = new QGraphicsView();
+        view->setMouseTracking(true);
+        view->setBackgroundBrush(QBrush(Qt::gray));/*
+        view->setViewport(new QGLWidget());
+        view->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);*/
+        vblwgtCentral->addWidget(view);
+        view->show();
+        setState(eFile | eMode | eView | eFloorNameChange | eAdd | eHelp,
+                 stEnable_Visible);
+        setState(eDock, stDisable_Unvisible);
+        //setFocus();
+        switchMode(MapFloor::Planning);
+    }
+    else
+    {
+        cbxFloorSelect->clear();
+    }
 }
 
 void MainWindow::setState(Elements elem, State st)
@@ -339,6 +351,8 @@ void MainWindow::mapNew()
     DialogMapSize* pDialog = new DialogMapSize(this);
     if (pDialog->exec() == QDialog::Accepted)
     {
+        if (map)
+            delete map;
         map = new Map(cPixPerRealM, displayPixPerM(width(), widthMM()),
                       pDialog->getMSizeX()*cPixPerRealM,
                       pDialog->getMSizeY()*cPixPerRealM, this);
@@ -369,13 +383,15 @@ void MainWindow::mapOpen()
                                               "карты или поврежден."));
                 return;
             }
+            if (map)
+                delete map;
             map = new Map(0, 0, 0, 0, this);
             s >> *map >> curFloor;
             map->setPixPerDisplayM(displayPixPerM(width(), widthMM()));
             createGraphics();
             setActiveFloor(curFloor);
             view->fitInView(view->sceneRect(), Qt::KeepAspectRatio);
-            for (int j = 0; j != map->floorsNumber(); ++j)
+            for (int j = 0; j != map->floorsNumber(); j++)
                 cbxFloorSelect->addItem(map->floor(j)->getName());
             openedFile = f.fileName();
         }
@@ -412,12 +428,12 @@ void MainWindow::nextFloor()
 
 void MainWindow::zoomOut()
 {
-    view->scale(1 - cZoom, 1 - cZoom);
+    view->scale(1/cZoom, 1/cZoom);
 }
 
 void MainWindow::zoomIn()
 {
-    view->scale(1 + cZoom, 1 + cZoom);
+    view->scale(cZoom, cZoom);
 }
 
 void MainWindow::zoomFit()
@@ -428,7 +444,8 @@ void MainWindow::zoomFit()
 void MainWindow::addBase()
 {
     QString str = QFileDialog::getOpenFileName(
-            this, tr("Выбирете подложку"), "", tr("Изображения(*.jpg *.bmp)"));
+            this, tr("Выбирете подложку"), "",
+            tr("Изображения(*.jpg *.jpeg *.bmp *.png *.tif)"));
     if (!str.isNull())
     {
         QPixmap pixmap(str);
@@ -531,9 +548,10 @@ void MainWindow::setActiveFloor(int i)
 {
     if ((i >= 0)&(i < map->floorsNumber()))
     {
+//        if ((curFloor >= 0) & (curFloor != i))
+//            map->floor(curFloor)->disconnect(SIGNAL(modeChanged(MapFloor::Mode)));
         curFloor = i;
         cbxFloorSelect->setCurrentIndex(i);
-        //ldtFloorNameChange->setText(map->getFloor(i)->getName());
         view->setScene(map->floor(i));
         connect(map->floor(i), SIGNAL(modeChanged(MapFloor::Mode)),
                 SLOT(switchMode(MapFloor::Mode)));

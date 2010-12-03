@@ -1,18 +1,20 @@
  
 
 HEADERS += \
+    Common/map.h \
     Common/mapfloor.h \
     Common/maparea.h \
-    Common/map.h \
+    Common/mapbase.h \
     Ariadne/mainwindow.h \
     Ariadne/dialogmapsize.h
 
 SOURCES += \
+    Common/map.cpp \
     Common/mapfloor.cpp \
     Common/maparea.cpp \
-    Common/map.cpp \
-    Ariadne/mainwindow.cpp \
+    Common/mapbase.cpp \
     Ariadne/main.cpp \
+    Ariadne/mainwindow.cpp \
     Ariadne/dialogmapsize.cpp
 
 RESOURCES += \

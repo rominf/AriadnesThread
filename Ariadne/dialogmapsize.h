@@ -27,8 +27,8 @@ private:
     QPushButton *btnOk;
     QPushButton *btnCancel;
 
-    static const qreal cMSizeX = 300;
-    static const qreal cMSizeY = 300;
+    static const qreal cMSizeX = 228;
+    static const qreal cMSizeY = 83;
     static const qreal cMinMSizeX = 10;
     static const qreal cMaxMSizeX = 10000;
     static const qreal cMinMSizeY = 10;

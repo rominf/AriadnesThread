@@ -86,10 +86,10 @@ private slots:
 private:
     ///////////////////////////////Constants////////////////////////////////////
     static const qint32 cMagicNumber = 0xA246B56D;
-    static const qreal cMSizeX = 300;
-    static const qreal cMSizeY = 300;
+//    static const qreal cMSizeX = 228;
+//    static const qreal cMSizeY = 83;
     static const qreal cPixPerRealM = 10;
-    static const qreal cZoom = 0.1;
+    static const qreal cZoom = 1.1;
     //static const qreal cScale = 1000;
 
     ///////////////////////////////Variables////////////////////////////////////
