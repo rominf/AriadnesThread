@@ -14,7 +14,7 @@ QDataStream & operator<<(QDataStream &output, const Map &map)
 {
     int last = map.floors.size();
     output << map.pixSizeX << map.pixSizeY << map.pixPerRealM << last;
-    for (int i = 0; i != last; ++i)
+    for (int i = 0; i != last; i++)
     {
         output << *map.floors.at(i);
     }
@@ -25,7 +25,7 @@ QDataStream & operator>>(QDataStream &input, Map &map)
 {
     int last;
     input >> map.pixSizeX >> map.pixSizeY >> map.pixPerRealM >> last;
-    for (int i = 0; i != last; ++i)
+    for (int i = 0; i != last; i++)
     {
         map.insertFloor(i);
         input >> *map.floors[i];

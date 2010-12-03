@@ -9,6 +9,7 @@
 #include <QObject>
 #include <QRectF>
 #include "maparea.h"
+#include "mapbase.h"
 
 #include <QtCore>
 #include <QtGui>
@@ -20,13 +21,6 @@ class MapFloor: public QGraphicsScene
     friend QDataStream &operator<<(QDataStream &output, const MapFloor &floor);
     friend QDataStream &operator>>(QDataStream &input, MapFloor &floor);
 public:
-    /*static const qreal cCursorCircleR;
-    static const qreal cMagnetDestToLine;
-    static const qreal cMagnetDestToTop;*/
-    #define cCursorCircleR 20.0
-    #define cMagnetDestToLine 50.0
-    #define cMagnetDestToTop 20.0
-
     enum Mode {Idle, Planning, FloorAdd, WallAdd, AreaAdd, DoorAdd, Marking};
     enum Straight {None, SaveX, SaveY};
 
@@ -47,13 +41,18 @@ protected:
     virtual void keyPressEvent(QKeyEvent *event);
 
 private:
+    #define cCursorCircleR 10.0
+    #define cMagnetDestToLine 50.0
+    #define cMagnetDestToTop 20.0
+
     Mode mode;
     QString name;
     QGraphicsRectItem *border;
     MapArea *outline;
     QVector<MapArea*> areas;
     QVector<QGraphicsLineItem*> walls;
-    QGraphicsPixmapItem *base;
+    QVector<QGraphicsLineItem*> doors;
+    MapBase *base;
     bool isCrossLinesActive;
 
     QGraphicsLineItem *tempLine;
@@ -74,16 +73,13 @@ private:
                                 const MapArea &area, Straight straight,
                                 qreal &min);
     QPointF getPoint(QPointF m, Straight straight);
-//    void getLine(QPointF m, QLineF &l, bool isControlPressed);
-//    void getSides(QPointF m, QLineF l, qreal &a, qreal &b, qreal &c);
-//    qreal perpendicularLength(qreal p, qreal a, qreal b, qreal c);
-//    qreal dest(QPointF m, QLineF l);
 
     void removeLastFromTempPolyline();
 
     void finalizeFloor();
     void finalizeWall();
     void finalizeArea();
+    void finalizeDoor(QPointF pos/*MapArea *area, QLineF line*/);
     QPolygonF convertLineVecToPolygon(const
                                       QVector<QGraphicsLineItem*> &vec) const;
 };

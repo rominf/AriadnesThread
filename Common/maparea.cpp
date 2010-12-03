@@ -1,7 +1,7 @@
 #include "maparea.h"
 
-MapArea::MapArea(const QPolygonF &polygon):
-        QGraphicsPolygonItem(polygon)
+MapArea::MapArea(int areaNumber, const QPolygonF &polygon):
+        QGraphicsPolygonItem(polygon), number(areaNumber)
 {
 }
 
@@ -22,8 +22,22 @@ QDataStream &operator>>(QDataStream &input, MapArea &area)
     return input;
 }
 
-/*void MapArea::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+int MapArea::getNumber()
 {
+    return number;
+}
 
+void MapArea::setNumber(int i)
+{
+    number = i;
+}
 
-}*/
+void MapArea::addDoor(QGraphicsLineItem *door)
+{
+    doors.append(door);
+}
+
+int MapArea::type() const
+{
+    return Type;
+}
