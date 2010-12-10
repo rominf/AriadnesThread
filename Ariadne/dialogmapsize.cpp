@@ -3,46 +3,46 @@
 DialogMapSize::DialogMapSize(QWidget *parent) :
     QDialog(parent)
 {
-    sbxMSizeX = new QDoubleSpinBox(this);
-    sbxMSizeX->setRange(cMinMSizeX, cMaxMSizeX);
-    sbxMSizeX->setValue(cMSizeX);
-    sbxMSizeX->setSuffix(tr(" м"));
-    sbxMSizeX->setWrapping(false);
-    sbxMSizeY = new QDoubleSpinBox(this);
-    sbxMSizeY->setRange(cMinMSizeY, cMaxMSizeY);
-    sbxMSizeY->setValue(cMSizeY);
-    sbxMSizeY->setSuffix(tr(" м"));
-    sbxMSizeY->setWrapping(false);
+    m_sbxMSizeX = new QDoubleSpinBox(this);
+    m_sbxMSizeX->setRange(cMinMSizeX, cMaxMSizeX);
+    m_sbxMSizeX->setValue(cMSizeX);
+    m_sbxMSizeX->setSuffix(tr(" м"));
+    m_sbxMSizeX->setWrapping(false);
+    m_sbxMSizeY = new QDoubleSpinBox(this);
+    m_sbxMSizeY->setRange(cMinMSizeY, cMaxMSizeY);
+    m_sbxMSizeY->setValue(cMSizeY);
+    m_sbxMSizeY->setSuffix(tr(" м"));
+    m_sbxMSizeY->setWrapping(false);
 
-    lblMSizeX = new QLabel(tr("&Длина"));
-    lblMSizeY = new QLabel(tr("&Ширина"));
+    m_lblMSizeX = new QLabel(tr("&Длина"));
+    m_lblMSizeY = new QLabel(tr("&Ширина"));
 
-    lblMSizeX->setBuddy(sbxMSizeX);
-    lblMSizeY->setBuddy(sbxMSizeY);
+    m_lblMSizeX->setBuddy(m_sbxMSizeX);
+    m_lblMSizeY->setBuddy(m_sbxMSizeY);
 
-    btnOk = new QPushButton(tr("&OK"));
-    btnCancel = new QPushButton(tr("&Отмена"));
+    m_btnOk = new QPushButton(tr("&OK"));
+    m_btnCancel = new QPushButton(tr("&Отмена"));
 
-    connect(btnOk, SIGNAL(clicked()), SLOT(accept()));
-    connect(btnCancel, SIGNAL(clicked()), SLOT(reject()));
+    connect(m_btnOk, SIGNAL(clicked()), SLOT(accept()));
+    connect(m_btnCancel, SIGNAL(clicked()), SLOT(reject()));
 
     //Layout setup
     QGridLayout* ptopLayout = new QGridLayout;
-    ptopLayout->addWidget(lblMSizeX, 0, 0);
-    ptopLayout->addWidget(lblMSizeY, 1, 0);
-    ptopLayout->addWidget(sbxMSizeX, 0, 1);
-    ptopLayout->addWidget(sbxMSizeY, 1, 1);
-    ptopLayout->addWidget(btnOk, 2,0);
-    ptopLayout->addWidget(btnCancel, 2, 1);
+    ptopLayout->addWidget(m_lblMSizeX, 0, 0);
+    ptopLayout->addWidget(m_lblMSizeY, 1, 0);
+    ptopLayout->addWidget(m_sbxMSizeX, 0, 1);
+    ptopLayout->addWidget(m_sbxMSizeY, 1, 1);
+    ptopLayout->addWidget(m_btnOk, 2,0);
+    ptopLayout->addWidget(m_btnCancel, 2, 1);
     setLayout(ptopLayout);
 }
 
-qreal DialogMapSize::getMSizeX()
+qreal DialogMapSize::MSizeX()
 {
-    return sbxMSizeX->value();
+    return m_sbxMSizeX->value();
 }
 
-qreal DialogMapSize::getMSizeY()
+qreal DialogMapSize::MSizeY()
 {
-    return sbxMSizeY->value();
+    return m_sbxMSizeY->value();
 }

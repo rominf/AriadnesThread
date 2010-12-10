@@ -3,20 +3,20 @@
 
 Map::Map(qreal mapPixPerRealM, qreal mapPixPerDisplayM,
          qreal mapPixSizeX, qreal mapPixSizeY, QObject *parent) : QObject(parent),
-pixPerRealM(mapPixPerRealM), pixPerDisplayM(mapPixPerDisplayM),
-pixSizeX(mapPixSizeX), pixSizeY(mapPixSizeY)
+m_pixPerRealM(mapPixPerRealM), m_pixPerDisplayM(mapPixPerDisplayM),
+m_pixSizeX(mapPixSizeX), m_pixSizeY(mapPixSizeY)
 {
     // Count map geometry
-    realMPerDisplayM = pixPerDisplayM / pixPerRealM;
+    m_realMPerDisplayM = m_pixPerDisplayM / m_pixPerRealM;
 }
 
 QDataStream & operator<<(QDataStream &output, const Map &map)
 {
-    int last = map.floors.size();
-    output << map.pixSizeX << map.pixSizeY << map.pixPerRealM << last;
+    int last = map.m_floors.size();
+    output << map.m_pixSizeX << map.m_pixSizeY << map.m_pixPerRealM << last;
     for (int i = 0; i != last; i++)
     {
-        output << *map.floors.at(i);
+        output << *map.m_floors.at(i);
     }
     return output;
 }
@@ -24,57 +24,57 @@ QDataStream & operator<<(QDataStream &output, const Map &map)
 QDataStream & operator>>(QDataStream &input, Map &map)
 {
     int last;
-    input >> map.pixSizeX >> map.pixSizeY >> map.pixPerRealM >> last;
+    input >> map.m_pixSizeX >> map.m_pixSizeY >> map.m_pixPerRealM >> last;
     for (int i = 0; i != last; i++)
     {
         map.insertFloor(i);
-        input >> *map.floors[i];
+        input >> *map.m_floors[i];
     }
     return input;
 }
 
 void Map::setPixPerDisplayM(qreal r)
 {
-    pixPerDisplayM = r;
+    m_pixPerDisplayM = r;
 }
 
 qreal Map::convertPixToDisplayM(qreal r) const
 {
-    return r/pixPerDisplayM;
+    return r/m_pixPerDisplayM;
 }
 
 qreal Map::convertPixToRealM(qreal r) const
 {
-    return r/pixPerRealM;
+    return r/m_pixPerRealM;
 }
 
 qreal Map::convertDisplayMToPix(qreal r) const
 {
-    return r*pixPerDisplayM;
+    return r*m_pixPerDisplayM;
 }
 
 qreal Map::convertRealMToPix(qreal r) const
 {
-    return r*pixPerRealM;
+    return r*m_pixPerRealM;
 }
 
 int Map::floorsNumber()
 {
-    return floors.size();
+    return m_floors.size();
 }
 
 void Map::insertFloor(int i, QString floorName)
 {
-    floors.insert(i, new
-                  MapFloor(QRectF(0, 0, pixSizeX, pixSizeY), floorName, this));
+    m_floors.insert(i, new
+                  MapFloor(QRectF(0, 0, m_pixSizeX, m_pixSizeY), floorName, this));
 }
 
 void Map::removeFloor(int i)
 {
-    floors.remove(i);
+    m_floors.remove(i);
 }
 
 MapFloor* Map::floor(int i) const
 {
-    return floors.at(i);
+    return m_floors.at(i);
 }
