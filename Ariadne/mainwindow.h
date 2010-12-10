@@ -5,9 +5,12 @@
 #include <QActionGroup>
 #include <QActionGroup>
 #include <QApplication>
+#include <QComboBox>
 #include <QCursor>
 #include <QDockWidget>
 #include <QDockWidget>
+#include <QFile>
+#include <QFileDialog>
 #include <QGraphicsLineItem>
 #include <QGraphicsRectItem>
 #include <QGraphicsScene>
@@ -16,6 +19,7 @@
 #include <QHBoxLayout>
 #include <QHBoxLayout>
 #include <QIcon>
+#include <QInputDialog>
 #include <QKeySequence>
 #include <QLabel>
 #include <QLineEdit>
@@ -86,11 +90,8 @@ private slots:
 private:
     ///////////////////////////////Constants////////////////////////////////////
     static const qint32 cMagicNumber = 0xA246B56D;
-//    static const qreal cMSizeX = 228;
-//    static const qreal cMSizeY = 83;
     static const qreal cPixPerRealM = 10;
     static const qreal cZoom = 1.1;
-    //static const qreal cScale = 1000;
 
     ///////////////////////////////Variables////////////////////////////////////
     QString openedFile;

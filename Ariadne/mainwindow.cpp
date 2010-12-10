@@ -40,21 +40,6 @@ MainWindow::~MainWindow()
 {
 }
 
-/*void MainWindow::keyPressEvent(QKeyEvent *event)
-{
-    switch (event->key())
-    {
-    case Qt::Key_Plus:
-        zoomIn();
-        break;
-    case Qt::Key_Minus:
-        zoomOut();
-        break;
-    default:
-        break;
-    }
-}*/
-
 void MainWindow::createActions()
 {
     actMapNew = new QAction(QIcon(":/New"), tr("Создать"), this);
@@ -176,8 +161,7 @@ void MainWindow::createToolBars()
     tbrView->setFloatable(false);
     tbrView->addAction(actPreviousFloor);
     cbxFloorSelect = new QComboBox(this);
-    connect(cbxFloorSelect,
-            SIGNAL(currentIndexChanged(int)), SLOT(setActiveFloor(int)));
+
     cbxFloorSelect->setEditable(true);
     cbxFloorSelect->setInsertPolicy(QComboBox::NoInsert);
     tbrView->addWidget(cbxFloorSelect);
@@ -231,15 +215,12 @@ void MainWindow::createGraphics()
     {
         view = new QGraphicsView();
         view->setMouseTracking(true);
-        view->setBackgroundBrush(QBrush(Qt::gray));/*
-        view->setViewport(new QGLWidget());
-        view->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);*/
+        view->setBackgroundBrush(QBrush(Qt::gray));
         vblwgtCentral->addWidget(view);
         view->show();
         setState(eFile | eMode | eView | eFloorNameChange | eAdd | eHelp,
                  stEnable_Visible);
         setState(eDock, stDisable_Unvisible);
-        //setFocus();
         switchMode(MapFloor::Planning);
     }
     else
@@ -354,8 +335,8 @@ void MainWindow::mapNew()
         if (map)
             delete map;
         map = new Map(cPixPerRealM, displayPixPerM(width(), widthMM()),
-                      pDialog->getMSizeX()*cPixPerRealM,
-                      pDialog->getMSizeY()*cPixPerRealM, this);
+                      pDialog->MSizeX()*cPixPerRealM,
+                      pDialog->MSizeY()*cPixPerRealM, this);
         createGraphics();
         addFloor();
         view->fitInView(view->sceneRect(), Qt::KeepAspectRatio);
@@ -389,10 +370,12 @@ void MainWindow::mapOpen()
             s >> *map >> curFloor;
             map->setPixPerDisplayM(displayPixPerM(width(), widthMM()));
             createGraphics();
+            for (int j = 0; j != map->floorsNumber(); j++)
+                cbxFloorSelect->addItem(map->floor(j)->name());
+            connect(cbxFloorSelect,
+                    SIGNAL(currentIndexChanged(int)), SLOT(setActiveFloor(int)));
             setActiveFloor(curFloor);
             view->fitInView(view->sceneRect(), Qt::KeepAspectRatio);
-            for (int j = 0; j != map->floorsNumber(); j++)
-                cbxFloorSelect->addItem(map->floor(j)->getName());
             openedFile = f.fileName();
         }
         else
@@ -475,7 +458,7 @@ void MainWindow::addFloor()
     cbxFloorSelect->addItem(s);
     cbxFloorSelect->setCurrentIndex(curFloor);
     //ldtFloorNameChange->setText(name);
-    switchMode(MapFloor::FloorAdd);
+    //switchMode(MapFloor::FloorAdd);
 }
 
 void MainWindow::addWall()
@@ -514,7 +497,6 @@ void MainWindow::switchMode(MapFloor::Mode m)
             setCursor(Qt::ArrowCursor);
             break;
         }
-    case MapFloor::FloorAdd:
     case MapFloor::WallAdd:
     case MapFloor::AreaAdd:
     case MapFloor::DoorAdd:
@@ -548,8 +530,8 @@ void MainWindow::setActiveFloor(int i)
 {
     if ((i >= 0)&(i < map->floorsNumber()))
     {
-//        if ((curFloor >= 0) & (curFloor != i))
-//            map->floor(curFloor)->disconnect(SIGNAL(modeChanged(MapFloor::Mode)));
+        if ((curFloor >= 0) & (curFloor != i))
+            map->floor(curFloor)->disconnect(SIGNAL(modeChanged(MapFloor::Mode)));
         curFloor = i;
         cbxFloorSelect->setCurrentIndex(i);
         view->setScene(map->floor(i));

@@ -1,59 +1,54 @@
 #include "mapfloor.h"
 
 MapFloor::MapFloor(const QRectF &sceneRect, QString floorName,QObject *parent) :
-    QGraphicsScene(sceneRect, parent)
+    QGraphicsScene(sceneRect, parent),
+    cCursorCircleR(15.0), cMagnetDestToLine(50.0), cMagnetDestToTop(20.0)
 {
     setName(floorName);
-    mode = Planning;
-    border = new QGraphicsRectItem(sceneRect, 0, this);
-    border->setBrush(QBrush(Qt::white));
-    border->setZValue(-2.0);
-    outline = 0;
-    base = 0;
-    tempLine = 0;
-    cursorCircle = new QGraphicsEllipseItem(
+    m_mode = Idle;
+    m_border = new QGraphicsRectItem(sceneRect, 0, this);
+    m_border->setBrush(QBrush(Qt::white));
+    m_border->setZValue(-2.0);
+    m_outline = 0;
+    m_selectedArea = 0;
+    m_base = 0;
+    m_tempLine = 0;
+    m_cursorCircle = new QGraphicsEllipseItem(
             -cCursorCircleR/2, -cCursorCircleR/2,
             cCursorCircleR, cCursorCircleR, 0, this);
-    cursorCircle->setPen(QPen(Qt::NoPen));
-    cursorCircle->setBrush(QBrush(Qt::red));
-    cursorCircle->hide();
-    crossLineHorizontal = new QGraphicsLineItem(0, this);
-    crossLineHorizontal->setPen(QPen(Qt::DotLine));
-    crossLineHorizontal->hide();
-    crossLineVertical = new QGraphicsLineItem(0, this);
-    crossLineVertical->setPen(QPen(Qt::DotLine));
-    crossLineVertical->hide();
+    m_cursorCircle->setZValue(INFINITY - 1);
+    m_cursorCircle->setPen(QPen(Qt::NoPen));
+    m_cursorCircle->setBrush(QBrush(Qt::red));
+    m_cursorCircle->hide();
+    m_crossLineHorizontal = new QGraphicsLineItem(0, this);
+    m_crossLineHorizontal->setZValue(INFINITY - 2);
+    m_crossLineHorizontal->setPen(QPen(Qt::DotLine));
+    m_crossLineHorizontal->hide();
+    m_crossLineVertical = new QGraphicsLineItem(0, this);
+    m_crossLineVertical->setZValue(INFINITY - 2);
+    m_crossLineVertical->setPen(QPen(Qt::DotLine));
+    m_crossLineVertical->hide();
 }
 
 QDataStream &operator<<(QDataStream &output, const MapFloor &floor)
 {
-    output << floor.name << *floor.outline;
-
-    int last = floor.walls.size();
-    output << last;
+    int last = floor.m_walls.size();
+    output << floor.m_name << *floor.m_outline << last;
     for (int i = 0; i != last; i++)
     {
-        QPointF p1 = floor.walls.at(i)->line().p1();
-        QPointF p2 = floor.walls.at(i)->line().p2();
+        QPointF p1 = floor.m_walls.at(i)->line().p1();
+        QPointF p2 = floor.m_walls.at(i)->line().p2();
         output << p1.x() << p1.y() << p2.x() << p2.y();
     }
-
-    last = floor.areas.size();
-    output << last;
-    for (int i = 0; i != last; i++)
-    {
-        output << *floor.areas.at(i);
-    }
-
     return output;
 }
 
 QDataStream &operator>>(QDataStream &input, MapFloor &floor)
 {
-    floor.outline = new MapArea(-1, 0);
-    floor.outline->setZValue(-1.0);
-    input >> floor.name >> *floor.outline;
-    floor.addItem(floor.outline);
+    floor.m_outline = new MapArea(0);
+    floor.m_outline->setZValue(-1.0);
+    input >> floor.m_name >> *floor.m_outline;
+    floor.addItem(floor.m_outline);
 
     int last;
     input >> last;
@@ -63,37 +58,34 @@ QDataStream &operator>>(QDataStream &input, MapFloor &floor)
         qreal x1, y1, x2, y2;
         input >> x1 >> y1 >> x2 >> y2;
         line->setLine(x1, y1, x2, y2);
-        floor.walls.append(line);
-        floor.addItem(floor.walls.at(i));
-    }
-
-    input >> last;
-    for (int i = 0; i != last; i++)
-    {
-        MapArea *area =  new MapArea(i, 0);
-        input >> *area;
-        floor.areas.append(area);
-        floor.addItem(floor.areas.at(i));
+        floor.m_walls.append(line);
+        floor.addItem(floor.m_walls.at(i));
     }
 
     return input;
 }
 
-QString MapFloor::getName() const
+QString MapFloor::name() const
 {
-    return name;
+    return m_name;
 }
 
 void MapFloor::setName(const QString &floorName)
 {
-    name = floorName;
+    m_name = floorName;
 }
 
 void MapFloor::setMode(Mode m)
 {
-    if (m != mode)
+    if (m != m_mode)
     {
-        mode = m;
+        if (m != Planning)
+            selectClear();
+        if (m_outline != 0)
+            if ((m == AreaAdd) | (m == WallAdd))
+                areasToLineVec(m_outline);
+
+        m_mode = m;
         emit modeChanged(m);
     }
 }
@@ -104,53 +96,55 @@ void MapFloor::mousePressEvent(QGraphicsSceneMouseEvent *event)
     switch (event->buttons())
     {
     case Qt::LeftButton:
-        switch (mode)
+        switch (m_mode)
         {
         case WallAdd:
-            if (!(tempLine))
+            if (!(m_tempLine))
             {
-                tempLine = new QGraphicsLineItem(
-                        QLineF(cursorCircle->pos(),
-                               cursorCircle->pos()));
-                addItem(tempLine);
+                m_tempLine = new QGraphicsLineItem(
+                        QLineF(m_cursorCircle->pos(),
+                               m_cursorCircle->pos()));
+                m_tempLine->setZValue(INFINITY - 2);
+                addItem(m_tempLine);
             }
             break;
-        case FloorAdd:
         case AreaAdd:
         {
             QPointF p1;
-            if (tempPolyline.isEmpty())
+            if (m_tempPolyline.isEmpty())
             {
-                p1 = cursorCircle->pos();
-                crossLineHorizontal->setLine(
+                p1 = m_cursorCircle->pos();
+                m_crossLineHorizontal->setLine(
                         0, p1.y(), sceneRect().right(), p1.y());
-                crossLineVertical->setLine(
+                m_crossLineVertical->setLine(
                         p1.x(), 0, p1.x(), sceneRect().bottom());
             }
             else
             {
-                p1 = tempPolyline.at(
-                        tempPolyline.size()-1)->line().p2();
+                p1 = m_tempPolyline.at(
+                        m_tempPolyline.size()-1)->line().p2();
 
-                if ((cursorCircle->pos().x() ==
-                    crossLineVertical->line().x1()) |
-                    (cursorCircle->pos().y() ==
-                    crossLineHorizontal->line().y1()))
-                    isCrossLinesActive = false;
+                if ((m_cursorCircle->pos().x() ==
+                    m_crossLineVertical->line().x1()) |
+                    (m_cursorCircle->pos().y() ==
+                    m_crossLineHorizontal->line().y1()))
+                    m_isCrossLinesActive = false;
                 else
-                    isCrossLinesActive = true;
-                crossLineHorizontal->hide();
-                crossLineVertical->hide();
+                    m_isCrossLinesActive = true;
+                m_crossLineHorizontal->hide();
+                m_crossLineVertical->hide();
             }
-            tempPolyline.push_back(new QGraphicsLineItem(
-                    QLineF(p1, cursorCircle->pos())));
-            addItem(tempPolyline.back());
+            m_tempPolyline.push_back(new QGraphicsLineItem(
+                    QLineF(p1, m_cursorCircle->pos())));
+            m_tempPolyline.back()->setZValue(INFINITY - 2);
+            addItem(m_tempPolyline.back());
             break;
         }
         case DoorAdd:
-            if (getPoint(event->scenePos(), None) == cursorCircle->pos())
+            if (getPoint(event->scenePos(), None, false) ==
+                m_cursorCircle->pos())
             {
-                finalizeDoor(cursorCircle->pos());
+                finalizeDoor(m_cursorCircle->pos());
 //                cursorCircle->hide();
 //                outline->hide();
 //                if (itemAt(cursorCircle->pos())->type() == MapArea::Type)
@@ -165,6 +159,10 @@ void MapFloor::mousePressEvent(QGraphicsSceneMouseEvent *event)
 //                }
             }
         default:
+            if (itemAt(event->scenePos())->type() == MapArea::Type)
+                selectArea(qgraphicsitem_cast<MapArea*>(
+                        itemAt(event->scenePos())));
+
             break; // Ignore other :)
         }
         break;
@@ -183,55 +181,59 @@ void MapFloor::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         QPointF pos = QPointF(0, 0);
         if (!validatePos(event->scenePos(), pos))
             event->setScenePos(pos);
-        bool isCtrl = (event->modifiers() == Qt::ControlModifier);
         Straight straight;
-        switch (mode)
+        switch (m_mode)
         {
         case WallAdd:
-            if (tempLine)
+            if (m_tempLine)
             {
-                QLineF line(tempLine->line().p1(), pos);
-                if (!isCtrl)
+                QLineF line(m_tempLine->line().p1(), pos);
+                if (!(event->modifiers() & Qt::ControlModifier))
                     straight = straighten(line);
                 else
                     straight = None;
+                if (!(event->modifiers() & Qt::ShiftModifier))
+                    pos = getPoint(line.p2(), straight);
+                else
+                    pos = line.p2();
                 pos = getPoint(line.p2(), straight);
                 line.setP2(pos);
-                tempLine->setLine(line);
+                m_tempLine->setLine(line);
             }
             else
             {
                 pos = getPoint(pos, None);
             }
-            cursorCircle->show();
-            cursorCircle->setPos(pos);
+            m_cursorCircle->show();
+            m_cursorCircle->setPos(pos);
             break;
-        case FloorAdd:
         case AreaAdd:
-            if (!(tempPolyline.isEmpty()))
+            if (!(m_tempPolyline.isEmpty()))
             {
-                QLineF line(tempPolyline.back()->line().p1(), pos);
-                if (!isCtrl)
+                QLineF line(m_tempPolyline.back()->line().p1(), pos);
+                if (!(event->modifiers() & Qt::ControlModifier))
                     straight = straighten(line);
                 else
                     straight = None;
-                pos = getPoint(line.p2(), straight);
+                if (!(event->modifiers() & Qt::ShiftModifier))
+                    pos = getPoint(line.p2(), straight);
+                else
+                    pos = line.p2();
                 line.setP2(pos);
-                tempPolyline.at(tempPolyline.size()-1)->setLine(line);
+                m_tempPolyline.at(m_tempPolyline.size()-1)->setLine(line);
             }
             else
-            {
                 pos = getPoint(pos, None);
-            }
-            if (!cursorCircle->isVisible())
-                cursorCircle->show();
-            cursorCircle->setPos(pos);
+
+            if (!m_cursorCircle->isVisible())
+                m_cursorCircle->show();
+            m_cursorCircle->setPos(pos);
             break;
         case DoorAdd:
             pos = getPoint(pos, None);
-            if (!cursorCircle->isVisible())
-                cursorCircle->show();
-            cursorCircle->setPos(pos);
+            if (!m_cursorCircle->isVisible())
+                m_cursorCircle->show();
+            m_cursorCircle->setPos(pos);
             break;
         default:
             break; // Ignore other :)
@@ -244,12 +246,8 @@ void MapFloor::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 void MapFloor::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
     event->accept();
-    switch (mode)
+    switch (m_mode)
     {
-    case FloorAdd:
-        removeLastFromTempPolyline();
-        finalizeFloor();
-        break;
     case AreaAdd:
         removeLastFromTempPolyline();
         finalizeArea();
@@ -268,21 +266,29 @@ void MapFloor::keyPressEvent(QKeyEvent *event)
     switch (event->key())
     {
     case Qt::Key_Delete:
-        switch (mode)
+        switch (m_mode)
         {
-        case FloorAdd:
+//        case FloorAdd:
         case AreaAdd:
             removeLastFromTempPolyline();
             break;
         default:
+//            if (selectedItems()[0]->type() == MapArea::Type)
+//                deleteArea(qgraphicsitem_cast<MapArea*>(selectedItems()[0]));
+            if (m_selectedArea != 0)
+            {
+                deleteArea(m_selectedArea);
+                m_selectedArea = 0;
+                areasToLineVec(m_outline);
+            }
             break; // Ignore other :)
         }
         break;
     case Qt::Key_Enter:
     case Qt::Key_Return:
-        switch (mode)
+        switch (m_mode)
         {
-        case FloorAdd: {finalizeFloor(); break;}
+//        case FloorAdd: {finalizeFloor(); break;}
         case AreaAdd: {finalizeArea(); break;}
         case WallAdd: {finalizeWall(); break;}
         default:{break;} // Ignore other :)
@@ -293,15 +299,86 @@ void MapFloor::keyPressEvent(QKeyEvent *event)
     }
 }
 
+void MapFloor::addItem (QGraphicsItem *item)
+{
+    QGraphicsScene::addItem(item);
+    if (item->type() == MapArea::Type)
+    {
+        MapArea *area = qgraphicsitem_cast<MapArea*>(item);
+        for (int i = 0; i != area->areasNumber(); i++)
+            addItem(area->area(i));
+    }
+}
+
+//QVariant MapFloor::itemChange(QGraphicsItem::GraphicsItemChange change,
+//                              const QVariant &value)
+//{
+//    if (change == QGraphicsItem::ItemSelectedChange)
+//        for (int i = 0; i != selectedItems().size(); i++)
+//            selectedItems()[i]->setSelected(false);
+//    return QGraphicsItem::itemChange(change, value);
+//}
+
 void MapFloor::addBase(QPixmap &pixmap)
 {
-    if (!base)
+    if (!m_base)
     {
-        base = new MapBase(pixmap, sceneRect());
-        addItem(base);
+        m_base = new MapBase(pixmap, sceneRect());
+        addItem(m_base);
     }
     else
-        base->setPixmap(pixmap, sceneRect());
+        m_base->setPixmap(pixmap, sceneRect());
+}
+
+MapArea* MapFloor::area(int i)
+{
+    return m_outline;
+}
+
+QSet<MapArea*> MapFloor::parentAreas(MapArea *area, const QPointF *pos)
+{
+    QSet<MapArea*> set;
+    MapArea *a;
+    QStack<MapArea*> stk;
+    stk.push(area);
+    while (!stk.isEmpty())
+    {
+        a = stk.pop();
+        if (a->contains(*pos))
+            set << a;
+        int size = a->areasNumber();
+        for (int i = 0; i !=size; i++)
+            stk.push(a->area(i));
+    }
+    return set;
+}
+
+void MapFloor::areasToLineVec(MapArea *area)
+{
+    if (!m_lines.isEmpty())
+    {
+        qDeleteAll(m_lines);
+        m_lines.clear();
+    }
+    int size;
+    MapArea *a;
+    QStack<MapArea*> stk;
+    stk.push(area);
+    while (!stk.isEmpty())
+    {
+        a = stk.pop();
+        size = a->polygon().size();
+        for (int i = 0; i != size; i++)
+        {
+
+            m_lines.append(new QLineF(a->polygon().at(i),
+                                  a->polygon().at((i+1)%size)));
+        }
+        size = a->areasNumber();
+        for (int i = 0; i !=size; i++)
+            stk.push(a->area(i));
+    }
+    int i = m_lines.size();
 }
 
 MapFloor::Straight MapFloor::straighten(QLineF &line)
@@ -320,15 +397,24 @@ MapFloor::Straight MapFloor::straighten(QLineF &line)
 
 qreal MapFloor::dest(QPointF m, QPointF n)
 {
+    // Compute destination between 2 points with standard formula
     return qSqrt(qPow(m.x() - n.x(), 2) + qPow(m.y() - n.y(), 2));
+}
+
+bool MapFloor::isInSegment(const QLineF &l, const QPointF &p)
+{
+    return ((p.x() >= qMin(l.x1(), l.x2())) & (p.x() <= qMax(l.x1(), l.x2()))&
+            (p.y() >= qMin(l.y1(), l.y2())) & (p.y() <= qMax(l.y1(), l.y2())));
 }
 
 QPointF MapFloor::getPerpendicularBase(QPointF m, QLineF l)
 {
     qreal x, y;
-    if (l.x1() != l.x2())
+    if (l.x1() != l.x2())   // If line isn't vertical
     {
-        qreal k = (l.y2() - l.y1())/(l.x2() - l.x1());
+        /* For more information about this computing see book:
+           ISBN 0486411478, 2.2 and 2.3-9                      */
+        qreal k = l.dy()/l.dx();
         qreal b = l.y1() - k*l.x1();
         x = (k*(m.y() - b) + m.x())/(k*k + 1);
         y = k*x + b;
@@ -338,144 +424,137 @@ QPointF MapFloor::getPerpendicularBase(QPointF m, QLineF l)
         x = l.x1();
         y = m.y();
     }
-    if ((x < qMin(l.x1(), l.x2()) - cMagnetDestToTop) |
-        (x > qMax(l.x1(), l.x2()) + cMagnetDestToTop) |
-        (y < qMin(l.y1(), l.y2()) - cMagnetDestToTop) |
-        (y > qMax(l.y1(), l.y2()) + cMagnetDestToTop))
-        x = -INFINITY;
     return QPointF(x, y);
 
 }
 
-bool MapFloor::getPointFromLine(QPointF m, QPointF &newPoint,
-                                const QLineF &l, Straight straight, qreal &min)
+bool MapFloor::getPointFromLine(QPointF m, QPointF &newPoint, const QLineF &l,
+                                Straight straight, qreal &min)
 {
     QPointF *p = new QPointF();
-    *p = getPerpendicularBase(m, l);
-    qreal d = dest(*p, m);
-    if ((d < cMagnetDestToLine) & (d < min))
+    qreal d;
+    if (l.x1() == l.x2())
+        if (straight != SaveX)
+        {
+            p->setX(l.x1());
+            p->setY(m.y());
+            d = dest(*p, m);
+        }
+        else
+            d = INFINITY;
+//    else if (l.y1() == l.y2())
+//    {
+//        if (straight != SaveY)
+//        {
+//            p->setX(m.x());
+//            p->setY(l.y1());
+//            d = dest(*p, m);
+//        }
+//        else
+//            d = INFINITY;
+//    }
+    else
     {
-        min = d;
         switch (straight)
         {
         case None:
-            newPoint = *p;
+            *p = getPerpendicularBase(m, l);
+            d = dest(*p, m);
             break;
         case SaveX:
-            newPoint.setX(m.x());
-            if (l.dx() == 0)                    // If line is near and parallel
-                newPoint.setY(p->y());
-            else
-                newPoint.setY((l.dy()/l.dx())*(m.x() - l.x1()) + l.y1());
+            p->setX(m.x());
+                p->setY((l.dy()/l.dx())*(m.x() - l.x1()) + l.y1());
+            d = qAbs(p->y() - m.y());
             break;
         case SaveY:
-            newPoint.setY(m.y());
-            if (l.dy() == 0)                    // If line is near and parallel
-                newPoint.setX(p->x());
-            else
-                newPoint.setX((l.dx()/l.dy())*(m.y() - l.y1()) + l.x1());
+            p->setY(m.y());
+                p->setX((l.dx()/l.dy())*(m.y() - l.y1()) + l.x1());
+            d = qAbs(p->x() - m.x());
             break;
         }
+    }
+
+
+
+    if ((d < cMagnetDestToLine) & (d < min) & (isInSegment(l, *p)))
+    {
+        min = d;
+        newPoint = *p;
         return true;
     }
     else
         return false;
-
 }
 
-bool MapFloor::getPointFromAreasTops(QPointF m, QPointF &newPoint,
-                                     const MapArea &area)
+bool MapFloor::getPointFromLineTops(QPointF m, QPointF &newPoint,
+                                    const QLineF *line)
 {
-    int size = area.polygon().size();
     qreal d;
-    for (int i = 0; i != size; i++)
+    d = dest(line->p1(), m);
+    if (d < cMagnetDestToTop)
     {
-        d = dest(area.polygon().at(i), m);
-        if (d < cMagnetDestToTop)
-        {
-            newPoint = area.polygon().at(i);
-            return true;
-        }
+        newPoint = line->p1();
+        return true;
     }
+    d = dest(line->p2(), m);
+    if (d < cMagnetDestToTop)
+    {
+        newPoint = line->p2();
+        return true;
+    }
+
     return false;
 }
 
-bool MapFloor::getPointFromAreasLines(QPointF m, QPointF &newPoint,
-                      const MapArea &area, Straight straight, qreal &min)
+QPointF MapFloor::getPoint(QPointF m, Straight straight, bool magnetToTops)
 {
-    int size = area.polygon().size();
-    QLineF *l = new QLineF();
-    for (int i = 0; i != size; i++)
-    {
-        l->setPoints(area.polygon().at(i),
-                     area.polygon().at((i+1)%size));
-        getPointFromLine(m, newPoint, *l, straight, min);
-    }
-    return true;
-}
-
-QPointF MapFloor::getPoint(QPointF m, Straight straight)
-{
-    qreal min = INFINITY;   // There must be max real
+    qreal min = INFINITY;
     QPointF newPoint;
 
-    if (straight == None)
-    {
-        if (outline)
-            if (getPointFromAreasTops(m, newPoint, *outline))
+    if ((straight == None) & (magnetToTops))
+        for (int i = 0; i != m_lines.size(); i++)
+            if (getPointFromLineTops(m, newPoint, m_lines.at(i)))
                 return newPoint;
 
-        for (int i = 0; i != areas.size(); i++)
-        {
-            if (getPointFromAreasTops(m, newPoint, *areas.at(i)))
-                return newPoint;
-        }
-
-    }
-
-    if (isCrossLinesActive & (!tempPolyline.isEmpty()))
+    if (m_isCrossLinesActive & (!m_tempPolyline.isEmpty()))
     {
         if (getPointFromLine(
-            m, newPoint, crossLineHorizontal->line(), straight, min))
+            m, newPoint, m_crossLineHorizontal->line(), straight, min))
         {
-            crossLineHorizontal->setLine(
-                    QLineF(tempPolyline.at(0)->line().p1(), newPoint));
-            crossLineHorizontal->show();
+            m_crossLineHorizontal->setLine(
+                    QLineF(m_tempPolyline.at(0)->line().p1(), newPoint));
+            m_crossLineHorizontal->show();
             return newPoint;
         }
         else
             {
-                crossLineHorizontal->setLine(
-                        0, tempPolyline.at(0)->line().y1(),
-                        sceneRect().right(), tempPolyline.at(0)->line().y1());
-                crossLineHorizontal->hide();
+                m_crossLineHorizontal->setLine(
+                        0, m_tempPolyline.at(0)->line().y1(),
+                        sceneRect().right(), m_tempPolyline.at(0)->line().y1());
+                m_crossLineHorizontal->hide();
             }
         if (getPointFromLine(
-            m, newPoint, crossLineVertical->line(), straight, min))
+            m, newPoint, m_crossLineVertical->line(), straight, min))
         {
-            crossLineVertical->setLine(
-                    QLineF(tempPolyline.at(0)->line().p1(), newPoint));
-            crossLineVertical->show();
+            m_crossLineVertical->setLine(
+                    QLineF(m_tempPolyline.at(0)->line().p1(), newPoint));
+            m_crossLineVertical->show();
             return newPoint;
         }
         else
             {
-                crossLineVertical->setLine(
-                        tempPolyline.at(0)->line().x1(), 0,
-                        tempPolyline.at(0)->line().x1(), sceneRect().bottom());
-                crossLineVertical->hide();
+                m_crossLineVertical->setLine(
+                        m_tempPolyline.at(0)->line().x1(), 0,
+                        m_tempPolyline.at(0)->line().x1(), sceneRect().bottom());
+                m_crossLineVertical->hide();
             }
     }
 
+    for (int i = 0; i != m_lines.size(); i++)
+        getPointFromLine(m, newPoint, *m_lines.at(i), straight, min);
 
-    if (outline)
-        getPointFromAreasLines(m, newPoint, *outline, straight, min);
-
-    for (int i = 0; i != areas.size(); i++)
-        getPointFromAreasLines(m, newPoint, *areas.at(i), straight, min);
-
-    for (int i = 0; i != walls.size(); i++)
-        getPointFromLine(m, newPoint, walls.at(i)->line(), straight, min);
+    for (int i = 0; i != m_walls.size(); i++)
+        getPointFromLine(m, newPoint, m_walls.at(i)->line(), straight, min);
 
     if (min == INFINITY)
         return m;
@@ -493,58 +572,123 @@ bool MapFloor::validatePos(QPointF pos, QPointF &rightPos)
 
 void MapFloor::removeLastFromTempPolyline()
 {
-    if (!(tempPolyline.isEmpty()))
+    if (!(m_tempPolyline.isEmpty()))
     {
-        removeItem(tempPolyline.at(tempPolyline.size()-1));
-        tempPolyline.pop_back();
+        removeItem(m_tempPolyline.at(m_tempPolyline.size()-1));
+        m_tempPolyline.pop_back();
     }
-}
-
-void MapFloor::finalizeFloor()
-{
-    setMode(Planning);
-    outline = new MapArea(-1, convertLineVecToPolygon(tempPolyline));
-    outline->setZValue(-1.0);
-    addItem(outline);
-    for (int i = 0; i != tempPolyline.size(); i++)
-        removeItem(tempPolyline.at(i));
-    tempPolyline.clear();
-    crossLineHorizontal->hide();
-    crossLineVertical->hide();
-    crossLineHorizontal->setLine(-5, -5, -5, -5);   // Else there are false
-    crossLineVertical->setLine(-5, -5, -5, -5);     // misoperation
-    cursorCircle->hide();
 }
 
 void MapFloor::finalizeWall()
 {
     setMode(Planning);
-    walls.append(tempLine);
-    tempLine = 0;
-    cursorCircle->hide();
+    m_walls.append(m_tempLine);
+    m_tempLine = 0;
+    m_cursorCircle->hide();
 }
 
 void MapFloor::finalizeArea()
 {
-    setMode(Planning);
-    MapArea *area = new MapArea(areas.size(),
-                                convertLineVecToPolygon(tempPolyline));
-//    area->setZValue(+100.500);
-    areas.append(area);
-    addItem(area);
-    for (int i = 0; i != tempPolyline.size(); i++)
-        removeItem(tempPolyline.at(i));
-    tempPolyline.clear();
-    crossLineHorizontal->hide();
-    crossLineVertical->hide();
-    crossLineHorizontal->setLine(-5, -5, -5, -5);   // Else there are false
-    crossLineVertical->setLine(-5, -5, -5, -5);     // misoperation
-    cursorCircle->hide();
+    if (m_tempPolyline.size() > 2)
+    {
+
+        QPolygonF polygon(convertLineVecToPolygon(m_tempPolyline));
+
+        MapArea *area;
+        MapArea *parentArea = 0;
+        if (!m_outline)
+        {
+            area = new MapArea(polygon);
+            m_outline = area;
+            area->setZValue(0.0);
+        }
+        else
+        {
+            gpc_polygon gpc_curpgn = convertQtToGpcPolygon(&polygon);
+            gpc_polygon gpc_intersection;
+            MapArea *a;
+            QStack<MapArea*> stk;
+            stk.push(m_outline);
+            while (!stk.isEmpty())
+            {
+                a = stk.pop();
+
+                QPolygonF pgn = a->polygon();
+                gpc_polygon gpc_pgn = convertQtToGpcPolygon(&pgn);
+                gpc_polygon_clip(GPC_INT, &gpc_curpgn, &gpc_pgn,
+                                 &gpc_intersection);
+                if (gpc_intersection.num_contours != 0)
+                {
+                    gpc_polygon gpc_newIntersection;
+                    gpc_polygon_clip(GPC_DIFF, &gpc_curpgn, &gpc_intersection,
+                                     &gpc_newIntersection);
+                    if (gpc_newIntersection.num_contours == 0)
+                    {
+                        parentArea = a;
+                        int size = a->areasNumber();
+                        for (int i = 0; i !=size; i++)
+                            stk.push(a->area(i));
+                    }
+                    else
+                    {
+                        QMessageBox::warning(0, tr("Ошибка при создании области"),
+                                             tr("Пожалуйста, поместите "
+                                                "область на этаж, чтобы не "
+                                                "было пересечения с другими "
+                                                "областями"));
+                        return;
+                    }
+                }
+            }
+            if (parentArea != 0)
+            {
+                area = new MapArea(polygon);
+                parentArea->addArea(area);
+            }
+            else
+            {
+                QMessageBox::warning(0, tr("Ошибка при создании области"),
+                                     tr("Пожалуйста, поместите область "
+                                        "внутри области этажа."));
+                return;
+            }
+        }
+
+        addItem(area);
+        for (int i = 0; i != m_tempPolyline.size(); i++)
+            removeItem(m_tempPolyline.at(i));
+        qDeleteAll(m_tempPolyline);
+        m_tempPolyline.clear();
+        m_crossLineHorizontal->hide();
+        m_crossLineVertical->hide();
+        m_crossLineHorizontal->setLine(-5, -5, -5, -5);   // Else there are false
+        m_crossLineVertical->setLine(-5, -5, -5, -5);     // misoperation
+        m_cursorCircle->hide();
+        setMode(Planning);
+    }
+    else
+        QMessageBox::warning(0, tr("Ошибка при создании области"),
+                             tr("Область должна иметь хотя бы две вершины. "
+                                "Пожалуйста, завершите создание области."));
+}
+
+void MapFloor::deleteArea(MapArea *area)
+{
+    while (area->areasNumber() != 0)
+        deleteArea(area->area(0));
+    removeItem(area);
+    if (area != m_outline)
+        area->parent()->deleteArea(area);
+    else
+    {
+        delete m_outline;
+        m_outline = 0;
+    }
 }
 
 void MapFloor::finalizeDoor(QPointF pos/*MapArea *area, QLineF line*/)
 {
-    setMode(Planning);
+    /*setMode(Planning);
     cursorCircle->hide();
     for (int i = 0; i !=areas.size(); i++)
     {
@@ -589,7 +733,7 @@ void MapFloor::finalizeDoor(QPointF pos/*MapArea *area, QLineF line*/)
                 return;
             }
         }
-    }
+    }*/
 
 }
 
@@ -602,3 +746,31 @@ QPolygonF MapFloor::convertLineVecToPolygon(const
     return polygon;
 }
 
+gpc_polygon MapFloor::convertQtToGpcPolygon(const QPolygonF *pgn)
+{
+    gpc_polygon gpc_pgn;
+    int size = pgn->size();
+    gpc_pgn.num_contours = 1;
+    gpc_pgn.contour = new gpc_vertex_list[1];
+    gpc_pgn.contour[0].num_vertices = size;
+    gpc_pgn.contour[0].vertex = new gpc_vertex[size];
+    for (int i = 0; i != size; i++)
+    {
+        gpc_pgn.contour[0].vertex[i].x = pgn->at(i).x();
+        gpc_pgn.contour[0].vertex[i].y = pgn->at(i).y();
+    }
+    return gpc_pgn;
+}
+
+void MapFloor::selectArea(MapArea *area)
+{
+    selectClear();
+    area->setBrush(QBrush(QColor::fromRgb(243, 243, 243)));
+    m_selectedArea = area;
+}
+
+void MapFloor::selectClear()
+{
+    if (m_selectedArea != 0)
+        m_selectedArea->setBrush(QBrush(Qt::white));
+}

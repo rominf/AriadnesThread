@@ -25,12 +25,12 @@ signals:
 public slots:
 
 private:
-    QVector<MapFloor*> floors;
-    qreal pixPerRealM;
-    qreal pixPerDisplayM;
-    qreal realMPerDisplayM;
-    qreal pixSizeX;
-    qreal pixSizeY;
+    QVector<MapFloor*> m_floors;
+    qreal m_pixPerRealM;
+    qreal m_pixPerDisplayM;
+    qreal m_realMPerDisplayM;
+    qreal m_pixSizeX;
+    qreal m_pixSizeY;
 
     qreal convertPixToDisplayM(qreal r) const;
     qreal convertPixToRealM(qreal r) const;
