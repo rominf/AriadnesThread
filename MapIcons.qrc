@@ -19,6 +19,6 @@
         <file alias="ZoomIn">Icons/magnifier-zoom-in.png</file>
         <file alias="ZoomOut">Icons/magnifier-zoom-out.png</file>
         <file alias="AddBase">Icons/image.png</file>
-        <file alias="Gs">1 этаж.jpg</file>
+        <file alias="Abc">1.jpg</file>
     </qresource>
 </RCC>

@@ -32,6 +32,7 @@
 #include <QPushButton>
 #include <QPushButton>
 #include <QRectF>
+#include <QScrollBar>
 #include <QShortcut>
 #include <QStackedWidget>
 #include <QStatusBar>
@@ -56,9 +57,9 @@ public:
         eFile = 1,
         eMode = 2,
         eView = 4,
-        eFloorNameChange = 8,
-        eAdd  = 16,
-        eDock = 32,
+        eAdd  = 8,
+        eDock = 16,
+        eMarking = 32,
         eHelp = 64
     };
     enum State {stEnable_Visible, stDisable_Visible, stDisable_Unvisible};
@@ -85,6 +86,8 @@ private slots:
     void actgrpTriggered(QAction *);    // Link between actgrpMode & switchMode
     void switchMode(MapFloor::Mode m);  // Apply app to proper mode
     void setActiveFloor(int i);         // Change visible floor
+    void setAreaName();
+    void dockVisibilityChanged(bool visible);
     void about();                       // Show info about my fantastic program
 
 private:
@@ -92,6 +95,7 @@ private:
     static const qint32 cMagicNumber = 0xA246B56D;
     static const qreal cPixPerRealM = 10;
     static const qreal cZoom = 1.1;
+    static const int cDockWidth = 250;
 
     ///////////////////////////////Variables////////////////////////////////////
     QString openedFile;
@@ -151,7 +155,7 @@ private:
     QWidget *wgtInfoEdit;
     QVBoxLayout *vbldckwgtInfoEdit;
     QLabel *lblRoomName;
-    QLineEdit *ldtRoomName;
+    QPlainTextEdit *ptdtRoomName;
     QLabel *lblRoomDescription;
     QPlainTextEdit *ptdtRoomDescription;
 

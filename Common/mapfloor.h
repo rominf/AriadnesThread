@@ -1,7 +1,7 @@
 #ifndef MAPFLOOR_H
 #define MAPFLOOR_H
 
-#include <QtCore/qmath.h>
+#include <qmath.h>
 #include <QGraphicsItem>
 #include <QGraphicsLineItem>
 #include <QGraphicsScene>
@@ -10,10 +10,14 @@
 #include <QLineF>
 #include <QMessageBox>
 #include <QObject>
+#include <QPixmap>
 #include <QRectF>
 #include <QStack>
+#include "geometry.h"
 #include "maparea.h"
 #include "mapbase.h"
+#include "mapselection.h"
+
 extern "C"
 {
     #include "gpc.h"
@@ -26,17 +30,19 @@ class MapFloor: public QGraphicsScene
 
     friend QDataStream &operator<<(QDataStream &output, const MapFloor &floor);
     friend QDataStream &operator>>(QDataStream &input, MapFloor &floor);
-public:
-    enum Mode {Idle, Planning, WallAdd, AreaAdd, DoorAdd, Marking};
-    enum Straight {None, SaveX, SaveY};
+public:    
+    explicit MapFloor(const QRectF &sceneRect, QObject *parent = 0);
 
-    explicit MapFloor(const QRectF &sceneRect, QString floorName = "",
-                      QObject *parent = 0);
+    static const qreal OutlineZValue;
+    enum Mode {Idle, Planning, WallAdd, AreaAdd, DoorAdd, Marking, Selection};
+
     QString name() const;
     void setName(const QString &floorName);
+    MapFloor::Mode mode();
     void setMode(Mode m);
     void addBase(QPixmap &pixmap);
-    MapArea* area(int i);
+    MapArea* area(int i = 0);
+    QAbstractGraphicsShapeItem* selectedItem();
 
 signals:
     void modeChanged(MapFloor::Mode);
@@ -52,20 +58,18 @@ protected:
 
 private:
     const qreal cCursorCircleR;
-    const qreal cMagnetDestToLine;
-    const qreal cMagnetDestToTop;
 
     Mode m_mode;
     QString m_name;
     QGraphicsRectItem *m_border;
     QVector<QLineF*> m_lines;
     MapArea *m_outline;
-    MapArea *m_selectedArea;
 //    QVector<MapArea*> areas;
     QVector<QGraphicsLineItem*> m_walls;
     QVector<QGraphicsLineItem*> m_doors;
     MapBase *m_base;
     bool m_isCrossLinesActive;
+    MapSelection *m_selection;
 
     QGraphicsLineItem *m_tempLine;
     QVector<QGraphicsLineItem*> m_tempPolyline;
@@ -75,15 +79,10 @@ private:
 
     QSet<MapArea*> parentAreas(MapArea *area, const QPointF *pos);
     void areasToLineVec(MapArea *area);
+    QVector<MapArea*> pointContainers(QPointF pos);
     bool validatePos(QPointF pos, QPointF &rightPos);
-    Straight straighten(QLineF &line);
-    qreal dest(QPointF m, QPointF n);
-    bool isInSegment(const QLineF &l, const QPointF &p);
-    QPointF getPerpendicularBase(QPointF m, QLineF l);
-    bool getPointFromLine(QPointF m, QPointF &newPoint,
-                               const QLineF &l, Straight straight, qreal &min);
-    bool getPointFromLineTops(QPointF m, QPointF &newPoint, const QLineF *line);
-    QPointF getPoint(QPointF m, Straight straight, bool magnetToTops = true);
+    QPointF getPoint(QPointF m, Geometry::Straight straight,
+                     bool magnetToTops = true);
 
     void removeLastFromTempPolyline();
 
@@ -94,11 +93,8 @@ private:
     void finalizeWall();
     void finalizeArea();
     void deleteArea(MapArea *area);
-    void finalizeDoor(QPointF pos/*MapArea *area, QLineF line*/);
-
-    void selectArea(MapArea *area);
-    void selectClear();
-
+    void finalizeDoor();
+    void deleteDoor(MapDoor *door);
 };
 
 #endif // MAPFLOOR_H
