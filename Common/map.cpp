@@ -60,13 +60,16 @@ qreal Map::convertRealMToPix(qreal r) const
 
 int Map::floorsNumber()
 {
-    return m_floors.size();
+    if (!m_floors.isEmpty())
+        return m_floors.size();
+    else
+        return 0;
 }
 
-void Map::insertFloor(int i, QString floorName)
+void Map::insertFloor(int i)
 {
     m_floors.insert(i, new
-                  MapFloor(QRectF(0, 0, m_pixSizeX, m_pixSizeY), floorName, this));
+                  MapFloor(QRectF(0, 0, m_pixSizeX, m_pixSizeY), this));
 }
 
 void Map::removeFloor(int i)

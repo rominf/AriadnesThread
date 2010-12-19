@@ -9,14 +9,14 @@ class Map : public QObject
 {
     Q_OBJECT
 
-    friend QDataStream & operator<<(QDataStream &output, const Map &map);
-    friend QDataStream & operator>>(QDataStream &input, Map &map);
+    friend QDataStream &operator<<(QDataStream &output, const Map &map);
+    friend QDataStream &operator>>(QDataStream &input, Map &map);
 public:
     explicit Map(qreal mapPixPerRealM, qreal mapPixPerDisplayM,
                  qreal mapPixSizeX, qreal mapPixSizeY, QObject *parent);
     void setPixPerDisplayM(qreal r);
     int floorsNumber();
-    void insertFloor(int i, QString floorName = "");
+    void insertFloor(int i);
     void removeFloor(int i);
     MapFloor* floor(int i) const;
 

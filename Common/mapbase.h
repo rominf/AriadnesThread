@@ -1,6 +1,7 @@
 #ifndef MAPBASE_H
 #define MAPBASE_H
 
+#include <qmath.h>
 #include <QBrush>
 #include <QGraphicsPixmapItem>
 #include <QGraphicsSceneMouseEvent>

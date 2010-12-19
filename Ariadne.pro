@@ -7,7 +7,10 @@ HEADERS += \
     Common/maparea.h \
     Common/mapbase.h \
     Ariadne/mainwindow.h \
-    Ariadne/dialogmapsize.h
+    Ariadne/dialogmapsize.h \
+    Common/geometry.h \
+    Common/mapdoor.h \
+    Common/mapselection.h
 
 SOURCES += \
     Common/gpc.c \
@@ -17,7 +20,10 @@ SOURCES += \
     Common/mapbase.cpp \
     Ariadne/main.cpp \
     Ariadne/mainwindow.cpp \
-    Ariadne/dialogmapsize.cpp
+    Ariadne/dialogmapsize.cpp \
+    Common/geometry.cpp \
+    Common/mapdoor.cpp \
+    Common/mapselection.cpp
 
 RESOURCES += \
     MapIcons.qrc
