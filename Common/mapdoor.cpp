@@ -1,6 +1,6 @@
 #include "mapdoor.h"
 
-const qreal MapDoor::cCircleR = 10.0;
+const qreal MapDoor::cCircleR = 7.0;
 quint32 MapDoor::m_count = 0;
 QSet<quint32> MapDoor::m_finishedDoors;
 
@@ -72,4 +72,9 @@ bool MapDoor::isFinished() const
 void MapDoor::clearFinishedDoors()
 {
     m_finishedDoors.clear();
+}
+
+int MapDoor::type() const
+{
+    return Type;
 }

@@ -14,12 +14,15 @@ class MapDoor : public QGraphicsEllipseItem
 
 public:
     MapDoor(const QPointF &point);
+
+    enum {Type = QGraphicsItem::UserType + 2};
     void addParentArea(MapArea *area);
     MapArea* parentArea(int i);
     int parentAreasNumber();
     QSet<quint32> parentAreasUins();
     bool isFinished() const;
     static void clearFinishedDoors();
+    int type() const;
 private:
     static const qreal cCircleR;
 

@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QDataStream>
+#include "graph.h"
 #include "mapfloor.h"
 
 class Map : public QObject
@@ -17,14 +18,29 @@ public:
     void setPixPerDisplayM(qreal r);
     int floorsNumber();
     void insertFloor(int i);
+    void swapFloors(int x, int y);
     void removeFloor(int i);
     MapFloor* floor(int i) const;
+//    QVector<QPointF*> graphNodesCoordinates();
 
-signals:
+//    void graphStartAnew();
+//    const Graph* graph() const;
+
+//signals:
 
 public slots:
+    void graphStartAnew();
+
+private slots:
+    void addNode(QPointF point, MapFloor &floor);
+    void addGraphItem(QGraphicsItem *item);
+    void deleteGraphItem(QGraphicsItem *item);
+    void graphDeleteNode(GraphNode *node);
+//    void graphNodesChanged(QVector<QPointF*> &nodes, int floor);
 
 private:
+    Graph *m_graph;
+
     QVector<MapFloor*> m_floors;
     qreal m_pixPerRealM;
     qreal m_pixPerDisplayM;

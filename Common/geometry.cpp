@@ -68,7 +68,7 @@ QPointF Geometry::getPerpendicularBase(QPointF m, QLineF l)
 }
 
 bool Geometry::getPointFromLine(QPointF m, QPointF &newPoint, const QLineF &l,
-                                Straight straight, qreal &min)
+                                Straight straight, bool extension, qreal &min)
 {
     QPointF *p = new QPointF();
     qreal d;
@@ -114,7 +114,7 @@ bool Geometry::getPointFromLine(QPointF m, QPointF &newPoint, const QLineF &l,
     }
 
     if ((d < cMagnetDestToLine) &
-        (d < min) & (inBoundingRectOfSegment(l, *p)))
+        (d < min) & ((inBoundingRectOfSegment(l, *p) | (extension))))
     {
         min = d;
         newPoint = *p;

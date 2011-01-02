@@ -23,6 +23,7 @@
 #include <QKeySequence>
 #include <QLabel>
 #include <QLineEdit>
+#include <QListView>
 #include <QMainWindow>
 #include <QMenu>
 #include <QMenu>
@@ -32,11 +33,16 @@
 #include <QPushButton>
 #include <QPushButton>
 #include <QRectF>
+#include <QItemSelectionModel>
 #include <QScrollBar>
 #include <QShortcut>
+#include <QSignalMapper>
 #include <QStackedWidget>
 #include <QStatusBar>
+#include <QStringListModel>
+#include <QTime>
 #include <QToolBar>
+#include <QToolButton>
 #include <QVBoxLayout>
 #include <QVBoxLayout>
 #include <QWidget>
@@ -55,39 +61,45 @@ public:
     enum Element
     {
         eFile = 1,
-        eMode = 2,
-        eView = 4,
-        eAdd  = 8,
-        eDock = 16,
-        eMarking = 32,
-        eHelp = 64
+        eView = 2,
+        eAdd  = 4,
+        eHelp = 8,
+        ePanels = 16,
+        eFloorsManagement = 32,
+        eAreasMarking = 64
     };
-    enum State {stEnable_Visible, stDisable_Visible, stDisable_Unvisible};
     Q_DECLARE_FLAGS(Elements, Element)
-
-/*protected:
-    virtual void keyPressEvent(QKeyEvent *event);*/
 
 private slots:
     void mapNew();                      // Creating map
     void mapOpen();                     // Opening map
     void mapSave();                     // Saving map
-    void previousFloor();               // Set visible previous floor
-    void nextFloor();                   // Set visible next floor
+    void floorDown();                   // Set visible lower floor
+    void floorUp();                     // Set visible higher floor
+
     void zoomOut();
     void zoomIn();
     void zoomFit();
     void addBase();
-    void floorNameChange(const QString &); // Set current floor name
-    void addFloor();                    // Adding floor, drawing outline for it
+    void hideBase(bool b);
+    void magnetToExtensions(bool b);
+//    void floorNameChange(const QString &); // Set current floor name
     void addWall();                     // Adding wall
     void addArea();                     // Adding area
     void addDoor();                     // Adding door
-    void actgrpTriggered(QAction *);    // Link between actgrpMode & switchMode
+    void actgrpPanelsTriggered(QAction *);    // Link between actgrpMode & switchMode
     void switchMode(MapFloor::Mode m);  // Apply app to proper mode
     void setActiveFloor(int i);         // Change visible floor
     void setAreaName();
-    void dockVisibilityChanged(bool visible);
+    void panelFloorsManagementVisibilityChanged(bool visible);
+    void floorAdd();                    // Adding floor
+    void floorDelete();
+    void floorMoveDown();
+    void floorMoveUp();
+    void viewFloorsListItemActivated(QModelIndex index);
+    void viewFloorsListItemChanged(QModelIndex index);
+    void mouseDoubleClicked();
+    void panelAreasMarkingVisibilityChanged(bool visible);
     void about();                       // Show info about my fantastic program
 
 private:
@@ -96,6 +108,12 @@ private:
     static const qreal cPixPerRealM = 10;
     static const qreal cZoom = 1.1;
     static const int cDockWidth = 250;
+    enum State
+    {
+        stSave = -1,
+        stFalse = false,
+        stTrue = true
+    };
 
     ///////////////////////////////Variables////////////////////////////////////
     QString openedFile;
@@ -108,37 +126,46 @@ private:
     ///////////////////////////////Objects//////////////////////////////////////
     // OUR ALL!!! Please, do not touch!
     Map *map;
+    QStringListModel *modelFloorsList;
+    QItemSelectionModel *selectionFloorsList;
     // our all ended. :)
 
     // Actions
     QAction *actMapNew;
     QAction *actMapOpen;
     QAction *actMapSave;
-    QAction *actSwitchToPlanningMode;
-    QAction *actSwitchToMarkingMode;
-    QAction *actPreviousFloor;
-    QAction *actNextFloor;
+    QAction *actFloorDown;
+    QAction *actFloorUp;
     QAction *actZoomOut;
     QAction *actZoomIn;
     QAction *actZoomFit;
     QAction *actAddBase;
-    QAction *actAddFloor;
+    QAction *actHideBase;
+    QAction *actMagnetToExtensions;
     QAction *actAddWall;
     QAction *actAddArea;
     QAction *actAddDoor;
     QAction *actAbout;
+
+    QAction *actPanelFloorsManagement;
+    QAction *actFloorAdd;
+    QAction *actFloorDelete;
+    QAction *actFloorMoveDown;
+    QAction *actFloorMoveUp;
+    QAction *actPanelAreasMarking;
+    QActionGroup *actgrpPanels;
     // QAction *actAboutQT;
-    QActionGroup *actgrpMode;
+
 
     // Menus
     QMenu *menuFile;
-    QMenu *menuMode;
+    QMenu *menuPanels;
     QMenu *menuAdd;
     QMenu *menuHelp;
 
     // Toolbars
     QToolBar *tbrFile;
-    QToolBar *tbrMode;
+    QToolBar *tbrPanels;
     QToolBar *tbrView;
     QComboBox *cbxFloorSelect;
     QToolBar *tbrAdd;
@@ -150,10 +177,23 @@ private:
     QWidget *wgtCentral;
     QVBoxLayout *vblwgtCentral;
 
-    // Dock Info
-    QDockWidget *dckwgtInfoEdit;
-    QWidget *wgtInfoEdit;
-    QVBoxLayout *vbldckwgtInfoEdit;
+    QSignalMapper *panelsSignalMapper;
+
+    // Dock FloorsManagement
+    QDockWidget *dckwgtFloorsManagement;
+    QWidget *wgtFloorsManagement;
+    QVBoxLayout *vblFloorsManagement;
+    QHBoxLayout *hblFloorsManagementButtons;
+    QToolButton *btnFloorAdd;
+    QToolButton *btnFloorDelete;
+    QToolButton *btnFloorMoveDown;
+    QToolButton *btnFloorMoveUp;
+    QListView *viewFloorsList;
+
+    // Dock AreasMarking
+    QDockWidget *dckwgtAreasMarking;
+    QWidget *wgtAreasMarking;
+    QVBoxLayout *vblAreasMarking;
     QLabel *lblRoomName;
     QPlainTextEdit *ptdtRoomName;
     QLabel *lblRoomDescription;
@@ -167,10 +207,12 @@ private:
     void createActions();
     void createMenus();
     void createToolBars();
-    void createDock();
+    void createPanelFloorsManagement();
+    void createPanelAreasMarking();
     void createGraphics();
-    void setState(Elements elem, State st);
+    void setState(Elements elem, State visible, State enable);
     qreal displayPixPerM(qreal pix, qreal mm) const;
+    void swapFloors(int x, int y);
     MapFloor::Mode getMode();
 };
 

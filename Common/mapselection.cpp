@@ -5,7 +5,8 @@ MapSelection::MapSelection(bool multiselection):
 {
     brushNormalArea = new QBrush(Qt::NoBrush);
     brushNormalDoor = new QBrush(Qt::white);
-    brushSelected = new QBrush(QColor::fromRgb(255, 250, 205));
+    brushSelectedArea = new QBrush(QColor::fromRgb(255, 250, 205, 127));
+    brushSelectedDoor = new QBrush(QColor::fromRgb(255, 250, 205, 255));
     penNormal = new QPen(Qt::SolidLine);
     penSelected = new QPen(Qt::SolidLine);
     penSelected->setWidthF(4);
@@ -27,14 +28,15 @@ void MapSelection::addItem(QGraphicsItem *item)
         {
         case MapArea::Type:
             m_areas.append(qgraphicsitem_cast<MapArea*>(shapeItem));
+            shapeItem->setBrush(*brushSelectedArea);
             break;
         case MapDoor::Type:
             m_doors.append(qgraphicsitem_cast<MapDoor*>(shapeItem));
+            shapeItem->setBrush(*brushSelectedDoor);
             break;
         default:
             return;
         }
-        shapeItem->setBrush(*brushSelected);
         shapeItem->setPen(*penSelected);
 }
 

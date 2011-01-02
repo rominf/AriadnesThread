@@ -8,6 +8,14 @@ m_pixSizeX(mapPixSizeX), m_pixSizeY(mapPixSizeY)
 {
     // Count map geometry
     m_realMPerDisplayM = m_pixPerDisplayM / m_pixPerRealM;
+
+    m_graph = new Graph();
+    connect(m_graph, SIGNAL(graphItemAdded(QGraphicsItem*)),
+            SLOT(addGraphItem(QGraphicsItem*)));
+//    connect(m_graph, SIGNAL(graphItemDeleted(QGraphicsItem*)),
+//            SLOT(addGraphItem(QGraphicsItem*)));
+//    connect(m_graph, SIGNAL(graphNodesChanged(QVector<QPointF*>,int)),
+//            SLOT(graphNodesChanged(QVector<QPointF*>*)));
 }
 
 QDataStream & operator<<(QDataStream &output, const Map &map)
@@ -32,6 +40,62 @@ QDataStream & operator>>(QDataStream &input, Map &map)
     }
     return input;
 }
+
+void Map::addNode(QPointF point, MapFloor &floor)
+{
+    int floorNumber = m_floors.indexOf(&floor);
+    m_graph->addNode(point, floorNumber);
+}
+
+void Map::addGraphItem(QGraphicsItem *item)
+{
+
+    if (item->type() == GraphArc::Type)
+    {
+        GraphArc *arc = qgraphicsitem_cast<GraphArc*>(item);
+        if (arc->node1()->floor() == arc->node2()->floor())
+            m_floors[arc->node1()->floor()]->addItem(arc);
+    }
+    else if (item->type() == GraphNode::Type)
+    {
+        GraphNode *node = qgraphicsitem_cast<GraphNode*>(item);
+        m_floors[node->floor()]->addItem(node);
+    }
+    else
+        return;
+}
+
+void Map::deleteGraphItem(QGraphicsItem *item)
+{
+    if (item->type() == GraphArc::Type)
+    {
+        GraphArc *arc = qgraphicsitem_cast<GraphArc*>(item);
+        if (arc->node1()->floor() == arc->node2()->floor())
+            m_floors[arc->node1()->floor()]->removeItem(arc);
+    }
+    else if (item->type() == GraphNode::Type)
+    {
+        GraphNode *node = qgraphicsitem_cast<GraphNode*>(item);
+        m_floors[node->floor()]->removeItem(node);
+    }
+    else
+        return;
+}
+
+void Map::graphStartAnew()
+{
+    m_graph->startAnew();
+}
+
+void Map::graphDeleteNode(GraphNode *node)
+{
+    m_graph->deleteNode(node);
+}
+
+//void Map::graphNodesChanged(QVector<QPointF*> &nodes, int floor)
+//{
+//    m_floors[floor]->setGraphNodes(nodes);
+//}
 
 void Map::setPixPerDisplayM(qreal r)
 {
@@ -60,16 +124,27 @@ qreal Map::convertRealMToPix(qreal r) const
 
 int Map::floorsNumber()
 {
-    if (!m_floors.isEmpty())
-        return m_floors.size();
+//    if (!m_floors.isEmpty())
+        return m_floors.size();/*
     else
-        return 0;
+        return 0;*/
 }
 
 void Map::insertFloor(int i)
 {
-    m_floors.insert(i, new
-                  MapFloor(QRectF(0, 0, m_pixSizeX, m_pixSizeY), this));
+    MapFloor *floor = new MapFloor(QRectF(0, 0, m_pixSizeX, m_pixSizeY), this);
+    m_floors.insert(i, floor);
+    connect(floor, SIGNAL(addedNode(QPointF,MapFloor&)),
+            SLOT(addNode(QPointF,MapFloor&)));
+    connect(floor, SIGNAL(graphStartedAnew()),
+            SLOT(graphStartAnew()));
+}
+
+void Map::swapFloors(int x, int y)
+{
+    MapFloor *floor = m_floors[x];
+    m_floors[x] = m_floors[y];
+    m_floors[y] = floor;
 }
 
 void Map::removeFloor(int i)
@@ -81,3 +156,13 @@ MapFloor* Map::floor(int i) const
 {
     return m_floors.at(i);
 }
+
+//QVector<QPointF*> Map::graphNodesCoordinates()
+//{
+//    return m_graph->nodesCoordinates();
+//}
+
+//const Graph* Map::graph() const
+//{
+//    return m_graph;
+//}

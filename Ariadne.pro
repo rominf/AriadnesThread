@@ -10,7 +10,10 @@ HEADERS += \
     Ariadne/dialogmapsize.h \
     Common/geometry.h \
     Common/mapdoor.h \
-    Common/mapselection.h
+    Common/mapselection.h \
+    Common/grapharc.h \
+    Common/graph.h \
+    Common/graphnode.h
 
 SOURCES += \
     Common/gpc.c \
@@ -23,7 +26,10 @@ SOURCES += \
     Ariadne/dialogmapsize.cpp \
     Common/geometry.cpp \
     Common/mapdoor.cpp \
-    Common/mapselection.cpp
+    Common/mapselection.cpp \
+    Common/grapharc.cpp \
+    Common/graph.cpp \
+    Common/graphnode.cpp
 
 RESOURCES += \
     MapIcons.qrc
