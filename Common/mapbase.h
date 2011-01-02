@@ -3,6 +3,7 @@
 
 #include <qmath.h>
 #include <QBrush>
+#include <QFile>
 #include <QGraphicsPixmapItem>
 #include <QGraphicsSceneMouseEvent>
 #include <QPixmap>
@@ -10,14 +11,18 @@
 class MapBase : public QGraphicsPixmapItem
 {
 public:
-    MapBase(QPixmap &pixmap, QRectF sceneRect);
-    void setPixmap(const QPixmap &pixmap, QRectF sceneRect);
+    MapBase(QString &fileName, QRectF sceneRect);
+    void setPixmap(QString &fileName, QRectF sceneRect);
+    QString fileName() const;
+//    void setVisible(bool Visible);
 
 //protected:
 //    virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
 //    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
 
-//private:
+private:
+    QString m_fileName;
+    static const QString cFakeFileName;
 //    const qreal cResizingHandleWidth;
 //    QRectF *resizingHandle;
 //    bool resizingHandlePressed;

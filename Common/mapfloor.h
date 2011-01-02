@@ -34,25 +34,43 @@ public:
     explicit MapFloor(const QRectF &sceneRect, QObject *parent = 0);
 
     static const qreal OutlineZValue;
-    enum Mode {Idle, Planning, WallAdd, AreaAdd, DoorAdd, Marking, Selection};
+    enum Mode
+    {
+        Idle, WallAdd, AreaAdd, DoorAdd, Graph, Selection
+    };
+    enum MagnetItem
+    {
+        miNone = 0,
+        miLines = 1,
+        miTops = 2,
+        miNodes = 4
+    };
+    Q_DECLARE_FLAGS(MagnetItems, MagnetItem)
 
     QString name() const;
     void setName(const QString &floorName);
     MapFloor::Mode mode();
     void setMode(Mode m);
-    void addBase(QPixmap &pixmap);
+    void addBase(QString fileName);
+    void baseSetVisible(bool visible);
     MapArea* area(int i = 0);
     QAbstractGraphicsShapeItem* selectedItem();
+    virtual void addItem (QGraphicsItem *item);
+//    void setGraphNodes(QVector<QPointF*> &nodes);
+    void magnetToExtensions(bool b);
 
 signals:
     void modeChanged(MapFloor::Mode);
+    void mouseDoubleClicked();
+    void addedNode(QPointF point, MapFloor &floor);
+    void graphStartedAnew();
 
 protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
     virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
     virtual void keyPressEvent(QKeyEvent *event);
-    virtual void addItem (QGraphicsItem * item);
+
 //    virtual QVariant itemChange(QGraphicsItem::GraphicsItemChange change,
 //                                 const QVariant &value);
 
@@ -60,9 +78,11 @@ private:
     const qreal cCursorCircleR;
 
     Mode m_mode;
+    bool m_magnetToExtensions;
     QString m_name;
     QGraphicsRectItem *m_border;
     QVector<QLineF*> m_lines;
+    QVector<QPointF*> m_graphNodes;
     MapArea *m_outline;
 //    QVector<MapArea*> areas;
     QVector<QGraphicsLineItem*> m_walls;
@@ -75,14 +95,15 @@ private:
     QVector<QGraphicsLineItem*> m_tempPolyline;
     QGraphicsLineItem *m_crossLineHorizontal;
     QGraphicsLineItem *m_crossLineVertical;
+    QGraphicsEllipseItem *m_startPoint;
     QGraphicsEllipseItem *m_cursorCircle;
 
     QSet<MapArea*> parentAreas(MapArea *area, const QPointF *pos);
     void areasToLineVec(MapArea *area);
     QVector<MapArea*> pointContainers(QPointF pos);
     bool validatePos(QPointF pos, QPointF &rightPos);
-    QPointF getPoint(QPointF m, Geometry::Straight straight,
-                     bool magnetToTops = true);
+    QPointF getPoint(QPointF m, Geometry::Straight straight, MagnetItems items);
+    QPointF graphGetPoint(QPointF pos);
 
     void removeLastFromTempPolyline();
 
@@ -96,5 +117,7 @@ private:
     void finalizeDoor();
     void deleteDoor(MapDoor *door);
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(MapFloor::MagnetItems)
 
 #endif // MAPFLOOR_H

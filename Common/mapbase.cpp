@@ -1,17 +1,25 @@
 #include "mapbase.h"
 
-MapBase::MapBase(QPixmap &pixmap, QRectF sceneRect):
-        QGraphicsPixmapItem(pixmap)
+const QString MapBase::cFakeFileName = "/error/file/doesnt/exist";
+
+MapBase::MapBase(QString &fileName, QRectF sceneRect):
+        QGraphicsPixmapItem()
 {
+//    m_fileName = "";
+    m_fileName = cFakeFileName;
     setZValue(-1);
     setOpacity(0.5);
-    setPixmap(pixmap, sceneRect);
+    setPixmap(fileName, sceneRect);
 }
 
-void MapBase::setPixmap(const QPixmap &pixmap, QRectF sceneRect)
+void MapBase::setPixmap(QString &fileName, QRectF sceneRect)
 {
+    QPixmap pixmap;
+    if (QFile::exists(fileName))
+        pixmap = QPixmap(fileName);
     if (!pixmap.isNull())
     {
+        m_fileName = fileName;
         QGraphicsPixmapItem::setPixmap(pixmap);
         qreal k, ky, kx, x, y;
         kx = sceneRect.width()/boundingRect().width();
@@ -31,6 +39,13 @@ void MapBase::setPixmap(const QPixmap &pixmap, QRectF sceneRect)
         setScale(k);
         setPos(x, y);
     }
+    else
+        m_fileName = cFakeFileName;
+}
+
+QString MapBase::fileName() const
+{
+    return m_fileName;
 }
 
 

@@ -1,6 +1,6 @@
 #include "maparea.h"
 
-const int MapArea::cFontSize = 20;
+const int MapArea::cFontSize = 16;
 quint32 MapArea::m_count = 0;
 
 MapArea::MapArea(const QPolygonF &polygon):
@@ -10,6 +10,7 @@ MapArea::MapArea(const QPolygonF &polygon):
 
     m_name = new QGraphicsTextItem(this);
     m_name->setFont(QFont("Arial", cFontSize));
+//    m_name->
 //    m_name->setZValue(1);
 //    m_name->setPos(this->polygon().boundingRect().center());
     m_description = "";
@@ -82,6 +83,15 @@ void MapArea::setName(const QString &name)
 {
     QTextDocument *doc = new QTextDocument(name);
     doc->setDefaultFont(QFont("Arial", cFontSize));
+    int fontSize = cFontSize;
+    while ((doc->size().width() > boundingRect().width()) |
+           (doc->size().height() > boundingRect().height()))
+    {
+        fontSize--;
+        doc->setDefaultFont(QFont("Arial", fontSize));
+    }
+    QTextOption alignment(Qt::AlignHCenter);
+    doc->setDefaultTextOption(alignment);
     m_name->setDocument(doc);
     if (m_areas.isEmpty())
     {

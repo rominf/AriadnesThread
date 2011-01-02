@@ -23,7 +23,8 @@ private:
     QVector<MapDoor*> m_doors;
     QBrush *brushNormalArea;
     QBrush *brushNormalDoor;
-    QBrush *brushSelected;
+    QBrush *brushSelectedArea;
+    QBrush *brushSelectedDoor;
     QPen *penNormal;
     QPen *penSelected;
 };

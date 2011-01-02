@@ -9,6 +9,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
 #include <QTextDocument>
+#include <QTextOption>
 #include "mapdoor.h"
 
 class MapDoor;
