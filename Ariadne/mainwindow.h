@@ -6,6 +6,7 @@
 #include <QActionGroup>
 #include <QApplication>
 #include <QComboBox>
+#include <QCheckBox>
 #include <QCursor>
 #include <QDockWidget>
 #include <QDockWidget>
@@ -62,11 +63,13 @@ public:
     {
         eFile = 1,
         eView = 2,
-        eAdd  = 4,
-        eHelp = 8,
-        ePanels = 16,
-        eFloorsManagement = 32,
-        eAreasMarking = 64
+        eLayers = 4,
+        eAdd  = 8,
+        eHelp = 16,
+        eFloorsSwitching = 32,
+        ePanels = 64,
+        eFloorsManagement = 128,
+        eAreasMarking = 256
     };
     Q_DECLARE_FLAGS(Elements, Element)
 
@@ -81,16 +84,17 @@ private slots:
     void zoomIn();
     void zoomFit();
     void addBase();
-    void hideBase(bool b);
+    void layerBaseSetVisible(bool visible);
+    void layerGraphSetVisible(bool visible);
     void magnetToExtensions(bool b);
 //    void floorNameChange(const QString &); // Set current floor name
     void addWall();                     // Adding wall
     void addArea();                     // Adding area
     void addDoor();                     // Adding door
+    void addNode();                     // Adding graph node
     void actgrpPanelsTriggered(QAction *);    // Link between actgrpMode & switchMode
     void switchMode(MapFloor::Mode m);  // Apply app to proper mode
     void setActiveFloor(int i);         // Change visible floor
-    void setAreaName();
     void panelFloorsManagementVisibilityChanged(bool visible);
     void floorAdd();                    // Adding floor
     void floorDelete();
@@ -100,6 +104,8 @@ private slots:
     void viewFloorsListItemChanged(QModelIndex index);
     void mouseDoubleClicked();
     void panelAreasMarkingVisibilityChanged(bool visible);
+    void setAreaName();
+    void chkAreaNameVisibleStateChanged(int state);
     void about();                       // Show info about my fantastic program
 
 private:
@@ -140,11 +146,13 @@ private:
     QAction *actZoomIn;
     QAction *actZoomFit;
     QAction *actAddBase;
-    QAction *actHideBase;
+    QAction *actLayerBase;
+    QAction *actLayerGraph;
     QAction *actMagnetToExtensions;
     QAction *actAddWall;
     QAction *actAddArea;
     QAction *actAddDoor;
+    QAction *actAddNode;
     QAction *actAbout;
 
     QAction *actPanelFloorsManagement;
@@ -166,8 +174,10 @@ private:
     // Toolbars
     QToolBar *tbrFile;
     QToolBar *tbrPanels;
-    QToolBar *tbrView;
+    QToolBar *tbrFloorsSwitching;
     QComboBox *cbxFloorSelect;
+    QToolBar *tbrView;
+    QToolBar *tbrLayers;
     QToolBar *tbrAdd;
     /*QToolBar *tbrFloorNameChange;
     QLabel *lblFloorNameChange;
@@ -194,10 +204,11 @@ private:
     QDockWidget *dckwgtAreasMarking;
     QWidget *wgtAreasMarking;
     QVBoxLayout *vblAreasMarking;
-    QLabel *lblRoomName;
-    QPlainTextEdit *ptdtRoomName;
-    QLabel *lblRoomDescription;
-    QPlainTextEdit *ptdtRoomDescription;
+    QLabel *lblAreaName;
+    QPlainTextEdit *ptdtAreaName;
+    QCheckBox *chkAreaNameVisible;
+    QLabel *lblAreaDescription;
+    QPlainTextEdit *ptdtAreaDescription;
 
     // Graphics
     QGraphicsView *view;

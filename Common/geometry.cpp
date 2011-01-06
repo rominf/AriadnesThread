@@ -42,7 +42,7 @@ bool Geometry::contain(const QPointF &p, const QLineF &l)
     qreal x1 = l.x1(); qreal y1 = l.y1();
     qreal x2 = l.x2(); qreal y2 = l.y2();
     // From determinant condition of three points on the one line
-    return (x*(y1 - y2) - y*(x1 - x2) + (x1*y2 - x2*y1) <= cError) &
+    return (qAbs(x*(y1 - y2) - y*(x1 - x2) + (x1*y2 - x2*y1)) <= cError) &
             (inBoundingRectOfSegment(l, p));
 }
 

@@ -25,6 +25,7 @@ public:
     QString name();
     void setName(const QString &name);
     void setNameVisible(bool show = true);
+    bool isNameVisible();
     QString description();
     void setDescription(QString &description);
     MapArea* parent();

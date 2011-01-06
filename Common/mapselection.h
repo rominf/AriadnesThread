@@ -4,6 +4,7 @@
 #include <QBrush>
 #include <QPen>
 #include <QVector>
+#include "graphnode.h"
 #include "maparea.h"
 #include "mapdoor.h"
 
@@ -21,12 +22,17 @@ private:
     bool m_multiselection;
     QVector<MapArea*> m_areas;
     QVector<MapDoor*> m_doors;
+    QVector<GraphNode*> m_nodes;
     QBrush *brushNormalArea;
     QBrush *brushNormalDoor;
+    QBrush *brushNormalNode;
     QBrush *brushSelectedArea;
     QBrush *brushSelectedDoor;
+    QBrush *brushSelectedNode;
     QPen *penNormal;
-    QPen *penSelected;
+    QPen *penSelectedArea;
+    QPen *penSelectedDoor;
+    QPen *penSelectedNode;
 };
 
 #endif // MAPSELECTION_H

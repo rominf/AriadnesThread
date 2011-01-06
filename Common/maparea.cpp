@@ -93,22 +93,22 @@ void MapArea::setName(const QString &name)
     QTextOption alignment(Qt::AlignHCenter);
     doc->setDefaultTextOption(alignment);
     m_name->setDocument(doc);
-    if (m_areas.isEmpty())
-    {
-        m_name->setVisible(true);
+    m_name->setPos(boundingRect().center().x() - doc->size().width()/2,
+                   boundingRect().center().y() - doc->size().height()/2);
+    m_name->setVisible(m_areas.isEmpty());
 //        QFontMetricsF fm(m_name->font());
 //        m_name->setPos(boundingRect().center().x() - fm.width(name)/2,
 //                       boundingRect().center().y() - fm.height()/2);
-        m_name->setPos(boundingRect().center().x() - doc->size().width()/2,
-                       boundingRect().center().y() - doc->size().height()/2);
-    }
-    else
-        m_name->setVisible(false);
 }
 
 void MapArea::setNameVisible(bool show)
 {
     m_name->setVisible(show);
+}
+
+bool MapArea::isNameVisible()
+{
+    return m_name->isVisible();
 }
 
 QString MapArea::description()
@@ -145,10 +145,11 @@ MapArea* MapArea::parent()
 
 void MapArea::addArea(MapArea *area)
 {
+    if (isVisible() & m_areas.isEmpty())
+        setNameVisible(false);
     area->m_parent = this;
     m_areas.append(area);
-    area->setZValue(zValue() + 1.0);
-    setNameVisible(false);
+    area->setZValue(zValue() + 2.0);
 }
 
 MapArea* MapArea::area(int i) const
@@ -158,7 +159,9 @@ MapArea* MapArea::area(int i) const
 
 void MapArea::deleteArea(MapArea* area)
 {
-    m_areas.remove(m_areas.indexOf(area));
+    int i = m_areas.indexOf(area);
+    if (i > -1)
+        m_areas.remove(i);
     delete area;
     if (m_areas.size() == 0)
         setNameVisible(true);
@@ -182,7 +185,9 @@ MapDoor* MapArea::door(int i) const
 
 void MapArea::deleteDoor(MapDoor* door)
 {
-    m_doors.remove(m_doors.indexOf(door));
+    int i = m_doors.indexOf(door);
+    if (i > -1)
+        m_doors.remove(i);
 }
 
 int MapArea::doorsNumber()
