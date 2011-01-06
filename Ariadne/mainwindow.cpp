@@ -31,8 +31,8 @@ MainWindow::MainWindow(QWidget *parent)
     createPanelAreasMarking();
 
     setState(eFile | eHelp, stTrue, stTrue);
-    setState(eView | eAdd | ePanels | eFloorsManagement | eAreasMarking,
-             stFalse, stFalse);
+    setState(eView | eLayers | eAdd | eFloorsSwitching | ePanels |
+             eFloorsManagement | eAreasMarking, stFalse, stFalse);
     actMapSave->setEnabled(false);
 
     showMaximized();
@@ -86,12 +86,12 @@ void MainWindow::createActions()
 
     actFloorDown = new QAction(QIcon(":/FloorDown"), tr("Этаж ниже"), this);
     connect(actFloorDown, SIGNAL(triggered()), SLOT(floorDown()));
-    actFloorDown->setShortcut(Qt::CTRL + Qt::Key_Right);
+    actFloorDown->setShortcut(Qt::CTRL + Qt::Key_Down);
 
     actFloorUp = new QAction(QIcon(":/FloorUp"), tr("Этаж выше"),
                                    this);
     connect(actFloorUp, SIGNAL(triggered()), SLOT(floorUp()));
-    actFloorUp->setShortcut(Qt::CTRL + Qt::Key_Left);
+    actFloorUp->setShortcut(Qt::CTRL + Qt::Key_Up);
 
 
     actZoomOut= new QAction(QIcon(":/ZoomOut"), tr("Уменьшить"), this);
@@ -110,10 +110,17 @@ void MainWindow::createActions()
     connect(actAddBase, SIGNAL(triggered()), SLOT(addBase()));
     actAddBase->setShortcut(Qt::CTRL + Qt::Key_B);
 
-    actHideBase = new QAction(QIcon(":/HideBase"), tr("Скрыть подложку"), this);
-    connect(actHideBase, SIGNAL(triggered(bool)), SLOT(hideBase(bool)));
-    actHideBase->setCheckable(true);
-//    actBaseVisible->setShortcut(Qt::CTRL + Qt::Key_B);
+    actLayerBase = new QAction(QIcon(":/LayerBase"), tr("Подложка"), this);
+    connect(actLayerBase, SIGNAL(triggered(bool)),
+            SLOT(layerBaseSetVisible(bool)));
+    actLayerBase->setCheckable(true);
+    actLayerBase->setChecked(true);
+
+    actLayerGraph = new QAction(QIcon(":/LayerGraph"), tr("Граф"), this);
+    connect(actLayerGraph, SIGNAL(triggered(bool)),
+            SLOT(layerGraphSetVisible(bool)));
+    actLayerGraph->setCheckable(true);
+    actLayerGraph->setChecked(true);
 
     actMagnetToExtensions = new QAction(
             QIcon(":/MagnetToExtensions"),
@@ -134,6 +141,11 @@ void MainWindow::createActions()
     actAddDoor = new QAction(QIcon(":/AddDoor"), tr("Добавить дверь"), this);
     connect(actAddDoor, SIGNAL(triggered()), SLOT(addDoor()));
     actAddDoor->setShortcut(Qt::CTRL + Qt::Key_D);
+
+    actAddNode = new QAction(QIcon(":/AddNode"), tr("Добавить вершину графа"),
+                             this);
+    connect(actAddNode, SIGNAL(triggered()), SLOT(addNode()));
+    actAddDoor->setShortcut(Qt::CTRL + Qt::Key_G);
 
 
     actFloorAdd = new QAction(QIcon(":/FloorAdd"), tr("Добавить этаж"), this);
@@ -177,9 +189,10 @@ void MainWindow::createMenus()
 
     menuAdd = menuBar()->addMenu(tr("Добавить"));
 //    menuAdd->addAction(actFloorAdd);
-    menuAdd->addAction(actAddWall);
+//    menuAdd->addAction(actAddWall);
     menuAdd->addAction(actAddArea);
     menuAdd->addAction(actAddDoor);
+    menuAdd->addAction(actAddNode);
 
     menuHelp = menuBar()->addMenu(tr("Помощь"));
     menuHelp->addAction(actAbout);
@@ -194,29 +207,37 @@ void MainWindow::createToolBars()
     tbrFile->addAction(actMapOpen);
     tbrFile->addAction(actMapSave);
 
-    tbrPanels = new QToolBar(tr("Панели"));
-    addToolBar(Qt::LeftToolBarArea, tbrPanels);
-    tbrPanels->setFloatable(false);
-    tbrPanels->addAction(actPanelFloorsManagement);
-    tbrPanels->addAction(actPanelAreasMarking);
-
-    tbrView = addToolBar(tr("Вид"));
-    tbrView->setFloatable(false);
-    tbrView->addAction(actFloorDown);
+    tbrFloorsSwitching = addToolBar(tr("Переключение этажей"));
+//    addToolBar(Qt::BottomToolBarArea, tbrFloorsSwitching);
+    tbrFloorsSwitching->setFloatable(false);
+//    QWidget *spacerLeft = new QWidget(this);
+//    spacerLeft->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+//    tbrFloorsSwitching->addWidget(spacerLeft);
+    tbrFloorsSwitching->addAction(actFloorDown);
     cbxFloorSelect = new QComboBox(this);
     cbxFloorSelect->setModel(modelFloorsList);
     connect(cbxFloorSelect,
             SIGNAL(currentIndexChanged(int)), SLOT(setActiveFloor(int)));
     cbxFloorSelect->setEditable(true);
     cbxFloorSelect->setInsertPolicy(QComboBox::NoInsert);
-    tbrView->addWidget(cbxFloorSelect);
-    tbrView->addAction(actFloorUp);
+    tbrFloorsSwitching->addWidget(cbxFloorSelect);
+    tbrFloorsSwitching->addAction(actFloorUp);
+//    QWidget *spacerRight = new QWidget(this);
+//    spacerRight ->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+//    tbrFloorsSwitching->addWidget(spacerRight);
+
+    tbrView = addToolBar(tr("Вид"));
+    tbrView->setFloatable(false);
     tbrView->addAction(actZoomOut);
     tbrView->addAction(actZoomIn);
     tbrView->addAction(actZoomFit);
     tbrView->addAction(actAddBase);
-    tbrView->addAction(actHideBase);
     tbrView->addAction(actMagnetToExtensions);
+
+    tbrLayers = addToolBar(tr("Слои"));
+    tbrLayers->setFloatable(false);
+    tbrLayers->addAction(actLayerBase);
+    tbrLayers->addAction(actLayerGraph);
 
     /*tbrALT = new QToolBar(tr("Изменить название этажа"));
     addToolBar(Qt::BottomToolBarArea, tbrFloorNameChange);
@@ -231,10 +252,16 @@ void MainWindow::createToolBars()
 
     tbrAdd = addToolBar(tr("Добавить"));
     tbrAdd->setFloatable(false);
-//    tbrAdd->addAction(actFloorAdd);
-    tbrAdd->addAction(actAddWall);
+//    tbrAdd->addAction(actAddWall);
     tbrAdd->addAction(actAddArea);
     tbrAdd->addAction(actAddDoor);
+    tbrAdd->addAction(actAddNode);
+
+    tbrPanels = new QToolBar(tr("Панели"));
+    addToolBar(Qt::LeftToolBarArea, tbrPanels);
+    tbrPanels->setFloatable(false);
+    tbrPanels->addAction(actPanelFloorsManagement);
+    tbrPanels->addAction(actPanelAreasMarking);
 }
 
 void MainWindow::createPanelFloorsManagement()
@@ -284,22 +311,25 @@ void MainWindow::createPanelAreasMarking()
     wgtAreasMarking = new QWidget;
     dckwgtAreasMarking->setWidget(wgtAreasMarking);
     vblAreasMarking = new QVBoxLayout(wgtAreasMarking);
-    lblRoomName = new QLabel(tr("Название: "));
-    ptdtRoomName = new QPlainTextEdit();
-    connect(ptdtRoomName, SIGNAL(textChanged()), SLOT(setAreaName()));
-    ptdtRoomName->setMaximumHeight(
-            (ptdtRoomName->fontMetrics().lineSpacing() +
-             ptdtRoomName->font().pointSize())*2);
-    ptdtRoomName->setMinimumWidth(cDockWidth);
+    lblAreaName = new QLabel(tr("Название: "));
+    ptdtAreaName = new QPlainTextEdit();
+    connect(ptdtAreaName, SIGNAL(textChanged()), SLOT(setAreaName()));
+    ptdtAreaName->setMaximumHeight(
+            (ptdtAreaName->fontMetrics().lineSpacing() +
+             ptdtAreaName->font().pointSize())*2);
+    ptdtAreaName->setMinimumWidth(cDockWidth);
+    chkAreaNameVisible = new QCheckBox(tr("Показывать название"));
+    connect(chkAreaNameVisible, SIGNAL(stateChanged(int)),
+            SLOT(chkAreaNameVisibleStateChanged(int)));
     //    ptdtRoomName->setMaximumHeight(ptdtRoomName->setGeometry(.pointSize()*2);
-    lblRoomDescription = new QLabel(tr("Описание: "));
-    ptdtRoomDescription = new QPlainTextEdit();
-    ptdtRoomDescription->setEnabled(false);
-    vblAreasMarking->addWidget(lblRoomName);
-    vblAreasMarking->addWidget(ptdtRoomName);
-    vblAreasMarking->addWidget(lblRoomDescription);
-    vblAreasMarking->addWidget(ptdtRoomDescription);
-
+    lblAreaDescription = new QLabel(tr("Описание: "));
+    ptdtAreaDescription = new QPlainTextEdit();
+    ptdtAreaDescription->setEnabled(false);
+    vblAreasMarking->addWidget(lblAreaName);
+    vblAreasMarking->addWidget(ptdtAreaName);
+    vblAreasMarking->addWidget(chkAreaNameVisible);
+    vblAreasMarking->addWidget(lblAreaDescription);
+    vblAreasMarking->addWidget(ptdtAreaDescription);
 }
 
 void MainWindow::createGraphics()
@@ -312,7 +342,8 @@ void MainWindow::createGraphics()
         view->setBackgroundBrush(QBrush(Qt::gray));
         vblwgtCentral->addWidget(view);
         view->show();
-        setState(eFile | eView | eAdd | eHelp | ePanels, stTrue, stTrue);
+        setState(eFile | eView | eLayers | eAdd | eHelp | eFloorsSwitching |
+                 ePanels, stTrue, stTrue);
         setState(eFloorsManagement | eAreasMarking, stFalse, stFalse);
         switchMode(MapFloor::Idle);
     }
@@ -341,24 +372,28 @@ void MainWindow::setState(Elements elem, State visible, State enable)
         }
         if (elem & eView)
         {
-            actFloorUp->setVisible(visible);
-            cbxFloorSelect->setVisible(visible);
-            actFloorDown->setVisible(visible);
-    //        actZoomOut->setVisible(vs);
-    //        actZoomIn->setVisible(vs);
-    //        actZoomFit->setVisible(vs);
+            actZoomOut->setVisible(visible);
+            actZoomIn->setVisible(visible);
+            actZoomFit->setVisible(visible);
             actAddBase->setVisible(visible);
-
+            actMagnetToExtensions->setVisible(visible);
 //            menuMode->menuAction()->setVisible(vs);
 
             tbrView->setVisible(visible);
         }
+        if (elem & eLayers)
+        {
+            actLayerBase->setVisible(visible);
+            actLayerGraph->setVisible(visible);
+
+            tbrLayers->setVisible(visible);
+        }
         if (elem & eAdd)
         {
-            actFloorAdd->setVisible(visible);
             actAddWall->setVisible(visible);
             actAddArea->setVisible(visible);
             actAddDoor->setVisible(visible);
+            actAddNode->setVisible(visible);
 
             menuAdd->menuAction()->setVisible(visible);
 
@@ -371,6 +406,14 @@ void MainWindow::setState(Elements elem, State visible, State enable)
             menuHelp->menuAction()->setVisible(visible);
 
 //            tbrAdd->setVisible(vs);
+        }
+        if (elem & eFloorsSwitching)
+        {
+            actFloorUp->setVisible(visible);
+            cbxFloorSelect->setVisible(visible);
+            actFloorDown->setVisible(visible);
+
+            tbrFloorsSwitching->setVisible(visible);
         }
         if (elem & ePanels)
         {
@@ -388,10 +431,16 @@ void MainWindow::setState(Elements elem, State visible, State enable)
         if (elem & eFloorsManagement)
         {
             dckwgtFloorsManagement->setVisible(visible);
+            if (!visible)
+                if (view)
+                    setFocus();
         }
         if (elem & eAreasMarking)
         {
             dckwgtAreasMarking->setVisible(visible);
+            if (!visible)
+                if (view)
+                    setFocus();
     //        ptdtRoomName->setVisible(vs);
     //        ptdtRoomDescription->setVisible(vs);
         }
@@ -410,33 +459,29 @@ void MainWindow::setState(Elements elem, State visible, State enable)
         }
         if (elem & eView)
         {
-            if (curFloor == 0)
-                actFloorUp->setEnabled(false);
-            else
-                actFloorUp->setEnabled(enable);
-            cbxFloorSelect->setEnabled(enable);
-            if (map)
-            {
-                if (curFloor == map->floorsNumber() - 1)
-                    actFloorDown->setEnabled(false);
-                else
-                    actFloorDown->setEnabled(enable);
-            }
-            //        actZoomOut->setEnabled(en);
-            //        actZoomIn->setEnabled(en);
-            //        actZoomFit->setEnabled(en);
+            actZoomOut->setEnabled(enable);
+            actZoomIn->setEnabled(enable);
+            actZoomFit->setEnabled(enable);
             actAddBase->setEnabled(enable);
+            actMagnetToExtensions->setEnabled(enable);
 
 //            menu->menuAction()->setEnabled(vs);
 
-            //        tbrView->setEnabled(en);
+            tbrView->setEnabled(enable);
+        }
+        if (elem & eLayers)
+        {
+            actLayerBase->setEnabled(enable);
+            actLayerGraph->setEnabled(enable);
+
+            tbrLayers->setEnabled(enable);
         }
         if (elem & eAdd)
         {
-            actFloorAdd->setEnabled(enable);
             actAddWall->setEnabled(enable);
             actAddArea->setEnabled(enable);
             actAddDoor->setEnabled(enable);
+            actAddNode->setEnabled(enable);
 
             menuAdd->menuAction()->setEnabled(enable);
 
@@ -449,6 +494,23 @@ void MainWindow::setState(Elements elem, State visible, State enable)
             menuHelp->menuAction()->setEnabled(enable);
 
 //            tbrAdd->setEnabled(b);
+        }
+        if (elem & eFloorsSwitching)
+        {
+            if (curFloor == 0)
+                actFloorUp->setEnabled(false);
+            else
+                actFloorUp->setEnabled(enable);
+            cbxFloorSelect->setEnabled(enable);
+            if (map)
+            {
+                if (curFloor == map->floorsNumber() - 1)
+                    actFloorDown->setEnabled(false);
+                else
+                    actFloorDown->setEnabled(enable);
+            }
+
+            tbrFloorsSwitching->setEnabled(enable);
         }
         if (elem & ePanels)
         {
@@ -617,12 +679,18 @@ void MainWindow::addBase()
     if (!str.isNull())
     {
         map->floor(curFloor)->addBase(str);
+        actLayerBase->setChecked(true);
     }
 }
 
-void MainWindow::hideBase(bool b)
+void MainWindow::layerBaseSetVisible(bool visible)
 {
-    map->floor(curFloor)->baseSetVisible(!b);
+    map->floor(curFloor)->baseSetVisible(visible);
+}
+
+void MainWindow::layerGraphSetVisible(bool visible)
+{
+    map->graph()->setVisible(visible);
 }
 
 void MainWindow::magnetToExtensions(bool b)
@@ -699,6 +767,11 @@ void MainWindow::addDoor()
     switchMode(MapFloor::DoorAdd);
 }
 
+void MainWindow::addNode()
+{
+    switchMode(MapFloor::NodeAdd);
+}
+
 void MainWindow::actgrpPanelsTriggered(QAction *qAct)
 {
     // Unchecking all previous checked actions
@@ -720,18 +793,20 @@ void MainWindow::switchMode(MapFloor::Mode m)
     switch (m)
     {
     case MapFloor::Idle:
-        setState(eFile | eView | eAdd | eHelp | ePanels, stTrue, stTrue);
+        setState(eFile | eView | eLayers | eAdd | eHelp | eFloorsSwitching |
+                 ePanels, stTrue, stTrue);
         setState(eFloorsManagement | eAreasMarking, stSave, stTrue);
         setCursor(Qt::ArrowCursor);
         break;
     case MapFloor::WallAdd:
     case MapFloor::AreaAdd:
     case MapFloor::DoorAdd:
-    case MapFloor::Graph:
-        setState(eFile | eView | eHelp | ePanels, stTrue, stTrue);
-        setState(eAdd | eFloorsManagement | eAreasMarking, stSave, stFalse);
+    case MapFloor::NodeAdd:
+        setState(eFile | eView | eLayers | eHelp | ePanels, stTrue, stTrue);
+        setState(eFloorsSwitching | eAdd | eFloorsManagement | eAreasMarking,
+                 stSave, stFalse);
         setCursor(Qt::CrossCursor);
-        if (m == MapFloor::Graph)
+        if (m == MapFloor::NodeAdd)
             map->graphStartAnew();
         break;
     case MapFloor::Selection:
@@ -753,14 +828,15 @@ void MainWindow::switchMode(MapFloor::Mode m)
 ////                                cbxFloorSelect->itemText(curFloor));
 
 //                    else
-                    ptdtRoomName->setPlainText(area->name());
-                    ptdtRoomName->setFocus();
-                    ptdtRoomName->selectAll();
+                    ptdtAreaName->setPlainText(area->name());
+//                    ptdtRoomName->setFocus();
+                    ptdtAreaName->selectAll();
+                    chkAreaNameVisible->setChecked(area->isNameVisible());
                 }
             if (!selectionIsValid)
             {
                 setState(eAreasMarking, stSave, stFalse);
-                ptdtRoomName->setPlainText("");
+                ptdtAreaName->setPlainText("");
             }
             break;
         }
@@ -776,7 +852,11 @@ void MainWindow::setActiveFloor(int i)
     if ((i >= 0)&(i < map->floorsNumber()))
     {
         if ((curFloor >= 0) & (curFloor != i))
-            map->floor(curFloor)->disconnect();
+        {
+            map->floor(curFloor)->disconnect
+                    (SIGNAL(modeChanged(MapFloor::Mode)));
+            map->floor(curFloor)->disconnect(SIGNAL(mouseDoubleClicked()));
+        }
         curFloor = i;
         QModelIndex index = modelFloorsList->index(i);
         selectionFloorsList->setCurrentIndex(
@@ -823,32 +903,9 @@ void MainWindow::setActiveFloor(int i)
     }
 }
 
-void MainWindow::setAreaName()
-{
-    if (map->floor(curFloor)->selectedItem() != 0)
-        if (map->floor(curFloor)->selectedItem()->type() == MapArea::Type)
-        {
-
-            MapArea *area = qgraphicsitem_cast<MapArea*>(
-                    map->floor(curFloor)->selectedItem());
-            QString areaName = ptdtRoomName->document()->toPlainText();
-            area->setName(areaName);
-        }
-}
-
 void MainWindow::panelFloorsManagementVisibilityChanged(bool visible)
 {
     actPanelFloorsManagement->setChecked(visible);
-}
-
-void MainWindow::mouseDoubleClicked()
-{
-    actPanelAreasMarking->trigger();
-}
-
-void MainWindow::panelAreasMarkingVisibilityChanged(bool visible)
-{
-    actPanelAreasMarking->setChecked(visible);
 }
 
 void MainWindow::viewFloorsListItemActivated(QModelIndex index)
@@ -862,6 +919,40 @@ void MainWindow::viewFloorsListItemChanged(QModelIndex index)
 {
     map->floor(curFloor)->setName(modelFloorsList->data(
             index, Qt::DisplayRole).toString());
+}
+
+void MainWindow::mouseDoubleClicked()
+{
+    actPanelAreasMarking->trigger();
+}
+
+void MainWindow::panelAreasMarkingVisibilityChanged(bool visible)
+{
+    actPanelAreasMarking->setChecked(visible);
+}
+
+void MainWindow::setAreaName()
+{
+    if (map->floor(curFloor)->selectedItem() != 0)
+        if (map->floor(curFloor)->selectedItem()->type() == MapArea::Type)
+        {
+
+            MapArea *area = qgraphicsitem_cast<MapArea*>(
+                    map->floor(curFloor)->selectedItem());
+            area->setName(ptdtAreaName->document()->toPlainText());
+        }
+}
+
+void MainWindow::chkAreaNameVisibleStateChanged(int state)
+{
+    if (map->floor(curFloor)->selectedItem() != 0)
+        if (map->floor(curFloor)->selectedItem()->type() == MapArea::Type)
+        {
+
+            MapArea *area = qgraphicsitem_cast<MapArea*>(
+                    map->floor(curFloor)->selectedItem());
+            area->setNameVisible(state == Qt::Checked);
+        }
 }
 
 void MainWindow::about()

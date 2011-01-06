@@ -37,7 +37,7 @@ QDataStream &operator>>(QDataStream &input, MapDoor &door)
         input >> c;
         door.m_parentAreasUins.insert(c);
     }
-        door.setZValue(100.0);
+//        door.setZValue(100.0);
     return input;
 }
 

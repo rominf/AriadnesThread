@@ -12,6 +12,8 @@ m_pixSizeX(mapPixSizeX), m_pixSizeY(mapPixSizeY)
     m_graph = new Graph();
     connect(m_graph, SIGNAL(graphItemAdded(QGraphicsItem*)),
             SLOT(addGraphItem(QGraphicsItem*)));
+    connect(m_graph, SIGNAL(lastNodeChanged(GraphNode*)),
+            SLOT(setLastNode(GraphNode*)));
 //    connect(m_graph, SIGNAL(graphItemDeleted(QGraphicsItem*)),
 //            SLOT(addGraphItem(QGraphicsItem*)));
 //    connect(m_graph, SIGNAL(graphNodesChanged(QVector<QPointF*>,int)),
@@ -26,6 +28,7 @@ QDataStream & operator<<(QDataStream &output, const Map &map)
     {
         output << *map.m_floors.at(i);
     }
+    output << *map.m_graph;
     return output;
 }
 
@@ -38,6 +41,7 @@ QDataStream & operator>>(QDataStream &input, Map &map)
         map.insertFloor(i);
         input >> *map.m_floors[i];
     }
+    input >> *map.m_graph;
     return input;
 }
 
@@ -47,50 +51,70 @@ void Map::addNode(QPointF point, MapFloor &floor)
     m_graph->addNode(point, floorNumber);
 }
 
+void Map::deleteNode(GraphNode *node)
+{
+    m_graph->deleteNode(node);
+}
+
+void Map::setLastNode(GraphNode *node)
+{
+    for (int i = 0; i != m_floors.size(); i++)
+        m_floors.at(i)->setLastNode(0);
+    if (node)
+        m_floors.at(node->floor())->setLastNode(node);
+}
+
 void Map::addGraphItem(QGraphicsItem *item)
 {
-
     if (item->type() == GraphArc::Type)
     {
         GraphArc *arc = qgraphicsitem_cast<GraphArc*>(item);
         if (arc->node1()->floor() == arc->node2()->floor())
-            m_floors[arc->node1()->floor()]->addItem(arc);
+        {
+            m_floors[arc->node1()->floor()]->addArc(arc);
+        }
     }
-    else if (item->type() == GraphNode::Type)
+    if (item->type() == GraphNode::Type)
     {
         GraphNode *node = qgraphicsitem_cast<GraphNode*>(item);
-        m_floors[node->floor()]->addItem(node);
+        m_floors[node->floor()]->addNode(node);
+//        m_floors[node->floor()]->setLastNode(m_graph->lastNode());
     }
-    else
-        return;
 }
 
-void Map::deleteGraphItem(QGraphicsItem *item)
-{
-    if (item->type() == GraphArc::Type)
-    {
-        GraphArc *arc = qgraphicsitem_cast<GraphArc*>(item);
-        if (arc->node1()->floor() == arc->node2()->floor())
-            m_floors[arc->node1()->floor()]->removeItem(arc);
-    }
-    else if (item->type() == GraphNode::Type)
-    {
-        GraphNode *node = qgraphicsitem_cast<GraphNode*>(item);
-        m_floors[node->floor()]->removeItem(node);
-    }
-    else
-        return;
-}
+//void Map::deleteGraphItem(QGraphicsItem *item)
+//{
+//    if (item->type() == GraphArc::Type)
+//    {
+//        GraphArc *arc = qgraphicsitem_cast<GraphArc*>(item);
+//        if (arc->node1()->floor() == arc->node2()->floor())
+//            m_floors[arc->node1()->floor()]->removeItem(arc);
+//    }
+//    if (item->type() == GraphNode::Type)
+//    {
+//        GraphNode *node = qgraphicsitem_cast<GraphNode*>(item);
+//        for (int i = 0; i != node->arcsNumber(); i++)
+//        {
+//            GraphArc *arc = node->arc(i);
+//            if (arc->node1()->floor() == arc->node2()->floor())
+//                m_floors[node->floor()]->removeItem(arc);
+//        }
+//        m_floors[node->floor()]->removeItem(node);
+//        m_floors[node->floor()]->setLastNode(m_graph->lastNode());
+//    }
+//}
 
 void Map::graphStartAnew()
 {
     m_graph->startAnew();
+    for (int i = 0; i != m_floors.size(); i++)
+        m_floors.at(i)->setLastNode(0);
 }
 
-void Map::graphDeleteNode(GraphNode *node)
-{
-    m_graph->deleteNode(node);
-}
+//void Map::graphDeleteNode(GraphNode *node)
+//{
+//    m_graph->deleteNode(node);
+//}
 
 //void Map::graphNodesChanged(QVector<QPointF*> &nodes, int floor)
 //{
@@ -136,6 +160,8 @@ void Map::insertFloor(int i)
     m_floors.insert(i, floor);
     connect(floor, SIGNAL(addedNode(QPointF,MapFloor&)),
             SLOT(addNode(QPointF,MapFloor&)));
+    connect(floor, SIGNAL(deletedNode(GraphNode*)),
+            SLOT(deleteNode(GraphNode*)));
     connect(floor, SIGNAL(graphStartedAnew()),
             SLOT(graphStartAnew()));
 }
@@ -155,6 +181,11 @@ void Map::removeFloor(int i)
 MapFloor* Map::floor(int i) const
 {
     return m_floors.at(i);
+}
+
+Graph* Map::graph() const
+{
+    return m_graph;
 }
 
 //QVector<QPointF*> Map::graphNodesCoordinates()

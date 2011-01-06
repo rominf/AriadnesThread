@@ -9,6 +9,8 @@ class Graph: public QObject
 {
     Q_OBJECT
 
+    friend QDataStream &operator<<(QDataStream &output, const Graph &graph);
+    friend QDataStream &operator>>(QDataStream &input, Graph &graph);
 public:
     Graph();
 //    void addFreeNode(QPointF *point);
@@ -21,11 +23,13 @@ public:
 signals:
     void graphItemAdded(QGraphicsItem *item);
     void graphItemDeleted(QGraphicsItem *item);
+    void lastNodeChanged(GraphNode *node);
 //    void graphNodesChanged(QVector<QPointF*> &nodes, int floor);
 private:
-    QVector<GraphNode*> m_freeNodes;
+    QVector<GraphNode*> m_startNodes;
     GraphNode *m_lastNode;
-    bool m_isFirstNode;
+    void setLastNode(GraphNode *node);
+//    bool m_isFirstNode;
 //    QVector<QPointF*> m_nodesCoordinates;
 //    void nodesCoordinates();
 };

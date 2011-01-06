@@ -16,9 +16,13 @@ public:
     GraphNode *node1() const;
     GraphNode *node2() const;
     int type() const;
+    quint32 uin();
 private:
     GraphNode *m_node1;
     GraphNode *m_node2;
+    quint32 m_uin;
+
+    static quint32 m_count; // Counter for making uins
 };
 
 #endif // GRAPHARC_H

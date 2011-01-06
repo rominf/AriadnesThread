@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QDataStream>
 #include "graph.h"
+#include "graphnode.h"
 #include "mapfloor.h"
 
 class Map : public QObject
@@ -21,6 +22,7 @@ public:
     void swapFloors(int x, int y);
     void removeFloor(int i);
     MapFloor* floor(int i) const;
+    Graph* graph() const;
 //    QVector<QPointF*> graphNodesCoordinates();
 
 //    void graphStartAnew();
@@ -33,9 +35,11 @@ public slots:
 
 private slots:
     void addNode(QPointF point, MapFloor &floor);
+    void deleteNode(GraphNode *node);
+    void setLastNode(GraphNode *node);
     void addGraphItem(QGraphicsItem *item);
-    void deleteGraphItem(QGraphicsItem *item);
-    void graphDeleteNode(GraphNode *node);
+//    void deleteGraphItem(QGraphicsItem *item);
+//    void graphDeleteNode(GraphNode *node);
 //    void graphNodesChanged(QVector<QPointF*> &nodes, int floor);
 
 private:

@@ -1,12 +1,17 @@
 #include "grapharc.h"
 
+quint32 GraphArc::m_count = 0;
+
 GraphArc::GraphArc(GraphNode *node1, GraphNode *node2):
         QGraphicsLineItem(QLineF(node1->pos(), node2->pos()))
 {
     m_node1 = node1;
     m_node2 = node2;
+    node1->addArc(this);
+    node2->addArc(this);
 //    setPen(QPen(Qt::black));
-//    setZValue(INFINITY - 2);
+    setZValue(100500 - 2);
+    m_uin = ++m_count;
 }
 
 GraphArc::~GraphArc()
@@ -28,4 +33,9 @@ GraphNode* GraphArc::node2() const
 int GraphArc::type() const
 {
     return Type;
+}
+
+quint32 GraphArc::uin()
+{
+    return m_uin;
 }

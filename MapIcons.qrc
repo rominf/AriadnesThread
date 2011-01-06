@@ -18,15 +18,17 @@
         <file alias="ZoomFit">Icons/magnifier-zoom-fit.png</file>
         <file alias="ZoomIn">Icons/magnifier-zoom-in.png</file>
         <file alias="ZoomOut">Icons/magnifier-zoom-out.png</file>
-        <file alias="AddBase">Icons/image.png</file>
+        <file alias="LayerBase">Icons/image.png</file>
         <file alias="Abc">1.jpg</file>
-        <file alias="GraphMode">Icons/layer-select-point.png</file>
-        <file alias="HideBase">Icons/image-empty.png</file>
+        <file>Icons/layer-select-point.png</file>
         <file alias="MagnetToExtensions">Icons/layer-shape-line.png</file>
         <file alias="FloorsManagement">Icons/layers-stack.png</file>
         <file alias="FloorUp">Icons/arrow-090.png</file>
         <file alias="FloorAdd">Icons/plus.png</file>
         <file alias="FloorDelete">Icons/minus.png</file>
         <file alias="FloorDown">Icons/arrow-270.png</file>
+        <file alias="AddBase">Icons/image--plus.png</file>
+        <file alias="LayerGraph">Icons/layer-shape-polyline.png</file>
+        <file alias="AddNode">Icons/my-add-node.png</file>
     </qresource>
 </RCC>

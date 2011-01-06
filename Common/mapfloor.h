@@ -14,6 +14,7 @@
 #include <QRectF>
 #include <QStack>
 #include "geometry.h"
+#include "graphnode.h"
 #include "maparea.h"
 #include "mapbase.h"
 #include "mapselection.h"
@@ -36,7 +37,7 @@ public:
     static const qreal OutlineZValue;
     enum Mode
     {
-        Idle, WallAdd, AreaAdd, DoorAdd, Graph, Selection
+        Idle, WallAdd, AreaAdd, DoorAdd, NodeAdd, Selection
     };
     enum MagnetItem
     {
@@ -56,13 +57,18 @@ public:
     MapArea* area(int i = 0);
     QAbstractGraphicsShapeItem* selectedItem();
     virtual void addItem (QGraphicsItem *item);
+    void addDoor(MapDoor *door);
+    void addNode(GraphNode *node);
+    void addArc(GraphArc *arc);
 //    void setGraphNodes(QVector<QPointF*> &nodes);
     void magnetToExtensions(bool b);
+    void setLastNode(GraphNode *node);
 
 signals:
     void modeChanged(MapFloor::Mode);
     void mouseDoubleClicked();
     void addedNode(QPointF point, MapFloor &floor);
+    void deletedNode(GraphNode *node);
     void graphStartedAnew();
 
 protected:
@@ -82,8 +88,8 @@ private:
     QString m_name;
     QGraphicsRectItem *m_border;
     QVector<QLineF*> m_lines;
-    QVector<QPointF*> m_graphNodes;
-    MapArea *m_outline;
+    QVector<QPointF> m_graphNodes;
+    QVector<MapArea*> m_outlines;
 //    QVector<MapArea*> areas;
     QVector<QGraphicsLineItem*> m_walls;
     QVector<QGraphicsLineItem*> m_doors;
@@ -97,12 +103,15 @@ private:
     QGraphicsLineItem *m_crossLineVertical;
     QGraphicsEllipseItem *m_startPoint;
     QGraphicsEllipseItem *m_cursorCircle;
+    GraphNode *m_lastNode;
 
     QSet<MapArea*> parentAreas(MapArea *area, const QPointF *pos);
-    void areasToLineVec(MapArea *area);
+    void areasToLineVec(/*MapArea *area*/);
     QVector<MapArea*> pointContainers(QPointF pos);
     bool validatePos(QPointF pos, QPointF &rightPos);
     QPointF getPoint(QPointF m, Geometry::Straight straight, MagnetItems items);
+    QLineF getLine(QLineF line, bool first, MagnetItems items,
+                   Qt::KeyboardModifiers modifiers);
     QPointF graphGetPoint(QPointF pos);
 
     void removeLastFromTempPolyline();
@@ -111,11 +120,13 @@ private:
                                       QVector<QGraphicsLineItem*> &vec) const;
     gpc_polygon convertQtToGpcPolygon(const QPolygonF *pgn);
 
+    void takeAwayGraphicsLineItem(QGraphicsLineItem *item);
     void finalizeWall();
     void finalizeArea();
     void deleteArea(MapArea *area);
     void finalizeDoor();
     void deleteDoor(MapDoor *door);
+//    void finalizeNode();
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(MapFloor::MagnetItems)
