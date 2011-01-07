@@ -1,6 +1,7 @@
 #include "mapfloor.h"
 
 const qreal MapFloor::OutlineZValue = 0.0;
+quint32 MapFloor::m_count = 0;
 
 MapFloor::MapFloor(const QRectF &sceneRect, QObject *parent) :
     QGraphicsScene(sceneRect, parent),
@@ -37,6 +38,7 @@ MapFloor::MapFloor(const QRectF &sceneRect, QObject *parent) :
     m_startPoint->setBrush(QBrush(Qt::red));
     m_startPoint->hide();
     m_selection = new MapSelection(false);
+    m_uin = ++m_count;
 }
 
 QDataStream &operator<<(QDataStream &output, const MapFloor &floor)
@@ -44,7 +46,7 @@ QDataStream &operator<<(QDataStream &output, const MapFloor &floor)
     // ### saving without outline
     MapDoor::clearFinishedDoors();
     int last = floor.m_outlines.size();
-    output << floor.m_name << floor.m_base->fileName() << last;
+    output << floor.m_uin << floor.m_name << floor.m_base->fileName() << last;
     for (int i = 0; i != last; i++)
         output << *floor.m_outlines[i];
     last = floor.m_walls.size();
@@ -62,7 +64,7 @@ QDataStream &operator>>(QDataStream &input, MapFloor &floor)
 {
     QString baseFileName;
     int last;
-    input >> floor.m_name >> baseFileName >> last;
+    input >> floor.m_uin >> floor.m_name >> baseFileName >> last;
     floor.addBase(baseFileName);
     for (int i = 0; i != last; i++)
     {
@@ -104,7 +106,7 @@ QDataStream &operator>>(QDataStream &input, MapFloor &floor)
                 for (int i = 0; i !=size; i++)
                     stk2.push(a2->area(i));
             }
-            floor.addDoor(door);
+            floor.addPointNodesMagnetTo(door->pos());
         }
 
         int size = a1->areasNumber();
@@ -123,6 +125,7 @@ QDataStream &operator>>(QDataStream &input, MapFloor &floor)
         floor.m_walls.append(line);
         floor.addItem(floor.m_walls.at(i));
     }
+    floor.m_count = qMax(floor.m_count, floor.m_uin);
 
     return input;
 }
@@ -263,7 +266,7 @@ void MapFloor::mousePressEvent(QGraphicsSceneMouseEvent *event)
 //                }
 //            }
         case NodeAdd:
-            emit addedNode(m_cursorCircle->pos(), *this);
+            emit addedNode(m_cursorCircle->pos(), m_uin);
             break;
         default:
         {
@@ -704,25 +707,88 @@ void MapFloor::takeAwayGraphicsLineItem(QGraphicsLineItem *item)
         item->setLine(-INFINITY, -INFINITY, -INFINITY, -INFINITY);
 }
 
-void MapFloor::addDoor(MapDoor *door)
+MapArea::CreateError MapFloor::addArea(MapArea *area)
+{
+    MapArea *parentArea = 0;
+
+    QPolygonF areaPgn = area->polygon();
+    gpc_polygon gpc_curpgn = convertQtToGpcPolygon(&areaPgn);
+    gpc_polygon gpc_intersection;
+    MapArea *a;
+    QStack<MapArea*> stk;
+    for (int i = 0; i != m_outlines.size(); i++)
+        stk.push(m_outlines[i]);
+    while (!stk.isEmpty())
+    {
+        a = stk.pop();
+
+        QPolygonF pgn = a->polygon();
+        gpc_polygon gpc_pgn = convertQtToGpcPolygon(&pgn);
+        gpc_polygon_clip(GPC_INT, &gpc_curpgn, &gpc_pgn, &gpc_intersection);
+        if (gpc_intersection.num_contours != 0)
+        {
+            gpc_polygon gpc_newIntersection;
+            gpc_polygon_clip(GPC_DIFF, &gpc_curpgn, &gpc_intersection,
+                             &gpc_newIntersection);
+            if (gpc_newIntersection.num_contours == 0)
+            {
+                if (areaPgn != pgn)
+                {
+                    parentArea = a;
+                    int size = a->areasNumber();
+                    for (int i = 0; i !=size; i++)
+                        stk.push(a->area(i));
+                }
+                else
+                {
+                    delete area;
+                    return MapArea::ceAreaExist;
+                }
+            }
+            else
+            {
+                delete area;
+                return MapArea::ceIntersection;
+            }
+        }
+    }
+    if (parentArea != 0)
+        parentArea->addArea(area);
+    else
+        m_outlines.append(area);
+    addItem(area);
+    return MapArea::ceNone;
+}
+
+bool MapFloor::addDoor(MapDoor *door)
 {
     QPointF point = QPointF(door->pos());
-    if (!m_graphNodes.contains(point))
-        m_graphNodes.append(point);
-    addItem(door);
+    QVector<MapArea*> areas = pointContainers(point);
+    if (!areas.isEmpty())
+    {
+        qreal maxZValue = 0;
+        for (int i = 0; i != areas.size(); i++)
+        {
+            maxZValue = qMax(maxZValue, areas[i]->zValue());
+            areas[i]->addDoor(door);
+        }
+        door->setZValue(maxZValue + 1.0);
+        if (!m_graphNodes.contains(point))
+            m_graphNodes.append(point);
+        addItem(door);
+        return true;
+    }
+    else
+    {
+        delete door;
+        return false;
+    }
 }
 
-void MapFloor::addNode(GraphNode *node)
+void MapFloor::addPointNodesMagnetTo(QPointF point)
 {
-    QPointF point = QPointF(node->pos());
     if (!m_graphNodes.contains(point))
         m_graphNodes.append(point);
-    addItem(node);
-}
-
-void MapFloor::addArc(GraphArc *arc)
-{
-    addItem(arc);
 }
 
 void MapFloor::finalizeWall()
@@ -735,59 +801,23 @@ void MapFloor::finalizeArea()
 {
     if (m_tempPolyline.size() > 2)
     {
-
         QPolygonF polygon(convertLineVecToPolygon(m_tempPolyline));
-
-        MapArea *area;
-        MapArea *parentArea = 0;
-
-        gpc_polygon gpc_curpgn = convertQtToGpcPolygon(&polygon);
-        gpc_polygon gpc_intersection;
-        MapArea *a;
-        QStack<MapArea*> stk;
-        for (int i = 0; i != m_outlines.size(); i++)
-            stk.push(m_outlines[i]);
-        while (!stk.isEmpty())
+        MapArea *area = new MapArea(polygon);
+        switch (addArea(area))
         {
-            a = stk.pop();
-
-            QPolygonF pgn = a->polygon();
-            gpc_polygon gpc_pgn = convertQtToGpcPolygon(&pgn);
-            gpc_polygon_clip(GPC_INT, &gpc_curpgn, &gpc_pgn,
-                             &gpc_intersection);
-            if (gpc_intersection.num_contours != 0)
-            {
-                gpc_polygon gpc_newIntersection;
-                gpc_polygon_clip(GPC_DIFF, &gpc_curpgn, &gpc_intersection,
-                                 &gpc_newIntersection);
-                if (gpc_newIntersection.num_contours == 0)
-                {
-                    parentArea = a;
-                    int size = a->areasNumber();
-                    for (int i = 0; i !=size; i++)
-                        stk.push(a->area(i));
-                }
-                else
-                {
-                    QMessageBox::warning(0,
-                                         tr("Ошибка при создании области"),
-                                         tr("Создаваемая область "
-                                            "пересекается с другими "
-                                            "областями."));
-                    return;
-                }
-            }
+        case MapArea::ceNone:
+            setMode(Idle);
+            break;
+        case MapArea::ceIntersection:
+            QMessageBox::warning(0, tr("Ошибка при создании области"),
+                                 tr("Создаваемая область пересекается с "
+                                    "другими областями."));
+            break;
+        case MapArea::ceAreaExist:
+            QMessageBox::warning(0, tr("Ошибка при создании области"),
+                                 tr("На этаже уже есть данная область."));
+            break;
         }
-        area = new MapArea(polygon);
-        if (parentArea != 0)
-            parentArea->addArea(area);
-        else
-            m_outlines.append(area);
-//            QMessageBox::warning(0, tr("Ошибка при создании области"),
-//                                 tr("Создаваемая область выходит за "
-//                                    "границы этажа."));
-        addItem(area);
-        setMode(Idle);
     }
     else
         QMessageBox::warning(0, tr("Ошибка при создании области"),
@@ -813,22 +843,9 @@ void MapFloor::deleteArea(MapArea *area)
 
 void MapFloor::finalizeDoor()
 {
-    QVector<MapArea*> areas = pointContainers(m_cursorCircle->pos());
-    if (!areas.isEmpty())
-    {
-        MapDoor *door = new MapDoor(m_cursorCircle->pos());
-        qreal maxZValue = 0;
-        for (int i = 0; i != areas.size(); i++)
-        {
-            maxZValue = qMax(maxZValue, areas[i]->zValue());
-            areas[i]->addDoor(door);
-        }
-        door->setZValue(maxZValue + 1.0);
-        addDoor(door);
-        m_graphNodes.append(m_cursorCircle->pos());
+    MapDoor *door = new MapDoor(m_cursorCircle->pos());
+    if (addDoor(door))
         setMode(Idle);
-    }
-
 }
 
 void MapFloor::deleteDoor(MapDoor *door)
@@ -865,4 +882,9 @@ gpc_polygon MapFloor::convertQtToGpcPolygon(const QPolygonF *pgn)
         gpc_pgn.contour[0].vertex[i].y = pgn->at(i).y();
     }
     return gpc_pgn;
+}
+
+quint32 MapFloor::uin()
+{
+    return m_uin;
 }

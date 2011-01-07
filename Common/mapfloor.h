@@ -24,7 +24,6 @@ extern "C"
     #include "gpc.h"
 }
 
-
 class MapFloor: public QGraphicsScene
 {
     Q_OBJECT
@@ -57,17 +56,18 @@ public:
     MapArea* area(int i = 0);
     QAbstractGraphicsShapeItem* selectedItem();
     virtual void addItem (QGraphicsItem *item);
-    void addDoor(MapDoor *door);
-    void addNode(GraphNode *node);
+    MapArea::CreateError addArea(MapArea *area);
+    bool addDoor(MapDoor *door);
+    void addPointNodesMagnetTo(QPointF point);
     void addArc(GraphArc *arc);
 //    void setGraphNodes(QVector<QPointF*> &nodes);
     void magnetToExtensions(bool b);
     void setLastNode(GraphNode *node);
-
+    quint32 uin();
 signals:
     void modeChanged(MapFloor::Mode);
     void mouseDoubleClicked();
-    void addedNode(QPointF point, MapFloor &floor);
+    void addedNode(QPointF point, quint32 floor);
     void deletedNode(GraphNode *node);
     void graphStartedAnew();
 
@@ -96,6 +96,9 @@ private:
     MapBase *m_base;
     bool m_isCrossLinesActive;
     MapSelection *m_selection;
+    quint32 m_uin;
+
+    static quint32 m_count; // Counter for making uins
 
     QGraphicsLineItem *m_tempLine;
     QVector<QGraphicsLineItem*> m_tempPolyline;

@@ -31,7 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
     createPanelAreasMarking();
 
     setState(eFile | eHelp, stTrue, stTrue);
-    setState(eView | eLayers | eAdd | eFloorsSwitching | ePanels |
+    setState(eEdit | eFloorsSwitching | eView | eLayers | eAdd |ePanels |
              eFloorsManagement | eAreasMarking, stFalse, stFalse);
     actMapSave->setEnabled(false);
 
@@ -43,6 +43,11 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
 }
+
+//const QStringListModel* MainWindow::modelFloorsList() const
+//{
+//    return modelFloorsList;
+//}
 
 void MainWindow::createActions()
 {
@@ -64,24 +69,10 @@ void MainWindow::createActions()
 //    actSwitchToPlanningMode->setCheckable(true);
 //    actSwitchToPlanningMode->setChecked(true);
 
-    actPanelFloorsManagement = new QAction(QIcon(":/FloorsManagement"),
-                                         tr("Управление этажами"), this);
-    actPanelFloorsManagement->setData(eFloorsManagement);
-    actPanelFloorsManagement->setShortcut(Qt::CTRL + Qt::Key_1);
-    actPanelFloorsManagement->setCheckable(true);
-
-    actPanelAreasMarking = new QAction(QIcon(":/AreasMarking"),
-                                         tr("Разметка помещений"), this);
-    actPanelAreasMarking->setData(eAreasMarking);
-    actPanelAreasMarking->setShortcut(Qt::CTRL + Qt::Key_2);
-    actPanelAreasMarking->setCheckable(true);
-
-    actgrpPanels = new QActionGroup(this);
-    actgrpPanels->setExclusive(false);
-    actgrpPanels->addAction(actPanelAreasMarking);
-    actgrpPanels->addAction(actPanelFloorsManagement);
-    connect(actgrpPanels, SIGNAL(triggered(QAction *)),
-            SLOT(actgrpPanelsTriggered(QAction *)));
+    actAreaCopy = new QAction(QIcon(":/AreaCopy"),
+                              tr("Копировать область"), this);
+    connect(actAreaCopy, SIGNAL(triggered()), SLOT(areaCopy()));
+    actAreaCopy->setShortcut(Qt::CTRL + Qt::Key_C);
 
 
     actFloorDown = new QAction(QIcon(":/FloorDown"), tr("Этаж ниже"), this);
@@ -145,7 +136,22 @@ void MainWindow::createActions()
     actAddNode = new QAction(QIcon(":/AddNode"), tr("Добавить вершину графа"),
                              this);
     connect(actAddNode, SIGNAL(triggered()), SLOT(addNode()));
-    actAddDoor->setShortcut(Qt::CTRL + Qt::Key_G);
+    actAddNode->setShortcut(Qt::CTRL + Qt::Key_G);
+
+
+    actAbout = new QAction(tr("О программе"), this);
+    connect(actAbout, SIGNAL(triggered()), SLOT(about()));
+    /*actAboutQT = new QAction(tr("О QT"), this);
+    actAboutQT->setStatusTip(tr("Об инструментарий Qt, при помощи которого "
+                                "была создана эта программа"));
+    connect(actAboutQT, SIGNAL(triggered()), qApp, SLOT(aboutQt()));*/
+
+
+    actPanelFloorsManagement = new QAction(QIcon(":/FloorsManagement"),
+                                         tr("Управление этажами"), this);
+    actPanelFloorsManagement->setData(eFloorsManagement);
+    actPanelFloorsManagement->setShortcut(Qt::CTRL + Qt::Key_1);
+    actPanelFloorsManagement->setCheckable(true);
 
 
     actFloorAdd = new QAction(QIcon(":/FloorAdd"), tr("Добавить этаж"), this);
@@ -168,12 +174,19 @@ void MainWindow::createActions()
 //    actFloorMoveUp->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_F);
 
 
-    actAbout = new QAction(tr("О программе"), this);
-    connect(actAbout, SIGNAL(triggered()), SLOT(about()));
-    /*actAboutQT = new QAction(tr("О QT"), this);
-    actAboutQT->setStatusTip(tr("Об инструментарий Qt, при помощи которого "
-                                "была создана эта программа"));
-    connect(actAboutQT, SIGNAL(triggered()), qApp, SLOT(aboutQt()));*/
+    actPanelAreasMarking = new QAction(QIcon(":/AreasMarking"),
+                                         tr("Разметка помещений"), this);
+    actPanelAreasMarking->setData(eAreasMarking);
+    actPanelAreasMarking->setShortcut(Qt::CTRL + Qt::Key_2);
+    actPanelAreasMarking->setCheckable(true);
+
+
+    actgrpPanels = new QActionGroup(this);
+    actgrpPanels->setExclusive(false);
+    actgrpPanels->addAction(actPanelAreasMarking);
+    actgrpPanels->addAction(actPanelFloorsManagement);
+    connect(actgrpPanels, SIGNAL(triggered(QAction *)),
+            SLOT(actgrpPanelsTriggered(QAction *)));
 }
 
 void MainWindow::createMenus()
@@ -182,6 +195,9 @@ void MainWindow::createMenus()
     menuFile->addAction(actMapNew);
     menuFile->addAction(actMapOpen);
     menuFile->addAction(actMapSave);
+
+    menuEdit = menuBar()->addMenu(tr("Правка"));
+    menuEdit->addAction(actAreaCopy);
 
     menuPanels = menuBar()->addMenu(tr("Панели"));
     menuPanels->addAction(actPanelFloorsManagement);
@@ -206,6 +222,10 @@ void MainWindow::createToolBars()
     tbrFile->addAction(actMapNew);
     tbrFile->addAction(actMapOpen);
     tbrFile->addAction(actMapSave);
+
+    tbrEdit = addToolBar(tr("Правка"));
+    tbrEdit->setFloatable(false);
+    tbrEdit->addAction(actAreaCopy);
 
     tbrFloorsSwitching = addToolBar(tr("Переключение этажей"));
 //    addToolBar(Qt::BottomToolBarArea, tbrFloorsSwitching);
@@ -342,8 +362,8 @@ void MainWindow::createGraphics()
         view->setBackgroundBrush(QBrush(Qt::gray));
         vblwgtCentral->addWidget(view);
         view->show();
-        setState(eFile | eView | eLayers | eAdd | eHelp | eFloorsSwitching |
-                 ePanels, stTrue, stTrue);
+        setState(eFile | eEdit | eFloorsSwitching | eView | eLayers | eAdd |
+                 eHelp | ePanels, stTrue, stTrue);
         setState(eFloorsManagement | eAreasMarking, stFalse, stFalse);
         switchMode(MapFloor::Idle);
     }
@@ -369,6 +389,14 @@ void MainWindow::setState(Elements elem, State visible, State enable)
             menuFile->menuAction()->setVisible(visible);
 
             tbrFile->setVisible(visible);
+        }
+        if (elem & eEdit)
+        {
+            actAreaCopy->setVisible(visible);
+
+            menuEdit->menuAction()->setVisible(visible);
+
+            tbrEdit->setVisible(visible);
         }
         if (elem & eView)
         {
@@ -456,6 +484,14 @@ void MainWindow::setState(Elements elem, State visible, State enable)
             menuFile->menuAction()->setEnabled(enable);
 
             tbrFile->setEnabled(enable);
+        }
+        if (elem & eEdit)
+        {
+            actAreaCopy->setEnabled(enable);
+
+            menuEdit->menuAction()->setEnabled(enable);
+
+            tbrEdit->setEnabled(enable);
         }
         if (elem & eView)
         {
@@ -646,6 +682,69 @@ void MainWindow::mapSave()
     }
 }
 
+void MainWindow::areaCopy()
+{
+    if (map->floor(curFloor)->selectedItem() != 0)
+        if (map->floor(curFloor)->selectedItem()->type() == MapArea::Type)
+        {
+            MapArea *oldArea = qgraphicsitem_cast<MapArea*>(
+                    map->floor(curFloor)->selectedItem());
+            DialogFloorChoice* dialog = new DialogFloorChoice(
+                    this, modelFloorsList, tr("Выберите этаж, на который будет"
+                                              "\nскопирована выделенная "
+                                              "область:"));
+            if (dialog->exec() == QDialog::Accepted)
+            {
+                int floor = dialog->floor();
+                if (floor != curFloor)
+                {
+                    MapArea *newArea = new MapArea(*oldArea);
+                    switch (map->floor(floor)->addArea(newArea))
+                    {
+                    case MapArea::ceNone:
+                    {
+                        MapArea *a;
+                        QStack<MapArea*> stk;
+                        stk.push(oldArea);
+                        while (!stk.isEmpty())
+                        {
+                            a = stk.pop();
+                            for (int i = 0; i != a->doorsNumber(); i++)
+                            {
+                                MapDoor *door = new MapDoor(*a->door(i));
+                                map->floor(floor)->addDoor(door);
+                            }
+                            int size = a->areasNumber();
+                            for (int i = 0; i !=size; i++)
+                                stk.push(a->area(i));
+                        }
+                        setActiveFloor(floor);
+                        break;
+                    }
+                    case MapArea::ceIntersection:
+                        QMessageBox::warning(
+                                0, tr("Ошибка при копировании области"),
+                                tr("На ") + map->floor(floor)->name() +
+                                tr(" этаже недостаточно места для вставки "
+                                   "области."));
+                        break;
+                    case MapArea::ceAreaExist:
+                        QMessageBox::warning(
+                                0, tr("Ошибка при копировании области"),
+                                tr("На ") + map->floor(floor)->name() +
+                                tr(" этаже уже есть данная область."));
+                        break;
+                    }
+                }
+                else
+                    QMessageBox::warning(
+                            0, tr("Ошибка при копировании области"),
+                            tr("На ") + map->floor(floor)->name() +
+                            tr(" этаже уже есть данная область."));
+            }
+        }
+}
+
 void MainWindow::floorUp()
 {
     setActiveFloor(curFloor - 1);
@@ -793,8 +892,8 @@ void MainWindow::switchMode(MapFloor::Mode m)
     switch (m)
     {
     case MapFloor::Idle:
-        setState(eFile | eView | eLayers | eAdd | eHelp | eFloorsSwitching |
-                 ePanels, stTrue, stTrue);
+        setState(eFile | eEdit | eFloorsSwitching | eView | eLayers | eAdd |
+                 eHelp | ePanels, stTrue, stTrue);
         setState(eFloorsManagement | eAreasMarking, stSave, stTrue);
         setCursor(Qt::ArrowCursor);
         break;
@@ -803,8 +902,8 @@ void MainWindow::switchMode(MapFloor::Mode m)
     case MapFloor::DoorAdd:
     case MapFloor::NodeAdd:
         setState(eFile | eView | eLayers | eHelp | ePanels, stTrue, stTrue);
-        setState(eFloorsSwitching | eAdd | eFloorsManagement | eAreasMarking,
-                 stSave, stFalse);
+        setState(eEdit | eFloorsSwitching | eAdd |
+                 eFloorsManagement | eAreasMarking, stSave, stFalse);
         setCursor(Qt::CrossCursor);
         if (m == MapFloor::NodeAdd)
             map->graphStartAnew();

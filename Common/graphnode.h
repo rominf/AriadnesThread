@@ -8,18 +8,18 @@
 #include "mapdoor.h"
 
 class GraphArc;
+class MapFloor;
 class GraphNode : public QGraphicsEllipseItem
 {
-
     friend QDataStream &operator<<(QDataStream &output, const GraphNode &node);
     friend QDataStream &operator>>(QDataStream &input, GraphNode &node);
 public:
     GraphNode();
-    GraphNode(const QPointF &point, int floor);
+    GraphNode(const QPointF &point, quint32 floor);
     ~GraphNode();
 
     enum {Type = QGraphicsItem::UserType + 4};
-    int floor();
+    quint32 floor();
     void addArc(GraphArc *arc);
     GraphArc* arc(int i) const;
     void deleteArc(GraphArc *arc);
@@ -29,7 +29,7 @@ public:
     quint32 uin();
 private:
     static const qreal cCircleR;
-    int m_floor;
+    quint32 m_floor;
     QVector<GraphArc*> m_arcs;
     quint32 m_uin;
 

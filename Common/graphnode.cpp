@@ -10,7 +10,7 @@ GraphNode::GraphNode():
     setZValue(100500 - 1);
 }
 
-GraphNode::GraphNode(const QPointF &point, int floor):
+GraphNode::GraphNode(const QPointF &point, quint32 floor):
         QGraphicsEllipseItem(-cCircleR, -cCircleR, 2*cCircleR, 2*cCircleR),
         m_floor(floor)
 {
@@ -45,7 +45,7 @@ QDataStream & operator>>(QDataStream &input, GraphNode &node)
     return input;
 }
 
-int GraphNode::floor()
+quint32 GraphNode::floor()
 {
     return m_floor;
 }
