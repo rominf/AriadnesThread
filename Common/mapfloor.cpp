@@ -712,8 +712,6 @@ MapArea::CreateError MapFloor::addArea(MapArea *area)
     MapArea *parentArea = 0;
 
     QPolygonF areaPgn = area->polygon();
-    gpc_polygon gpc_curpgn = convertQtToGpcPolygon(&areaPgn);
-    gpc_polygon gpc_intersection;
     MapArea *a;
     QStack<MapArea*> stk;
     for (int i = 0; i != m_outlines.size(); i++)
@@ -721,18 +719,14 @@ MapArea::CreateError MapFloor::addArea(MapArea *area)
     while (!stk.isEmpty())
     {
         a = stk.pop();
-
         QPolygonF pgn = a->polygon();
-        gpc_polygon gpc_pgn = convertQtToGpcPolygon(&pgn);
-        gpc_polygon_clip(GPC_INT, &gpc_curpgn, &gpc_pgn, &gpc_intersection);
-        if (gpc_intersection.num_contours != 0)
+        QPolygonF intersection = pgn.intersected(areaPgn);
+        if (!intersection.isEmpty())
         {
-            gpc_polygon gpc_newIntersection;
-            gpc_polygon_clip(GPC_DIFF, &gpc_curpgn, &gpc_intersection,
-                             &gpc_newIntersection);
-            if (gpc_newIntersection.num_contours == 0)
+            QPolygonF subtraction = areaPgn.subtracted(intersection);
+            if (subtraction.isEmpty())
             {
-                if (areaPgn != pgn)
+                if (!pgn.subtracted(areaPgn).isEmpty())
                 {
                     parentArea = a;
                     int size = a->areasNumber();
@@ -866,22 +860,6 @@ QPolygonF MapFloor::convertLineVecToPolygon(const
     for (int i = 0; i != vec.size(); i++)
         polygon << vec.at(i)->line().p1();
     return polygon;
-}
-
-gpc_polygon MapFloor::convertQtToGpcPolygon(const QPolygonF *pgn)
-{
-    gpc_polygon gpc_pgn;
-    int size = pgn->size();
-    gpc_pgn.num_contours = 1;
-    gpc_pgn.contour = new gpc_vertex_list[1];
-    gpc_pgn.contour[0].num_vertices = size;
-    gpc_pgn.contour[0].vertex = new gpc_vertex[size];
-    for (int i = 0; i != size; i++)
-    {
-        gpc_pgn.contour[0].vertex[i].x = pgn->at(i).x();
-        gpc_pgn.contour[0].vertex[i].y = pgn->at(i).y();
-    }
-    return gpc_pgn;
 }
 
 quint32 MapFloor::uin()

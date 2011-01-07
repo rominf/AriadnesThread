@@ -19,10 +19,10 @@
 #include "mapbase.h"
 #include "mapselection.h"
 
-extern "C"
-{
-    #include "gpc.h"
-}
+//extern "C"
+//{
+//    #include "gpc.h"
+//}
 
 class MapFloor: public QGraphicsScene
 {
@@ -121,7 +121,7 @@ private:
 
     QPolygonF convertLineVecToPolygon(const
                                       QVector<QGraphicsLineItem*> &vec) const;
-    gpc_polygon convertQtToGpcPolygon(const QPolygonF *pgn);
+//    gpc_polygon convertQtToGpcPolygon(const QPolygonF *pgn);
 
     void takeAwayGraphicsLineItem(QGraphicsLineItem *item);
     void finalizeWall();
