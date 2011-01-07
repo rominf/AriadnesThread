@@ -20,8 +20,15 @@ class MapArea : public QGraphicsPolygonItem
 
 public:
     explicit MapArea(const QPolygonF &polygon);
+    explicit MapArea(const MapArea &area);
 
     enum {Type = QGraphicsItem::UserType + 1};
+    enum CreateError
+    {
+        ceNone,
+        ceIntersection,
+        ceAreaExist
+    };
     QString name();
     void setName(const QString &name);
     void setNameVisible(bool show = true);

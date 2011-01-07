@@ -30,7 +30,7 @@ QDataStream & operator<<(QDataStream &output, const Graph &graph)
             }
         }
     }
-    output << GraphNode(QPointF(0, 0), -1) << false; // For marking end of nodes
+    output << GraphNode(QPointF(0, 0), 0) << false; // For marking end of nodes
     for (int i = 0; i != nodes.size(); i++)
         for (int j = 0; j != nodes.at(i)->arcsNumber(); j++)
         {
@@ -52,7 +52,7 @@ QDataStream & operator>>(QDataStream &input, Graph &graph)
     GraphNode *node = new GraphNode();
     bool isStartNode;
     input >> *node >> isStartNode;
-    while (node->floor() != -1)
+    while (node->floor() != 0)
     {
         nodes.insert(node->uin(), node);
         if (isStartNode)
@@ -79,7 +79,7 @@ void Graph::deleteArc(GraphArc *arc)
     delete arc;
 }
 
-void Graph::addNode(QPointF &point, int floor)
+void Graph::addNode(QPointF &point, quint32 floor)
 {
     // If doubleclick
     if (m_lastNode)
@@ -211,8 +211,8 @@ void Graph::deleteNode(GraphNode *node)
 
 void Graph::setVisible(bool visible)
 {
-    for (int i = 0; i != m_startNodes.size(); i++)
-        m_startNodes[i]->setVisible(visible);
+//    for (int i = 0; i != m_startNodes.size(); i++)
+//        m_startNodes[i]->setVisible(visible);
 
     GraphNode *n;
     QStack<GraphNode*> stk;

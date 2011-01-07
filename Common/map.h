@@ -34,7 +34,7 @@ public slots:
     void graphStartAnew();
 
 private slots:
-    void addNode(QPointF point, MapFloor &floor);
+    void addNode(QPointF point, quint32 floor);
     void deleteNode(GraphNode *node);
     void setLastNode(GraphNode *node);
     void addGraphItem(QGraphicsItem *item);
@@ -44,8 +44,9 @@ private slots:
 
 private:
     Graph *m_graph;
-
     QVector<MapFloor*> m_floors;
+    MapSelection *m_copy;
+
     qreal m_pixPerRealM;
     qreal m_pixPerDisplayM;
     qreal m_realMPerDisplayM;

@@ -15,7 +15,7 @@ public:
     Graph();
 //    void addFreeNode(QPointF *point);
     void deleteArc(GraphArc *arc);
-    void addNode(QPointF &point, int floor/*, GraphNode *linkedNode*/);
+    void addNode(QPointF &point, quint32 floor/*, GraphNode *linkedNode*/);
     GraphNode* lastNode();
     void deleteNode(GraphNode *node);
     void setVisible(bool visible);

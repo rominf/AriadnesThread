@@ -37,8 +37,6 @@
 #include <QItemSelectionModel>
 #include <QScrollBar>
 #include <QShortcut>
-#include <QSignalMapper>
-#include <QStackedWidget>
 #include <QStatusBar>
 #include <QStringListModel>
 #include <QTime>
@@ -50,6 +48,7 @@
 #include "../Common/map.h"
 #include "../Common/mapfloor.h"
 #include "dialogmapsize.h"
+#include "dialogfloorchoice.h"
 
 
 class MainWindow : public QMainWindow
@@ -62,24 +61,26 @@ public:
     enum Element
     {
         eFile = 1,
-        eView = 2,
-        eLayers = 4,
-        eAdd  = 8,
-        eHelp = 16,
-        eFloorsSwitching = 32,
-        ePanels = 64,
-        eFloorsManagement = 128,
-        eAreasMarking = 256
+        eEdit = 2,
+        eView = 4,
+        eLayers = 8,
+        eAdd  = 16,
+        eHelp = 32,
+        eFloorsSwitching = 64,
+        ePanels = 128,
+        eFloorsManagement = 256,
+        eAreasMarking = 512
     };
     Q_DECLARE_FLAGS(Elements, Element)
+//    const QStringListModel* modelFloorsList() const;
 
 private slots:
     void mapNew();                      // Creating map
     void mapOpen();                     // Opening map
     void mapSave();                     // Saving map
+    void areaCopy();                    // Copy area to another floor
     void floorDown();                   // Set visible lower floor
     void floorUp();                     // Set visible higher floor
-
     void zoomOut();
     void zoomIn();
     void zoomFit();
@@ -140,6 +141,7 @@ private:
     QAction *actMapNew;
     QAction *actMapOpen;
     QAction *actMapSave;
+    QAction *actAreaCopy;
     QAction *actFloorDown;
     QAction *actFloorUp;
     QAction *actZoomOut;
@@ -167,18 +169,20 @@ private:
 
     // Menus
     QMenu *menuFile;
+    QMenu *menuEdit;
     QMenu *menuPanels;
     QMenu *menuAdd;
     QMenu *menuHelp;
 
     // Toolbars
     QToolBar *tbrFile;
-    QToolBar *tbrPanels;
+    QToolBar *tbrEdit;
     QToolBar *tbrFloorsSwitching;
     QComboBox *cbxFloorSelect;
     QToolBar *tbrView;
     QToolBar *tbrLayers;
     QToolBar *tbrAdd;
+    QToolBar *tbrPanels;
     /*QToolBar *tbrFloorNameChange;
     QLabel *lblFloorNameChange;
     QLineEdit *ldtFloorNameChange;*/
@@ -186,8 +190,6 @@ private:
     // Central
     QWidget *wgtCentral;
     QVBoxLayout *vblwgtCentral;
-
-    QSignalMapper *panelsSignalMapper;
 
     // Dock FloorsManagement
     QDockWidget *dckwgtFloorsManagement;

@@ -13,6 +13,7 @@ class MapDoor : public QGraphicsEllipseItem
     friend QDataStream &operator>>(QDataStream &input, MapDoor &door);
 
 public:
+    MapDoor(const MapDoor &door);
     MapDoor(const QPointF &point);
 
     enum {Type = QGraphicsItem::UserType + 2};

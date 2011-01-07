@@ -9,13 +9,25 @@ MapArea::MapArea(const QPolygonF &polygon):
 //    setFlags(QGraphicsItem::ItemIsSelectable);
 
     m_name = new QGraphicsTextItem(this);
-    m_name->setFont(QFont("Arial", cFontSize));
+//    m_name->setFont(QFont("Arial", cFontSize));
 //    m_name->
 //    m_name->setZValue(1);
 //    m_name->setPos(this->polygon().boundingRect().center());
     m_description = "";
     setBrush(QBrush(Qt::NoBrush));
     m_uin = ++m_count;
+}
+
+MapArea::MapArea(const MapArea &area):
+        QGraphicsPolygonItem(area.polygon())
+{
+    m_description = "";
+    setBrush(QBrush(Qt::NoBrush));
+    m_uin = ++m_count;
+    m_name = new QGraphicsTextItem(this);
+    setName(area.m_name->toPlainText());
+    for (int i = 0; i != area.m_areas.size(); i++)
+        addArea(new MapArea(*area.m_areas.at(i)));
 }
 
 QDataStream &operator<<(QDataStream &output, const MapArea &area)

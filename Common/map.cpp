@@ -45,10 +45,9 @@ QDataStream & operator>>(QDataStream &input, Map &map)
     return input;
 }
 
-void Map::addNode(QPointF point, MapFloor &floor)
+void Map::addNode(QPointF point, quint32 floor)
 {
-    int floorNumber = m_floors.indexOf(&floor);
-    m_graph->addNode(point, floorNumber);
+    m_graph->addNode(point, floor);
 }
 
 void Map::deleteNode(GraphNode *node)
@@ -61,7 +60,9 @@ void Map::setLastNode(GraphNode *node)
     for (int i = 0; i != m_floors.size(); i++)
         m_floors.at(i)->setLastNode(0);
     if (node)
-        m_floors.at(node->floor())->setLastNode(node);
+        for (int i = 0; i != m_floors.size(); i++)
+            if (m_floors.at(i)->uin() == node->floor())
+                m_floors.at(i)->setLastNode(node);
 }
 
 void Map::addGraphItem(QGraphicsItem *item)
@@ -71,13 +72,20 @@ void Map::addGraphItem(QGraphicsItem *item)
         GraphArc *arc = qgraphicsitem_cast<GraphArc*>(item);
         if (arc->node1()->floor() == arc->node2()->floor())
         {
-            m_floors[arc->node1()->floor()]->addArc(arc);
+            for (int i = 0; i != m_floors.size(); i++)
+                if (m_floors.at(i)->uin() == arc->node1()->floor())
+                    m_floors.at(i)->addItem(arc);
         }
     }
     if (item->type() == GraphNode::Type)
     {
         GraphNode *node = qgraphicsitem_cast<GraphNode*>(item);
-        m_floors[node->floor()]->addNode(node);
+        for (int i = 0; i != m_floors.size(); i++)
+            if (m_floors.at(i)->uin() == node->floor())
+            {
+                m_floors.at(i)->addItem(node);
+                m_floors.at(i)->addPointNodesMagnetTo(node->pos());
+            }
 //        m_floors[node->floor()]->setLastNode(m_graph->lastNode());
     }
 }
@@ -158,8 +166,8 @@ void Map::insertFloor(int i)
 {
     MapFloor *floor = new MapFloor(QRectF(0, 0, m_pixSizeX, m_pixSizeY), this);
     m_floors.insert(i, floor);
-    connect(floor, SIGNAL(addedNode(QPointF,MapFloor&)),
-            SLOT(addNode(QPointF,MapFloor&)));
+    connect(floor, SIGNAL(addedNode(QPointF,quint32)),
+            SLOT(addNode(QPointF,quint32)));
     connect(floor, SIGNAL(deletedNode(GraphNode*)),
             SLOT(deleteNode(GraphNode*)));
     connect(floor, SIGNAL(graphStartedAnew()),

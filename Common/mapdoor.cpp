@@ -4,6 +4,16 @@ const qreal MapDoor::cCircleR = 7.0;
 quint32 MapDoor::m_count = 0;
 QSet<quint32> MapDoor::m_finishedDoors;
 
+MapDoor::MapDoor(const MapDoor &door):
+        QGraphicsEllipseItem(/*point.x() */- cCircleR, /*point.y() */- cCircleR,
+                             2*cCircleR, 2*cCircleR)
+{
+    QPointF point = door.pos();
+    setPos(point.x(), point.y());
+    m_uin = ++m_count;
+    setBrush(QBrush(Qt::white));
+}
+
 MapDoor::MapDoor(const QPointF &point):
         QGraphicsEllipseItem(/*point.x() */- cCircleR, /*point.y() */- cCircleR,
                              2*cCircleR, 2*cCircleR)
