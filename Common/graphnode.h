@@ -19,7 +19,7 @@ public:
     ~GraphNode();
 
     enum {Type = QGraphicsItem::UserType + 4};
-    quint32 floor();
+    quint32 floorUin();
     void addArc(GraphArc *arc);
     GraphArc* arc(int i) const;
     void deleteArc(GraphArc *arc);

@@ -20,7 +20,8 @@ class MapArea : public QGraphicsPolygonItem
 
 public:
     explicit MapArea(const QPolygonF &polygon);
-    explicit MapArea(const MapArea &area);
+    explicit MapArea(const MapArea &area, const QString &before,
+                     const QString &after);
 
     enum {Type = QGraphicsItem::UserType + 1};
     enum CreateError
@@ -34,7 +35,7 @@ public:
     void setNameVisible(bool show = true);
     bool isNameVisible();
     QString description();
-    void setDescription(QString &description);
+    void setDescription(const QString &description);
     MapArea* parent();
 //    void setParent(MapArea *parent);
     void addArea(MapArea *area);
@@ -49,8 +50,6 @@ public:
     quint32 uin();
 private:
     static const int cFontSize;
-//    int m_number;
-//    QString m_name;
     QGraphicsTextItem *m_name;
     QString m_description;
     MapArea *m_parent;

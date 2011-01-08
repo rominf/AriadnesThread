@@ -34,7 +34,7 @@ public slots:
     void graphStartAnew();
 
 private slots:
-    void addNode(QPointF point, quint32 floor);
+    void addNode(QPointF point, quint32 floorUin);
     void deleteNode(GraphNode *node);
     void setLastNode(GraphNode *node);
     void addGraphItem(QGraphicsItem *item);

@@ -52,7 +52,7 @@ QDataStream & operator>>(QDataStream &input, Graph &graph)
     GraphNode *node = new GraphNode();
     bool isStartNode;
     input >> *node >> isStartNode;
-    while (node->floor() != 0)
+    while (node->floorUin() != 0)
     {
         nodes.insert(node->uin(), node);
         if (isStartNode)
@@ -79,66 +79,55 @@ void Graph::deleteArc(GraphArc *arc)
     delete arc;
 }
 
-void Graph::addNode(QPointF &point, quint32 floor)
+void Graph::addNode(QPointF point, quint32 floorUin)
 {
     // If doubleclick
     if (m_lastNode)
         if (m_lastNode->pos() == point)
             return;
-    // Searching current node between free nodes
+
     bool nodeIsCreated = false;
     GraphNode *node;
-    for (int i = 0; i != m_startNodes.size(); i++)
-
-        if (m_startNodes.at(i)->pos() == point)
-        {
-            nodeIsCreated = true;
-            node = m_startNodes[i];
-            break;
-        }
-    // If current node isn't free, we try to find it between normal nodes
-    if (!nodeIsCreated)
+    GraphNode *n;
+    QStack<GraphNode*> stk;
+    QVector<GraphNode*> vec;
+    for (int i = 0; i < m_startNodes.size(); i++)
     {
-        GraphNode *n;
-        QStack<GraphNode*> stk;
-        QVector<GraphNode*> vec;
-        for (int i = 0; i < m_startNodes.size(); i++)
+        GraphNode *startNode = m_startNodes.at(i);
+        stk.push(startNode);
+        vec.append(startNode);
+        while (!stk.isEmpty())
         {
-            GraphNode *startNode = m_startNodes.at(i);
-            stk.push(startNode);
-            vec.append(startNode);
-            while (!stk.isEmpty())
+            n = stk.pop();
+            // Removing surplus nodes
+            if (n != startNode)
             {
-                n = stk.pop();
-                // Removing surplus nodes
-                if (n != startNode)
+                int i = m_startNodes.indexOf(n);
+                if (i > -1)
+                    m_startNodes.remove(i);
+            }
+            if ((n->pos() == point) & (n->floorUin() == floorUin))
+            {
+                node = n;
+                nodeIsCreated = true;
+                break;
+            }
+            for (int i = 0; i !=n->arcsNumber(); i++)
+            {
+                GraphNode *next = n->adjacentNode(n->arc(i));
+                if (!vec.contains(next))
                 {
-                    int i = m_startNodes.indexOf(n);
-                    if (i > -1)
-                        m_startNodes.remove(i);
-                }
-                if (n->pos() == point)
-                {
-                    node = n;
-                    nodeIsCreated = true;
-                    break;
-                }
-                for (int i = 0; i !=n->arcsNumber(); i++)
-                {
-                    GraphNode *next = n->adjacentNode(n->arc(i));
-                    if (!vec.contains(next))
-                    {
-                        stk.push(next);
-                        vec.append(next);
-                    }
+                    stk.push(next);
+                    vec.append(next);
                 }
             }
         }
     }
-    // If it still not found - we create it!
+//    }
+    // If node isn't created - we create it!
     if (!nodeIsCreated)
     {
-        node = new GraphNode(point, floor);
+        node = new GraphNode(point, floorUin);
         emit graphItemAdded(node);
     }
     // Adding arc
@@ -160,8 +149,6 @@ void Graph::addNode(QPointF &point, quint32 floor)
     else
         m_startNodes.append(node);
     setLastNode(node);
-//    nodesCoordinates();
-//    emit graphNodesChanged(m_nodesCoordinates, floor);
 }
 
 GraphNode* Graph::lastNode()
@@ -192,28 +179,52 @@ void Graph::deleteNode(GraphNode *node)
     delete node;
 }
 
-//void Graph::nodesCoordinates()
-//{
-//    m_nodesCoordinates.clear();
-//    GraphNode *node;
-//    QStack<GraphNode*> stk;
-//    stk.push(m_lastNode);
-//    while (!stk.isEmpty())
-//    {
-//        node = stk.pop();
-//        m_nodesCoordinates.append(new QPointF(node->pos()));
-//        int size = node->arcsNumber();
-//        for (int i = 0; i !=size; i++)
-//            stk.push(node->adjacentNode(node->arc(i)));
-//    }
-////    return m_nodesCoordinates;
-//}
+void Graph::copyFloor(quint32 fromUin, quint32 toUin)
+{
+    GraphNode *n;
+    QStack<GraphNode*> stk;
+    QVector<GraphNode*> vec;
+
+    int startNodesNumber = m_startNodes.size();
+    for (int i = 0; i != startNodesNumber; i++)
+    {
+        GraphNode *startNode = m_startNodes.at(i);
+        stk.push(startNode);
+        vec.append(startNode);
+        while (!stk.isEmpty())
+        {
+            n = stk.pop();
+            m_lastNode = 0;
+
+            if (n->floorUin() == fromUin)
+            {
+                addNode(n->pos(), toUin);
+                for (int i = 0; i != n->arcsNumber(); i++)
+                {
+                    GraphNode *adjacentNode = n->adjacentNode(n->arc(i));
+                    if (adjacentNode->floorUin() == fromUin)
+                    {
+                        addNode(adjacentNode->pos(), toUin);
+                        addNode(n->pos(), toUin);
+                    }
+                }
+            }
+            int size = n->arcsNumber();
+            for (int i = 0; i !=size; i++)
+            {
+                GraphNode *next = n->adjacentNode(n->arc(i));
+                if (!vec.contains(next))
+                {
+                    stk.push(next);
+                    vec.append(next);
+                }
+            }
+        }
+    }
+}
 
 void Graph::setVisible(bool visible)
 {
-//    for (int i = 0; i != m_startNodes.size(); i++)
-//        m_startNodes[i]->setVisible(visible);
-
     GraphNode *n;
     QStack<GraphNode*> stk;
     QVector<GraphNode*> vec;
@@ -246,17 +257,6 @@ void Graph::setVisible(bool visible)
             }
         }
     }
-//    GraphNode *node;
-//    QStack<GraphNode*> stk;
-//    stk.push(m_node);
-//    while (!stk.isEmpty())
-//    {
-//        node = stk.pop();
-//        node->setVisible(visible);
-//        int size = node->areasNumber();
-//        for (int i = 0; i !=size; i++)
-//            stk.push(node->area(i));
-//    }
 }
 
 void Graph::startAnew()
