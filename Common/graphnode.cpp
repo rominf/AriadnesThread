@@ -45,7 +45,7 @@ QDataStream & operator>>(QDataStream &input, GraphNode &node)
     return input;
 }
 
-quint32 GraphNode::floor()
+quint32 GraphNode::floorUin()
 {
     return m_floor;
 }

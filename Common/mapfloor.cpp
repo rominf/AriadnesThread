@@ -43,7 +43,6 @@ MapFloor::MapFloor(const QRectF &sceneRect, QObject *parent) :
 
 QDataStream &operator<<(QDataStream &output, const MapFloor &floor)
 {
-    // ### saving without outline
     MapDoor::clearFinishedDoors();
     int last = floor.m_outlines.size();
     output << floor.m_uin << floor.m_name << floor.m_base->fileName() << last;
@@ -94,18 +93,11 @@ QDataStream &operator>>(QDataStream &input, MapFloor &floor)
                 a2 = stk2.pop();
                 if ((a1 != a2) & (door->parentAreasUins().contains(a2->uin())))
                     a2->addDoor(door);
-//                if (door->parentAreasUins().contains(a2->uin())) // If door is
-//                {                                                // in this area
-//                    if (a2->doorsNumber() == 0)                  // If this area
-//                        a2->addDoor(door);                       // don't
-//                    else if (door != a2->door(0))                // contain this
-//                        a2->addDoor(door);                       // door already
-//                }
-
                 int size = a2->areasNumber();
                 for (int i = 0; i !=size; i++)
                     stk2.push(a2->area(i));
             }
+            floor.addItem(door);
             floor.addPointNodesMagnetTo(door->pos());
         }
 
@@ -114,7 +106,6 @@ QDataStream &operator>>(QDataStream &input, MapFloor &floor)
             stk1.push(a1->area(i));
     }
 
-//    int last;
     input >> last;
     for (int i = 0; i != last; i++)
     {
@@ -133,13 +124,11 @@ QDataStream &operator>>(QDataStream &input, MapFloor &floor)
 QString MapFloor::name() const
 {
     return m_name;
-//    return m_outline->name();
 }
 
 void MapFloor::setName(const QString &floorName)
 {
-       m_name = floorName;
-//    m_outline->setName(floorName);
+    m_name = floorName;
 }
 
 MapFloor::Mode MapFloor::mode()
@@ -760,13 +749,13 @@ bool MapFloor::addDoor(MapDoor *door)
     QVector<MapArea*> areas = pointContainers(point);
     if (!areas.isEmpty())
     {
-        qreal maxZValue = 0;
+//        qreal maxZValue = 0;
         for (int i = 0; i != areas.size(); i++)
-        {
-            maxZValue = qMax(maxZValue, areas[i]->zValue());
+//        {
+//            maxZValue = qMax(maxZValue, areas[i]->zValue());
             areas[i]->addDoor(door);
-        }
-        door->setZValue(maxZValue + 1.0);
+//        }
+//        door->setZValue(maxZValue + 1.0);
         if (!m_graphNodes.contains(point))
             m_graphNodes.append(point);
         addItem(door);

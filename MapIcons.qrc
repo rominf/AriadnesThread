@@ -1,34 +1,30 @@
 <RCC>
     <qresource prefix="/">
-        <file alias="Save">Icons/disk-black.png</file>
-        <file alias="New">Icons/document.png</file>
-        <file alias="Open">Icons/folder-horizontal-open.png</file>
-        <file alias="AddDoor">Icons/door.png</file>
-        <file alias="AddWall">Icons/wall.png</file>
-        <file alias="AreaCopy">Icons/layers-arrange.png</file>
-        <file alias="AddArea">Icons/layer-select.png</file>
-        <file>Icons/hammer-left.png</file>
-        <file>Icons/pencil.png</file>
-        <file alias="AreasMarking">Icons/tag.png</file>
-        <file>Icons/ruler--pencil.png</file>
-        <file alias="PlanningMode">Icons/pencil-ruler.png</file>
-        <file alias="AppIcon">Icons/starthere.png</file>
-        <file alias="Previous">Icons/arrow-180.png</file>
-        <file alias="Next">Icons/arrow.png</file>
-        <file alias="ZoomFit">Icons/magnifier-zoom-fit.png</file>
-        <file alias="ZoomIn">Icons/magnifier-zoom-in.png</file>
-        <file alias="ZoomOut">Icons/magnifier-zoom-out.png</file>
-        <file alias="LayerBase">Icons/image.png</file>
-        <file alias="Abc">1.jpg</file>
-        <file>Icons/layer-select-point.png</file>
-        <file alias="MagnetToExtensions">Icons/layer-shape-line.png</file>
-        <file alias="FloorsManagement">Icons/layers-stack.png</file>
-        <file alias="FloorUp">Icons/arrow-090.png</file>
-        <file alias="FloorAdd">Icons/plus.png</file>
-        <file alias="FloorDelete">Icons/minus.png</file>
-        <file alias="FloorDown">Icons/arrow-270.png</file>
-        <file alias="AddBase">Icons/image--plus.png</file>
-        <file alias="LayerGraph">Icons/layer-shape-polyline.png</file>
-        <file alias="AddNode">Icons/my-add-node.png</file>
+        <file alias="AddArea">Icons/AddArea.png</file>
+        <file alias="AddBase">Icons/AddBase.png</file>
+        <file alias="AddDoor">Icons/AddDoor.png</file>
+        <file alias="AddNode">Icons/AddNode.png</file>
+        <file alias="AddWall">Icons/AddWall.png</file>
+        <file alias="AppIcon">Icons/AppIcon.png</file>
+        <file alias="AreaCopy">Icons/AreaCopy.png</file>
+        <file alias="AreasMarking">Icons/AreasMarking.png</file>
+        <file alias="FloorAdd">Icons/FloorAdd.png</file>
+        <file alias="FloorDefault">Icons/FloorDefault.png</file>
+        <file alias="FloorDelete">Icons/FloorDelete.png</file>
+        <file alias="FloorDown">Icons/FloorDown.png</file>
+        <file alias="FloorsManagement">Icons/FloorsManagement.png</file>
+        <file alias="FloorUp">Icons/FloorUp.png</file>
+        <file alias="GraphCopy">Icons/GraphCopy.png</file>
+        <file alias="LayerBase">Icons/LayerBase.png</file>
+        <file alias="LayerGraph">Icons/LayerGraph.png</file>
+        <file alias="MagnetToExtensions">Icons/MagnetToExtensions.png</file>
+        <file alias="New">Icons/New.png</file>
+        <file alias="Open">Icons/Open.png</file>
+        <file alias="Quit">Icons/Quit.png</file>
+        <file alias="Save">Icons/Save.png</file>
+        <file alias="SaveAs">Icons/SaveAs.png</file>
+        <file alias="ZoomFit">Icons/ZoomFit.png</file>
+        <file alias="ZoomIn">Icons/ZoomIn.png</file>
+        <file alias="ZoomOut">Icons/ZoomOut.png</file>
     </qresource>
 </RCC>

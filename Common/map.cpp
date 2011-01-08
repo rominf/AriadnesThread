@@ -25,9 +25,7 @@ QDataStream & operator<<(QDataStream &output, const Map &map)
     int last = map.m_floors.size();
     output << map.m_pixSizeX << map.m_pixSizeY << map.m_pixPerRealM << last;
     for (int i = 0; i != last; i++)
-    {
         output << *map.m_floors.at(i);
-    }
     output << *map.m_graph;
     return output;
 }
@@ -45,9 +43,9 @@ QDataStream & operator>>(QDataStream &input, Map &map)
     return input;
 }
 
-void Map::addNode(QPointF point, quint32 floor)
+void Map::addNode(QPointF point, quint32 floorUin)
 {
-    m_graph->addNode(point, floor);
+    m_graph->addNode(point, floorUin);
 }
 
 void Map::deleteNode(GraphNode *node)
@@ -61,7 +59,7 @@ void Map::setLastNode(GraphNode *node)
         m_floors.at(i)->setLastNode(0);
     if (node)
         for (int i = 0; i != m_floors.size(); i++)
-            if (m_floors.at(i)->uin() == node->floor())
+            if (m_floors.at(i)->uin() == node->floorUin())
                 m_floors.at(i)->setLastNode(node);
 }
 
@@ -70,10 +68,10 @@ void Map::addGraphItem(QGraphicsItem *item)
     if (item->type() == GraphArc::Type)
     {
         GraphArc *arc = qgraphicsitem_cast<GraphArc*>(item);
-        if (arc->node1()->floor() == arc->node2()->floor())
+        if (arc->node1()->floorUin() == arc->node2()->floorUin())
         {
             for (int i = 0; i != m_floors.size(); i++)
-                if (m_floors.at(i)->uin() == arc->node1()->floor())
+                if (m_floors.at(i)->uin() == arc->node1()->floorUin())
                     m_floors.at(i)->addItem(arc);
         }
     }
@@ -81,7 +79,7 @@ void Map::addGraphItem(QGraphicsItem *item)
     {
         GraphNode *node = qgraphicsitem_cast<GraphNode*>(item);
         for (int i = 0; i != m_floors.size(); i++)
-            if (m_floors.at(i)->uin() == node->floor())
+            if (m_floors.at(i)->uin() == node->floorUin())
             {
                 m_floors.at(i)->addItem(node);
                 m_floors.at(i)->addPointNodesMagnetTo(node->pos());

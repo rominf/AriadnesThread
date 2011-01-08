@@ -1,7 +1,6 @@
  
 
 HEADERS += \
-    Common/gpc.h \
     Common/map.h \
     Common/mapfloor.h \
     Common/maparea.h \
@@ -17,7 +16,6 @@ HEADERS += \
     Ariadne/dialogfloorchoice.h
 
 SOURCES += \
-    Common/gpc.c \
     Common/map.cpp \
     Common/mapfloor.cpp \
     Common/maparea.cpp \

@@ -74,11 +74,17 @@ public:
     Q_DECLARE_FLAGS(Elements, Element)
 //    const QStringListModel* modelFloorsList() const;
 
+protected:
+    virtual void closeEvent(QCloseEvent *event);
+
 private slots:
     void mapNew();                      // Creating map
     void mapOpen();                     // Opening map
-    void mapSave();                     // Saving map
+    void mapSave();                     // Saving map to open file
+    void mapSaveAs();                   // Saving map to another file
+    void exit();                        // Exit program
     void areaCopy();                    // Copy area to another floor
+    void graphCopy();                   // Copy graph to another floor
     void floorDown();                   // Set visible lower floor
     void floorUp();                     // Set visible higher floor
     void zoomOut();
@@ -101,11 +107,13 @@ private slots:
     void floorDelete();
     void floorMoveDown();
     void floorMoveUp();
+    void floorSetDefault();
     void viewFloorsListItemActivated(QModelIndex index);
     void viewFloorsListItemChanged(QModelIndex index);
     void mouseDoubleClicked();
     void panelAreasMarkingVisibilityChanged(bool visible);
     void setAreaName();
+    void setAreaDescription();
     void chkAreaNameVisibleStateChanged(int state);
     void about();                       // Show info about my fantastic program
 
@@ -115,6 +123,7 @@ private:
     static const qreal cPixPerRealM = 10;
     static const qreal cZoom = 1.1;
     static const int cDockWidth = 250;
+    static const bool isExtraShortcutsEnabled = true;
     enum State
     {
         stSave = -1,
@@ -123,9 +132,11 @@ private:
     };
 
     ///////////////////////////////Variables////////////////////////////////////
-    QString openedFile;
+    QString openFileName;
     MapFloor::Mode mode;
     int curFloor;
+    quint32 defaultFloor;
+    bool autoAreasRenaming;
 
     ///////////////////////////////Enums////////////////////////////////////////
 
@@ -141,7 +152,10 @@ private:
     QAction *actMapNew;
     QAction *actMapOpen;
     QAction *actMapSave;
+    QAction *actMapSaveAs;
+    QAction *actQuit;
     QAction *actAreaCopy;
+    QAction *actGraphCopy;
     QAction *actFloorDown;
     QAction *actFloorUp;
     QAction *actZoomOut;
@@ -162,6 +176,7 @@ private:
     QAction *actFloorDelete;
     QAction *actFloorMoveDown;
     QAction *actFloorMoveUp;
+    QAction *actFloorSetDefault;
     QAction *actPanelAreasMarking;
     QActionGroup *actgrpPanels;
     // QAction *actAboutQT;
@@ -200,6 +215,7 @@ private:
     QToolButton *btnFloorDelete;
     QToolButton *btnFloorMoveDown;
     QToolButton *btnFloorMoveUp;
+    QToolButton *btnFloorSetDefault;
     QListView *viewFloorsList;
 
     // Dock AreasMarking
@@ -217,6 +233,7 @@ private:
     QGraphicsPixmapItem *pImage;
 
     ///////////////////////////////Functions////////////////////////////////////
+    QList<QKeySequence> shortcuts(QKeySequence main, QKeySequence extra);
     void createActions();
     void createMenus();
     void createToolBars();
@@ -227,6 +244,7 @@ private:
     qreal displayPixPerM(qreal pix, qreal mm) const;
     void swapFloors(int x, int y);
     MapFloor::Mode getMode();
+    void mapSave(QString &fileName);
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(MainWindow::Elements)
