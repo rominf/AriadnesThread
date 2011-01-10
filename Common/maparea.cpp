@@ -6,10 +6,13 @@ quint32 MapArea::m_count = 0;
 MapArea::MapArea(const QPolygonF &polygon):
         QGraphicsPolygonItem(polygon)
 {
-    m_name = new QGraphicsTextItem(this);
-    m_description = "";
-    setBrush(QBrush(Qt::NoBrush));
     m_uin = ++m_count;
+    m_inscription = new QGraphicsTextItem(this);
+    m_number = "";
+    m_name = "";
+    m_description = "";
+//    updateTitle();
+    setBrush(QBrush(Qt::NoBrush));
 }
 
 MapArea::MapArea(const MapArea &area, const QString &before,
@@ -18,16 +21,19 @@ MapArea::MapArea(const MapArea &area, const QString &before,
 {
     setBrush(QBrush(Qt::NoBrush));
     m_uin = ++m_count;
-    m_name = new QGraphicsTextItem(this);
-    QString oldAreasName = area.m_name->toPlainText();
-    QString newAreasName;
-    if (oldAreasName.indexOf(before) == 0)
-        newAreasName = oldAreasName.replace(before, after);
+    m_inscription = new QGraphicsTextItem(this);
+    QString oldAreasNumber = area.m_number;
+    QString newAreasNumber;
+    if (oldAreasNumber.indexOf(before) == 0)
+        newAreasNumber = oldAreasNumber.replace(before, after);
     else
-        newAreasName = oldAreasName;
-    setName(newAreasName);
-    m_name->setVisible(area.m_name->isVisible());
+        newAreasNumber = oldAreasNumber;
+    m_number = newAreasNumber;
+    m_name = area.m_name;
     m_description = area.m_description;
+    m_isNumberVisible = area.m_isNumberVisible;
+    m_isNameVisible = area.m_isNameVisible;
+//    updateTitle();
     for (int i = 0; i != area.m_areas.size(); i++)
         addArea(new MapArea(*area.m_areas.at(i), before, after));
 }
@@ -46,8 +52,8 @@ QDataStream &operator<<(QDataStream &output, const MapArea &area)
     last = 0;
     for (int i = 0; i != area.m_doors.size(); i++)
         last += !area.m_doors.at(i)->isFinished();
-    output << area.m_uin << area.m_name->toPlainText()
-            << area.m_name->isVisible() << area.m_description << last;
+    output << area.m_uin << area.m_number << area.m_name << area.m_description
+            << area.m_inscription->toPlainText() << last;
     for (int i = 0; i != area.m_doors.size(); i++)
         if (!area.m_doors.at(i)->isFinished())
             output << *area.m_doors.at(i);
@@ -69,11 +75,11 @@ QDataStream &operator>>(QDataStream &input, MapArea &area)
     input >> list;
     QPolygonF polygon(list.toVector());
     area.setPolygon(polygon);
-    QString name;
-    bool nameVisible;
-    input >> area.m_uin >> name >> nameVisible >> area.m_description >> last;
-    area.setName(name);
-    area.m_name->setVisible(nameVisible);
+    QString inscription;
+    input >> area.m_uin >> area.m_number >> area.m_name >> area.m_description
+            >> inscription >> last;
+    area.setInscription(inscription);
+//    area.updateTitle();
     area.m_count = qMax(area.m_count, area.m_uin);
     for (int i = 0; i != last; i++)
     {
@@ -85,42 +91,45 @@ QDataStream &operator>>(QDataStream &input, MapArea &area)
     return input;
 }
 
+QString MapArea::number()
+{
+    return m_number;
+}
+
+void MapArea::setNumber(const QString &number)
+{
+    m_number = number;
+}
+
+//bool MapArea::isNumberVisible()
+//{
+//    return m_isNumberVisible;
+//}
+
+//void MapArea::setNumberVisible(bool show)
+//{
+//    m_isNumberVisible = show;
+//}
+
 QString MapArea::name()
 {
-    return m_name->toPlainText();
+    return m_name;
 }
 
 void MapArea::setName(const QString &name)
 {
-    QTextDocument *doc = new QTextDocument(name);
-    doc->setDefaultFont(QFont("Arial", cFontSize));
-    int fontSize = cFontSize;
-    while ((doc->size().width() > boundingRect().width()) |
-           (doc->size().height() > boundingRect().height()))
-    {
-        fontSize--;
-        doc->setDefaultFont(QFont("Arial", fontSize));
-    }
-    QTextOption alignment(Qt::AlignHCenter);
-    doc->setDefaultTextOption(alignment);
-    m_name->setDocument(doc);
-    m_name->setPos(boundingRect().center().x() - doc->size().width()/2,
-                   boundingRect().center().y() - doc->size().height()/2);
-//    m_name->setVisible(m_areas.isEmpty());
-//        QFontMetricsF fm(m_name->font());
-//        m_name->setPos(boundingRect().center().x() - fm.width(name)/2,
-//                       boundingRect().center().y() - fm.height()/2);
+    m_name = name;
 }
 
-void MapArea::setNameVisible(bool show)
-{
-    m_name->setVisible(show);
-}
+//bool MapArea::isNameVisible()
+//{
+//    return m_isNameVisible;
+//}
 
-bool MapArea::isNameVisible()
-{
-    return m_name->isVisible();
-}
+//void MapArea::setNameVisible(bool show)
+//{
+//    m_isNameVisible = show;
+//}
 
 QString MapArea::description()
 {
@@ -130,6 +139,32 @@ QString MapArea::description()
 void MapArea::setDescription(const QString &description)
 {
     m_description = description;
+}
+
+QString MapArea::inscription()
+{
+    return m_inscription->toPlainText();
+}
+
+void MapArea::setInscription(const QString &inscription)
+{
+    if (!boundingRect().isValid())    // If area is invalid
+        return;
+
+    QTextDocument *doc = new QTextDocument(inscription);
+    doc->setDefaultFont(QFont("Arial", cFontSize));
+    int fontSize = cFontSize;
+    qreal width = boundingRect().width();
+    qreal height = boundingRect().height();
+    while (((doc->size().width() > width) |
+            (doc->size().height() > height)) & (fontSize > 1))
+        doc->setDefaultFont(QFont("Arial", --fontSize));
+    doc->setTextWidth(doc->size().width());
+    QTextOption alignment(Qt::AlignHCenter);
+    doc->setDefaultTextOption(alignment);
+    m_inscription->setDocument(doc);
+    m_inscription->setPos(boundingRect().center().x() - doc->size().width()/2,
+                    boundingRect().center().y() - doc->size().height()/2);
 }
 
 MapArea* MapArea::parent()
@@ -156,8 +191,8 @@ MapArea* MapArea::parent()
 
 void MapArea::addArea(MapArea *area)
 {
-    if (isVisible() & m_areas.isEmpty())
-        setNameVisible(false);
+//    if (isVisible() & m_areas.isEmpty())
+//        setNameVisible(false);
     area->m_parent = this;
     m_areas.append(area);
     area->setZValue(zValue() + 2.0);
@@ -174,8 +209,8 @@ void MapArea::deleteArea(MapArea* area)
     if (i > -1)
         m_areas.remove(i);
     delete area;
-    if (m_areas.size() == 0)
-        setNameVisible(true);
+//    if (m_areas.size() == 0)
+//        setNameVisible(true);
 }
 
 int MapArea::areasNumber()
@@ -216,3 +251,12 @@ quint32 MapArea::uin()
 {
     return m_uin;
 }
+
+//void MapArea::updateTitle()
+//{
+
+////    m_name->setVisible(m_areas.isEmpty());
+////        QFontMetricsF fm(m_name->font());
+////        m_name->setPos(boundingRect().center().x() - fm.width(name)/2,
+////                       boundingRect().center().y() - fm.height()/2);
+//}

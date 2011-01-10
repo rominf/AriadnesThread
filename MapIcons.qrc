@@ -26,5 +26,6 @@
         <file alias="ZoomFit">Icons/ZoomFit.png</file>
         <file alias="ZoomIn">Icons/ZoomIn.png</file>
         <file alias="ZoomOut">Icons/ZoomOut.png</file>
+        <file alias="HandDrag">Icons/HandDrag.png</file>
     </qresource>
 </RCC>

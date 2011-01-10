@@ -13,12 +13,12 @@ MapFloor::MapFloor(const QRectF &sceneRect, QObject *parent) :
     m_border->setBrush(QBrush(Qt::white));
     m_border->setZValue(-2.0);
     m_base = 0;
-    addBase("");
+    addBase(MapBase::cFakeFileName);
     m_tempLine = 0;
     m_cursorCircle = new QGraphicsEllipseItem(
             -cCursorCircleR, -cCursorCircleR,
             2*cCursorCircleR, 2*cCursorCircleR, 0, this);
-    m_cursorCircle->setZValue(100500);  // ###increase 100500
+    m_cursorCircle->setZValue(100500);  // ### increase 100500
     m_cursorCircle->setPen(QPen(Qt::red));
     m_cursorCircle->setBrush(QBrush(Qt::NoBrush));
     m_cursorCircle->hide();
@@ -45,7 +45,8 @@ QDataStream &operator<<(QDataStream &output, const MapFloor &floor)
 {
     MapDoor::clearFinishedDoors();
     int last = floor.m_outlines.size();
-    output << floor.m_uin << floor.m_name << floor.m_base->fileName() << last;
+    output << floor.m_uin << floor.m_name << floor.m_base->fileName()
+            /*<< floor.m_base->isVisible()*/<< last;
     for (int i = 0; i != last; i++)
         output << *floor.m_outlines[i];
     last = floor.m_walls.size();
@@ -236,24 +237,8 @@ void MapFloor::mousePressEvent(QGraphicsSceneMouseEvent *event)
             break;
         }
         case DoorAdd:
-//            if (getPoint(event->scenePos(), Geometry::None, false) ==
-//                m_cursorCircle->pos())
-//            {
                 finalizeDoor();
                 break;
-//                cursorCircle->hide();
-//                outline->hide();
-//                if (itemAt(cursorCircle->pos())->type() == MapArea::Type)
-//                {
-//                    MapArea *area = qgraphicsitem_cast<MapArea *>(
-//                            itemAt(cursorCircle->pos()));
-//                    finalizeDoor(area,
-//                                 QLineF(cursorCircle->pos().x(),
-//                                        cursorCircle->pos().y() - 20,
-//                                        cursorCircle->pos().x(),
-//                                        cursorCircle->pos().y() + 20));
-//                }
-//            }
         case NodeAdd:
             emit addedNode(m_cursorCircle->pos(), m_uin);
             break;
@@ -263,8 +248,9 @@ void MapFloor::mousePressEvent(QGraphicsSceneMouseEvent *event)
             bool selectionIsNormal = false;
             if (item)
                 if (((item->type() == MapArea::Type) |
-                    (item->type() == MapDoor::Type) |
-                    (item->type() == GraphNode::Type)) &
+                     (item->type() == QGraphicsTextItem::Type) |
+                     (item->type() == MapDoor::Type) |
+                     (item->type() == GraphNode::Type)) &
                     ((m_mode == Idle) | (m_mode == Selection)))
                 {
                     selectionIsNormal = true;
@@ -272,7 +258,7 @@ void MapFloor::mousePressEvent(QGraphicsSceneMouseEvent *event)
                     setMode(Selection);
                 }
             if (!selectionIsNormal)
-                m_selection->clear();
+                setMode(Idle);
             break; // Ignore other :)
         }
         }
@@ -348,9 +334,6 @@ void MapFloor::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
             if (m_selection->item()->type() == MapArea::Type)
                 emit mouseDoubleClicked();
         break;
-//    case Planning:
-//        setMode(Marking);
-//        break;
     case AreaAdd:
         removeLastFromTempPolyline();
         finalizeArea();
@@ -436,8 +419,7 @@ void MapFloor::keyPressEvent(QKeyEvent *event)
         }
         break;
     case Qt::Key_Escape:
-        if ((m_mode == AreaAdd) | (m_mode == DoorAdd) |
-            (m_mode == WallAdd) | (m_mode == NodeAdd))
+        if ((m_mode >= AreaAdd) & (m_mode <= NodeAdd))
             setMode(Idle);
     default:
         break; // Ignore other :)
@@ -470,9 +452,14 @@ void MapFloor::setLastNode(GraphNode *node)
     m_lastNode = node;
 }
 
+bool MapFloor::isBaseExist()
+{
+    return (m_base != 0);
+}
+
 void MapFloor::addBase(QString fileName)
 {
-    if (!m_base)
+    if (!isBaseExist())
     {
 //        m_base = new MapBase(pixmap, sceneRect());
 //        QPixmap *p = new QPixmap();
@@ -488,6 +475,12 @@ void MapFloor::addBase(QString fileName)
     else
         m_base->setPixmap(fileName, sceneRect());
 }
+
+//bool MapFloor::isBaseVisible()
+//{
+//    if (!isBaseExist())
+//        return m_base->isVisible();
+//}
 
 void MapFloor::baseSetVisible(bool visible)
 {
@@ -587,6 +580,14 @@ QPointF MapFloor::getPoint(QPointF m, Geometry::Straight straight,
 
     if (items & miLines)
     {
+        for (int i = 0; i != m_tempPolyline.size(); i++)
+            Geometry::getPointFromLine(m, newPoint,m_tempPolyline.at(i)->line(),
+                                       straight, b, min);
+
+        for (int i = 0; i != m_lines.size(); i++)
+            Geometry::getPointFromLine(m, newPoint, *m_lines.at(i),
+                                       straight, b, min);
+
         if (m_isCrossLinesActive & (!m_tempPolyline.isEmpty()))
         {
             if (Geometry::getPointFromLine(
@@ -623,13 +624,9 @@ QPointF MapFloor::getPoint(QPointF m, Geometry::Straight straight,
                 }
         }
 
-        for (int i = 0; i != m_lines.size(); i++)
-            Geometry::getPointFromLine(m, newPoint,
-                                       *m_lines.at(i), straight, b, min);
-
-        for (int i = 0; i != m_walls.size(); i++)
-            Geometry::getPointFromLine(m, newPoint,
-                                       m_walls.at(i)->line(), straight, b, min);
+//        for (int i = 0; i != m_walls.size(); i++)
+//            Geometry::getPointFromLine(m, newPoint, m_walls.at(i)->line(),
+//                                       straight, b, min);
     }
 
     if (items & miNodes)
@@ -658,7 +655,7 @@ QLineF MapFloor::getLine(QLineF line, bool first, MagnetItems items,
     if (!(modifiers & Qt::CTRL) & !first)
         straight = Geometry::straighten(line);
     if (modifiers & Qt::ALT)
-        items = items & !miTops;
+        items = items & ~miTops;
     if (!(modifiers & Qt::SHIFT))
         line.setP2(getPoint(line.p2(), straight, items));
     return line;

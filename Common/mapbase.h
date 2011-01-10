@@ -12,6 +12,9 @@ class MapBase : public QGraphicsPixmapItem
 {
 public:
     MapBase(QString &fileName, QRectF sceneRect);
+
+    static const QString cFakeFileName;
+
     void setPixmap(QString &fileName, QRectF sceneRect);
     QString fileName() const;
 //    void setVisible(bool Visible);
@@ -22,7 +25,6 @@ public:
 
 private:
     QString m_fileName;
-    static const QString cFakeFileName;
 //    const qreal cResizingHandleWidth;
 //    QRectF *resizingHandle;
 //    bool resizingHandlePressed;

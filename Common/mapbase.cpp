@@ -1,6 +1,6 @@
 #include "mapbase.h"
 
-const QString MapBase::cFakeFileName = "/error/file/doesnt/exist";
+const QString MapBase::cFakeFileName = "/this/file/mustn't/exist";
 
 MapBase::MapBase(QString &fileName, QRectF sceneRect):
         QGraphicsPixmapItem()

@@ -30,12 +30,18 @@ public:
         ceIntersection,
         ceAreaExist
     };
+    QString number();
+    void setNumber(const QString &number);
+//    bool isNumberVisible();
+//    void setNumberVisible(bool show = true);
     QString name();
     void setName(const QString &name);
-    void setNameVisible(bool show = true);
-    bool isNameVisible();
+//    bool isNameVisible();
+//    void setNameVisible(bool show = true);
     QString description();
     void setDescription(const QString &description);
+    QString inscription();
+    void setInscription(const QString &inscription);
     MapArea* parent();
 //    void setParent(MapArea *parent);
     void addArea(MapArea *area);
@@ -50,7 +56,11 @@ public:
     quint32 uin();
 private:
     static const int cFontSize;
-    QGraphicsTextItem *m_name;
+    QGraphicsTextItem *m_inscription;
+    QString m_number;
+    bool m_isNumberVisible;
+    QString m_name;
+    bool m_isNameVisible;
     QString m_description;
     MapArea *m_parent;
     QVector<MapArea*> m_areas;
@@ -58,6 +68,8 @@ private:
     quint32 m_uin;
 
     static quint32 m_count; // Counter for making uins
+
+//    void updateTitle();
 };
 
 #endif // MAPAREA_H

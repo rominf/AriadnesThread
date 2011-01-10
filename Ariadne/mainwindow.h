@@ -90,6 +90,7 @@ private slots:
     void zoomOut();
     void zoomIn();
     void zoomFit();
+    void handDrag(bool checked);
     void addBase();
     void layerBaseSetVisible(bool visible);
     void layerGraphSetVisible(bool visible);
@@ -112,9 +113,13 @@ private slots:
     void viewFloorsListItemChanged(QModelIndex index);
     void mouseDoubleClicked();
     void panelAreasMarkingVisibilityChanged(bool visible);
+    void setAreaNumber();
     void setAreaName();
     void setAreaDescription();
-    void chkAreaNameVisibleStateChanged(int state);
+    void setAreaInscription();
+    void updateAreaInscription();
+//    void chkAreaNumberVisibleStateChanged(int state);
+//    void chkAreaNameVisibleStateChanged(int state);
     void about();                       // Show info about my fantastic program
 
 private:
@@ -122,7 +127,7 @@ private:
     static const qint32 cMagicNumber = 0xA246B56D;
     static const qreal cPixPerRealM = 10;
     static const qreal cZoom = 1.1;
-    static const int cDockWidth = 250;
+    static const int cDockWidth = 150;
     static const bool isExtraShortcutsEnabled = true;
     enum State
     {
@@ -137,6 +142,7 @@ private:
     int curFloor;
     quint32 defaultFloor;
     bool autoAreasRenaming;
+    bool isFirstAreasMarking;
 
     ///////////////////////////////Enums////////////////////////////////////////
 
@@ -161,6 +167,7 @@ private:
     QAction *actZoomOut;
     QAction *actZoomIn;
     QAction *actZoomFit;
+    QAction *actHandDrag;
     QAction *actAddBase;
     QAction *actLayerBase;
     QAction *actLayerGraph;
@@ -222,11 +229,19 @@ private:
     QDockWidget *dckwgtAreasMarking;
     QWidget *wgtAreasMarking;
     QVBoxLayout *vblAreasMarking;
+    QLabel *lblAreaNumber;
+    QLineEdit *ldtAreaNumber;
     QLabel *lblAreaName;
-    QPlainTextEdit *ptdtAreaName;
-    QCheckBox *chkAreaNameVisible;
+    QLineEdit *ldtAreaName;
     QLabel *lblAreaDescription;
     QPlainTextEdit *ptdtAreaDescription;
+    QPushButton *btnUpdateAreaInscription;
+    QLabel *lblAreaInscription;
+    QPlainTextEdit *ptdtAreaInscription;
+//    QGroupBox *grpbxFieldVisible;
+//    QVBoxLayout *vblFieldVisible;
+//    QCheckBox *chkAreaNumberVisible;
+//    QCheckBox *chkAreaNameVisible;
 
     // Graphics
     QGraphicsView *view;
@@ -239,6 +254,7 @@ private:
     void createToolBars();
     void createPanelFloorsManagement();
     void createPanelAreasMarking();
+    void blockAndFreePanelAreasMarking();
     void createGraphics();
     void setState(Elements elem, State visible, State enable);
     qreal displayPixPerM(qreal pix, qreal mm) const;

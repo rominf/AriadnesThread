@@ -111,7 +111,12 @@ void MainWindow::createActions()
     actZoomFit = new QAction(QIcon(":/ZoomFit"), tr("&Вместить"), this);
     connect(actZoomFit, SIGNAL(triggered()), SLOT(zoomFit()));
     actZoomFit->setShortcut(/*Qt::CTRL + */tr("*"));
-//    actZoomFit->setVisible(false);
+
+    actHandDrag = new QAction(QIcon(":/HandDrag"),
+                              tr("&Панорамирование"), this);
+    connect(actHandDrag, SIGNAL(triggered(bool)), SLOT(handDrag(bool)));
+    actHandDrag->setShortcuts(shortcuts(tr("Ctrl+H"), tr("H")));
+    actHandDrag->setCheckable(true);
 
     actAddBase = new QAction(QIcon(":/AddBase"),
                              tr("Добавить &подложку"), this);
@@ -279,6 +284,7 @@ void MainWindow::createToolBars()
     tbrView->addAction(actZoomIn);
     tbrView->addAction(actZoomFit);
     tbrView->addAction(actAddBase);
+    tbrView->addAction(actHandDrag);
     tbrView->addAction(actMagnetToExtensions);
 
     tbrLayers = addToolBar(tr("Слои"));
@@ -374,29 +380,92 @@ void MainWindow::createPanelAreasMarking()
 
     vblAreasMarking = new QVBoxLayout(wgtAreasMarking);
 
+    lblAreaNumber = new QLabel(tr("Номер: "));
+    vblAreasMarking->addWidget(lblAreaNumber);
+
+    ldtAreaNumber = new QLineEdit();
+    connect(ldtAreaNumber, SIGNAL(textChanged(QString)), SLOT(setAreaNumber()));
+    vblAreasMarking->addWidget(ldtAreaNumber);
+
     lblAreaName = new QLabel(tr("Название: "));
     vblAreasMarking->addWidget(lblAreaName);
 
-    ptdtAreaName = new QPlainTextEdit();
-    connect(ptdtAreaName, SIGNAL(textChanged()), SLOT(setAreaName()));
-    ptdtAreaName->setMaximumHeight(
-            (ptdtAreaName->fontMetrics().lineSpacing() +
-             ptdtAreaName->font().pointSize())*2);
-    ptdtAreaName->setMinimumWidth(cDockWidth);
-    vblAreasMarking->addWidget(ptdtAreaName);
-
-    chkAreaNameVisible = new QCheckBox(tr("Показывать название"));
-    connect(chkAreaNameVisible, SIGNAL(stateChanged(int)),
-            SLOT(chkAreaNameVisibleStateChanged(int)));
-    vblAreasMarking->addWidget(chkAreaNameVisible);
+    ldtAreaName = new QLineEdit();
+    connect(ldtAreaName, SIGNAL(textChanged(QString)), SLOT(setAreaName()));
+//    ldtAreaName->setMaximumHeight(
+//            (ptdtAreaName->fontMetrics().lineSpacing() +
+//             ptdtAreaName->font().pointSize())*2);
+//    // ### Must be rewrited
+//    ptdtAreaName->setMinimumWidth(cDockWidth);
+//    ptdtAreaName->setMinimumWidth(0);
+    vblAreasMarking->addWidget(ldtAreaName);
 
     lblAreaDescription = new QLabel(tr("Описание: "));
     vblAreasMarking->addWidget(lblAreaDescription);
 
-    ptdtAreaDescription = new QPlainTextEdit();
+    ptdtAreaDescription = new QPlainTextEdit("");
     connect(ptdtAreaDescription, SIGNAL(textChanged()),
             SLOT(setAreaDescription()));
     vblAreasMarking->addWidget(ptdtAreaDescription);
+
+    btnUpdateAreaInscription = new QPushButton(tr("Обновить надпись"));
+    connect(btnUpdateAreaInscription, SIGNAL(clicked()),
+            SLOT(updateAreaInscription()));
+    vblAreasMarking->addWidget(btnUpdateAreaInscription);
+
+    lblAreaInscription = new QLabel(tr("Надпись: "));
+    vblAreasMarking->addWidget(lblAreaInscription);
+
+    ptdtAreaInscription = new QPlainTextEdit("");
+    connect(ptdtAreaInscription, SIGNAL(textChanged()),
+            SLOT(setAreaInscription()));
+    vblAreasMarking->addWidget(ptdtAreaInscription);
+
+//    grpbxFieldVisible = new QGroupBox(tr("Показывать на плане: "));
+//    vblAreasMarking->addWidget(grpbxFieldVisible);
+
+//    vblFieldVisible = new QVBoxLayout(grpbxFieldVisible);
+
+//    chkAreaNumberVisible = new QCheckBox(tr("Номер"));
+//    connect(chkAreaNumberVisible, SIGNAL(stateChanged(int)),
+//            SLOT(chkAreaNumberVisibleStateChanged(int)));
+//    vblFieldVisible->addWidget(chkAreaNumberVisible);
+
+//    chkAreaNameVisible = new QCheckBox(tr("Название"));
+//    connect(chkAreaNameVisible, SIGNAL(stateChanged(int)),
+//            SLOT(chkAreaNameVisibleStateChanged(int)));
+//    vblFieldVisible->addWidget(chkAreaNameVisible);
+
+//    grpbxFieldVisible->setLayout(vblFieldVisible);
+}
+
+void MainWindow::blockAndFreePanelAreasMarking()
+{
+    setState(eAreasMarking, stSave, stFalse);
+    ldtAreaNumber->setText("");
+    ldtAreaName->setText("");
+    ptdtAreaDescription->setPlainText("");
+    ptdtAreaInscription->setPlainText("");
+//    chkAreaNumberVisible->setChecked(false);
+//    chkAreaNameVisible->setChecked(false);
+}
+
+void MainWindow::updateAreaInscription()
+{
+    QString number = ldtAreaNumber->text();
+    QString name = ldtAreaName->text();
+    QString description = ptdtAreaDescription->toPlainText();
+    QString inscription = "";
+    inscription += number;
+    if (!name.isEmpty())
+        if (!inscription.isEmpty())
+            inscription += "\n";
+    inscription += name;
+    if (!description.isEmpty())
+        if (!inscription.isEmpty())
+            inscription += "\n";
+    inscription += description;
+    ptdtAreaInscription->setPlainText(inscription);
 }
 
 void MainWindow::createGraphics()
@@ -455,6 +524,7 @@ void MainWindow::setState(Elements elem, State visible, State enable)
             actZoomIn->setVisible(visible);
             actZoomFit->setVisible(visible);
             actAddBase->setVisible(visible);
+            actHandDrag->setVisible(visible);
             actMagnetToExtensions->setVisible(visible);
 //            menuMode->menuAction()->setVisible(vs);
 
@@ -553,6 +623,7 @@ void MainWindow::setState(Elements elem, State visible, State enable)
             actZoomIn->setEnabled(enable);
             actZoomFit->setEnabled(enable);
             actAddBase->setEnabled(enable);
+            actHandDrag->setEnabled(enable);
             actMagnetToExtensions->setEnabled(enable);
 
 //            menu->menuAction()->setEnabled(vs);
@@ -618,11 +689,15 @@ void MainWindow::setState(Elements elem, State visible, State enable)
         if (elem & eFloorsManagement)
         {
             wgtFloorsManagement->setEnabled(enable);
+
+            actPanelFloorsManagement->setEnabled(enable);
             //        dckwgtFloorsManagement->setEnabled(en);
         }
         if (elem & eAreasMarking)
         {
             wgtAreasMarking->setEnabled(enable);
+
+            actPanelAreasMarking->setEnabled(enable);
             //        dckwgtAreasMarking->setEnabled(en);
             //        ptdtRoomName->setEnabled(en);
             //        ptdtRoomDescription->setEnabled(en);
@@ -719,6 +794,7 @@ void MainWindow::mapNew()
 
 void MainWindow::mapOpen()
 {
+    // ### Переспросить при открытии о сохранении
     QString str = QFileDialog::getOpenFileName(
             this, tr("Открытие здания"),
             openFileName, tr("Файл здания(*.bld)"));
@@ -905,6 +981,14 @@ void MainWindow::zoomFit()
     view->fitInView(view->sceneRect(), Qt::KeepAspectRatio);
 }
 
+void MainWindow::handDrag(bool checked)
+{
+    if (checked)
+        view->setDragMode(QGraphicsView::ScrollHandDrag);
+    else
+        view->setDragMode(QGraphicsView::NoDrag);
+}
+
 void MainWindow::addBase()
 {
     QString str = QFileDialog::getOpenFileName(
@@ -913,13 +997,18 @@ void MainWindow::addBase()
     if (!str.isNull())
     {
         map->floor(curFloor)->addBase(str);
-        actLayerBase->setChecked(true);
+        if (map->floor(curFloor)->isBaseExist())
+        {
+            actLayerBase->setChecked(true);
+            actLayerBase->setEnabled(true);
+        }
     }
 }
 
 void MainWindow::layerBaseSetVisible(bool visible)
 {
-    map->floor(curFloor)->baseSetVisible(visible);
+    for (int i = 0; i != map->floorsNumber(); i++)
+        map->floor(i)->baseSetVisible(visible);
 }
 
 void MainWindow::layerGraphSetVisible(bool visible)
@@ -1034,7 +1123,8 @@ void MainWindow::switchMode(MapFloor::Mode m)
     case MapFloor::Idle:
         setState(eFile | eEdit | eFloorsSwitching | eView | eLayers | eAdd |
                  eHelp | ePanels, stTrue, stTrue);
-        setState(eFloorsManagement | eAreasMarking, stSave, stTrue);
+        setState(eFloorsManagement, stSave, stTrue);
+        blockAndFreePanelAreasMarking();
         setCursor(Qt::ArrowCursor);
         break;
     case MapFloor::WallAdd:
@@ -1052,23 +1142,28 @@ void MainWindow::switchMode(MapFloor::Mode m)
         {
             bool selectionIsValid = false;
             if (map->floor(curFloor)->selectedItem() != 0)
-                if (map->floor(curFloor)->selectedItem()->type() == MapArea::Type)
+                if (map->floor(curFloor)->selectedItem()->type() ==
+                                                                MapArea::Type)
                 {
                     selectionIsValid = true;
+                    isFirstAreasMarking = false;
                     setState(eAreasMarking, stSave, stTrue);
                     MapArea *area = qgraphicsitem_cast<MapArea*>(
                             map->floor(curFloor)->selectedItem());
-                    ptdtAreaName->setPlainText(area->name());
-                    ptdtAreaName->selectAll();
-                    chkAreaNameVisible->setChecked(area->isNameVisible());
+                    ldtAreaNumber->setText(area->number());
+                    ldtAreaName->setText(area->name());
                     ptdtAreaDescription->setPlainText(area->description());
+                    ptdtAreaInscription->setPlainText(area->inscription());
+                    if (ldtAreaNumber->text().isEmpty() &
+                        ldtAreaName->text().isEmpty() &
+                        ptdtAreaDescription->toPlainText().isEmpty() &
+                        ptdtAreaInscription->toPlainText().isEmpty())
+                        isFirstAreasMarking = true;
+//                    chkAreaNumberVisible->setChecked(area->isNumberVisible());
+//                    chkAreaNameVisible->setChecked(area->isNameVisible());
                 }
             if (!selectionIsValid)
-            {
-                setState(eAreasMarking, stSave, stFalse);
-                ptdtAreaName->setPlainText("");
-                ptdtAreaDescription->setPlainText("");
-            }
+                blockAndFreePanelAreasMarking();
             break;
         }
     }
@@ -1165,6 +1260,20 @@ void MainWindow::panelAreasMarkingVisibilityChanged(bool visible)
     actPanelAreasMarking->setChecked(visible);
 }
 
+void MainWindow::setAreaNumber()
+{
+    if (map->floor(curFloor)->selectedItem() != 0)
+        if (map->floor(curFloor)->selectedItem()->type() == MapArea::Type)
+        {
+            MapArea *area = qgraphicsitem_cast<MapArea*>(
+                    map->floor(curFloor)->selectedItem());
+            area->setNumber(ldtAreaNumber->text());
+            if (isFirstAreasMarking)
+                updateAreaInscription();
+        }
+}
+
+
 void MainWindow::setAreaName()
 {
     if (map->floor(curFloor)->selectedItem() != 0)
@@ -1173,7 +1282,9 @@ void MainWindow::setAreaName()
 
             MapArea *area = qgraphicsitem_cast<MapArea*>(
                     map->floor(curFloor)->selectedItem());
-            area->setName(ptdtAreaName->document()->toPlainText());
+            area->setName(ldtAreaName->text());
+            if (isFirstAreasMarking)
+                updateAreaInscription();
         }
 }
 
@@ -1186,20 +1297,46 @@ void MainWindow::setAreaDescription()
                     map->floor(curFloor)->selectedItem());
             area->setDescription(
                     ptdtAreaDescription->document()->toPlainText());
+            if (isFirstAreasMarking)
+                updateAreaInscription();
         }
 }
 
-void MainWindow::chkAreaNameVisibleStateChanged(int state)
+void MainWindow::setAreaInscription()
 {
     if (map->floor(curFloor)->selectedItem() != 0)
         if (map->floor(curFloor)->selectedItem()->type() == MapArea::Type)
         {
-
             MapArea *area = qgraphicsitem_cast<MapArea*>(
                     map->floor(curFloor)->selectedItem());
-            area->setNameVisible(state == Qt::Checked);
+            area->setInscription(
+                    ptdtAreaInscription->document()->toPlainText());
         }
 }
+
+//void MainWindow::chkAreaNumberVisibleStateChanged(int state)
+//{
+//    if (map->floor(curFloor)->selectedItem() != 0)
+//        if (map->floor(curFloor)->selectedItem()->type() == MapArea::Type)
+//        {
+
+//        MapArea *area = qgraphicsitem_cast<MapArea*>(
+//                map->floor(curFloor)->selectedItem());
+//        area->setNumberVisible(state == Qt::Checked);
+//    }
+//}
+
+//void MainWindow::chkAreaNameVisibleStateChanged(int state)
+//{
+//    if (map->floor(curFloor)->selectedItem() != 0)
+//        if (map->floor(curFloor)->selectedItem()->type() == MapArea::Type)
+//        {
+
+//            MapArea *area = qgraphicsitem_cast<MapArea*>(
+//                    map->floor(curFloor)->selectedItem());
+//            area->setNameVisible(state == Qt::Checked);
+//        }
+//}
 
 void MainWindow::about()
 {
