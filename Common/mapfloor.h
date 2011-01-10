@@ -51,7 +51,9 @@ public:
     void setName(const QString &floorName);
     MapFloor::Mode mode();
     void setMode(Mode m);
+    bool isBaseExist();
     void addBase(QString fileName);
+//    bool isBaseVisible();
     void baseSetVisible(bool visible);
     MapArea* area(int i = 0);
     QAbstractGraphicsShapeItem* selectedItem();
