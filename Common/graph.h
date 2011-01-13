@@ -21,6 +21,10 @@ public:
     void copyFloor(quint32 fromUin, quint32 toUin);
     void setVisible(bool visible);
     void startAnew();
+    void way(QVector<GraphNode*> start, QVector<GraphNode*> finish);
+    void clearWay();
+    qreal djkstra(GraphNode *start, QVector<GraphNode*> *finish,
+                  qreal minWayLength);
 signals:
     void graphItemAdded(QGraphicsItem *item);
     void graphItemDeleted(QGraphicsItem *item);
@@ -28,8 +32,11 @@ signals:
 //    void graphNodesChanged(QVector<QPointF*> &nodes, int floor);
 private:
     QVector<GraphNode*> m_startNodes;
+    QVector<GraphNode*> m_way;
     GraphNode *m_lastNode;
+
     void setLastNode(GraphNode *node);
+    void paintWay(bool isActive = true);
 //    bool m_isFirstNode;
 //    QVector<QPointF*> m_nodesCoordinates;
 //    void nodesCoordinates();

@@ -4,6 +4,7 @@
 #include <qmath.h>
 #include <QGraphicsLineItem>
 #include "graphnode.h"
+#include "geometry.h"
 
 class GraphNode;
 class GraphArc : public QGraphicsLineItem
@@ -15,11 +16,15 @@ public:
     enum {Type = QGraphicsItem::UserType + 3};
     GraphNode *node1() const;
     GraphNode *node2() const;
+    bool contain(GraphNode *node) const;
+    int lenght() const;
     int type() const;
-    quint32 uin();
+    quint32 floorUin() const;
+    quint32 uin() const;
 private:
     GraphNode *m_node1;
     GraphNode *m_node2;
+    int m_lenght;
     quint32 m_uin;
 
     static quint32 m_count; // Counter for making uins

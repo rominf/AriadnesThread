@@ -55,6 +55,7 @@ public:
     void addBase(QString fileName);
 //    bool isBaseVisible();
     void baseSetVisible(bool visible);
+    void crossBaseSetVisible(bool visible);
     MapArea* area(int i = 0);
     QAbstractGraphicsShapeItem* selectedItem();
     virtual void addItem (QGraphicsItem *item);
@@ -69,6 +70,7 @@ public:
 signals:
     void modeChanged(MapFloor::Mode);
     void mouseDoubleClicked();
+    void mouseMiddleButtonClicked(QGraphicsItem *item);
     void addedNode(QPointF point, quint32 floor);
     void deletedNode(GraphNode *node);
     void graphStartedAnew();
@@ -96,6 +98,7 @@ private:
     QVector<QGraphicsLineItem*> m_walls;
     QVector<QGraphicsLineItem*> m_doors;
     MapBase *m_base;
+    QGraphicsRectItem *m_crossBase;
     bool m_isCrossLinesActive;
     MapSelection *m_selection;
     quint32 m_uin;

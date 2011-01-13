@@ -23,7 +23,7 @@ void MapSelection::addItem(QGraphicsItem *item)
 {
         if (!m_multiselection)
             clear();
-        QAbstractGraphicsShapeItem *shapeItem;
+        QAbstractGraphicsShapeItem *shapeItem = 0;
         if ((item->type() == MapArea::Type) | (item->type() == MapDoor::Type) |
             (item->type() == GraphNode::Type))
             shapeItem = qgraphicsitem_cast<QAbstractGraphicsShapeItem*>(item);

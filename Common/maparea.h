@@ -19,9 +19,9 @@ class MapArea : public QGraphicsPolygonItem
     friend QDataStream &operator>>(QDataStream &input, MapArea &area);
 
 public:
-    explicit MapArea(const QPolygonF &polygon);
-    explicit MapArea(const MapArea &area, const QString &before,
-                     const QString &after);
+    explicit MapArea(const QPolygonF &polygon, const quint32 floorUin);
+    explicit MapArea(const MapArea &area, const quint32 floorUin,
+                     const QString &before, const QString &after);
 
     enum {Type = QGraphicsItem::UserType + 1};
     enum CreateError
@@ -54,17 +54,19 @@ public:
     int doorsNumber();
     int type() const;
     quint32 uin();
+    quint32 floorUin();
 private:
     static const int cFontSize;
+    static const QString cFontFamily;
+
     QGraphicsTextItem *m_inscription;
     QString m_number;
-    bool m_isNumberVisible;
     QString m_name;
-    bool m_isNameVisible;
     QString m_description;
     MapArea *m_parent;
     QVector<MapArea*> m_areas;
     QVector<MapDoor*> m_doors;
+    quint32 m_floorUin;
     quint32 m_uin;
 
     static quint32 m_count; // Counter for making uins

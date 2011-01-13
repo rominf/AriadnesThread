@@ -11,6 +11,8 @@ public:
     Geometry();
 
     enum Straight {None, SaveX, SaveY};
+    static const qreal cMagnetDestToNode = 15.0;
+    static const qreal cMagnetDestToNodeLine = 10.0;
 
     static Straight straighten(QLineF &line);
     static qreal dest(QPointF m, QPointF n);

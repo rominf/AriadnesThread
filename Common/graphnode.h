@@ -22,9 +22,11 @@ public:
     quint32 floorUin();
     void addArc(GraphArc *arc);
     GraphArc* arc(int i) const;
+    GraphArc* arc(GraphNode *adjacent) const;
+    const QVector<GraphArc*> arcs() const;
     void deleteArc(GraphArc *arc);
     int arcsNumber();
-    GraphNode* adjacentNode(GraphArc *arc);
+    GraphNode* adjacentNode(GraphArc *arc) const;
     int type() const;
     quint32 uin();
 private:

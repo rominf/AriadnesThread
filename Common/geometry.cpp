@@ -71,7 +71,7 @@ bool Geometry::getPointFromLine(QPointF m, QPointF &newPoint, const QLineF &l,
                                 Straight straight, bool extension, qreal &min)
 {
     QPointF *p = new QPointF();
-    qreal d;
+    qreal d = INFINITY;
     if (l.x1() == l.x2())
         if (straight != SaveX)
         {
