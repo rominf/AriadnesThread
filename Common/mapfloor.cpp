@@ -13,6 +13,10 @@ MapFloor::MapFloor(const QRectF &sceneRect, QObject *parent) :
     m_border->setBrush(QBrush(Qt::white));
     m_border->setZValue(-2.0);
     m_base = 0;
+    m_crossBase = new QGraphicsRectItem(sceneRect, 0, this);
+    m_crossBase->setBrush(QBrush(Qt::NoBrush));
+    m_crossBase->setOpacity(0.5);
+    m_crossBase->setZValue(-1.0);
     addBase(MapBase::cFakeFileName);
     m_tempLine = 0;
     m_cursorCircle = new QGraphicsEllipseItem(
@@ -68,7 +72,7 @@ QDataStream &operator>>(QDataStream &input, MapFloor &floor)
     floor.addBase(baseFileName);
     for (int i = 0; i != last; i++)
     {
-        floor.m_outlines.append(new MapArea(0));
+        floor.m_outlines.append(new MapArea(0, floor.uin()));
         input >> *floor.m_outlines[i];
         floor.m_outlines[i]->setZValue(MapFloor::OutlineZValue);
         floor.addItem(floor.m_outlines[i]);
@@ -263,6 +267,16 @@ void MapFloor::mousePressEvent(QGraphicsSceneMouseEvent *event)
         }
         }
         break;
+    case Qt::MiddleButton:
+    {
+        QGraphicsItem *item = itemAt(event->scenePos());
+        if (item)
+        {
+            if (item->type() == QGraphicsTextItem::Type)
+                item = item->parentItem();
+            emit mouseMiddleButtonClicked(item);
+        }
+    }
     default:
         break;
     }
@@ -365,7 +379,8 @@ void MapFloor::keyPressEvent(QKeyEvent *event)
             {
                 int i = m_graphNodes.indexOf(m_lastNode->pos());
                 if (i > -1)
-                    m_graphNodes.remove(i);
+                    if (itemAt(m_lastNode->pos()) == m_lastNode)
+                        m_graphNodes.remove(i);
                 takeAwayGraphicsLineItem(m_tempLine);
                 emit deletedNode(m_lastNode);
             }
@@ -386,7 +401,8 @@ void MapFloor::keyPressEvent(QKeyEvent *event)
                 {
                     int i = m_graphNodes.indexOf(shapeItem->pos());
                     if (i > -1)
-                        m_graphNodes.remove(i);
+                        if (itemAt(shapeItem->pos()) == shapeItem)
+                            m_graphNodes.remove(i);
                     takeAwayGraphicsLineItem(m_tempLine);
                     emit deletedNode(qgraphicsitem_cast<GraphNode*>(shapeItem));
                     break;
@@ -487,6 +503,14 @@ void MapFloor::baseSetVisible(bool visible)
     m_base->setVisible(visible);
 }
 
+void MapFloor::crossBaseSetVisible(bool visible)
+{
+    if (visible)
+        m_crossBase->setBrush(QBrush(Qt::CrossPattern));
+    else
+        m_crossBase->setBrush(QBrush(Qt::NoBrush));
+}
+
 MapArea* MapFloor::area(int i)
 {
     return m_outlines[i];
@@ -580,9 +604,11 @@ QPointF MapFloor::getPoint(QPointF m, Geometry::Straight straight,
 
     if (items & miLines)
     {
-        for (int i = 0; i != m_tempPolyline.size(); i++)
-            Geometry::getPointFromLine(m, newPoint,m_tempPolyline.at(i)->line(),
-                                       straight, b, min);
+        if (!m_tempPolyline.isEmpty())
+            for (int i = 0; i != m_tempPolyline.size() - 1; i++)
+                Geometry::getPointFromLine(m, newPoint,
+                                           m_tempPolyline.at(i)->line(),
+                                           straight, b, min);
 
         for (int i = 0; i != m_lines.size(); i++)
             Geometry::getPointFromLine(m, newPoint, *m_lines.at(i),
@@ -631,14 +657,41 @@ QPointF MapFloor::getPoint(QPointF m, Geometry::Straight straight,
 
     if (items & miNodes)
     {
+        int nodeNum = -1;
+        qreal d = INFINITY;
         if ((straight == Geometry::None))
+        {
+            for (int i = 0; i != m_graphNodes.size(); i++)
+                if (Geometry::dest(m_graphNodes.at(i), m) < d)
+                {
+                    d = Geometry::dest(m_graphNodes.at(i), m);
+                    nodeNum = i;
+                }
+            if (d < Geometry::cMagnetDestToNode)
+                return m_graphNodes.at(nodeNum);
+        }
+        if (b)
+        {
+            d = INFINITY;
+            QPointF point;
             for (int i = 0; i != m_graphNodes.size(); i++)
             {
-                qreal d = Geometry::dest(m_graphNodes.at(i), m);
-                // WARNING! cMagnet...
-                if (d < 10.0)
-                    return m_graphNodes.at(i);
+                if (straight == Geometry::SaveY)
+                    if (qAbs(m_graphNodes.at(i).x() - m.x()) < d)
+                    {
+                        d = qAbs(m_graphNodes.at(i).x() - m.x());
+                        point = QPointF(m_graphNodes.at(i).x(), m.y());
+                    }
+                if (straight == Geometry::SaveX)
+                    if (qAbs(m_graphNodes.at(i).y() - m.y()) < d)
+                    {
+                        d = qAbs(m_graphNodes.at(i).y() - m.y());
+                        point = QPointF(m.x(), m_graphNodes.at(i).y());
+                    }
             }
+            if (d < Geometry::cMagnetDestToNode)
+                return point;
+        }
     }
 
     if (min == INFINITY)
@@ -709,8 +762,9 @@ MapArea::CreateError MapFloor::addArea(MapArea *area)
         QPolygonF intersection = pgn.intersected(areaPgn);
         if (!intersection.isEmpty())
         {
-            QPolygonF subtraction = areaPgn.subtracted(intersection);
-            if (subtraction.isEmpty())
+            QPolygonF subtraction1 = areaPgn.subtracted(intersection);
+            QPolygonF subtraction2 = intersection.subtracted(areaPgn);
+            if (subtraction1.isEmpty() & subtraction2.isEmpty())
             {
                 if (!pgn.subtracted(areaPgn).isEmpty())
                 {
@@ -782,11 +836,12 @@ void MapFloor::finalizeArea()
     if (m_tempPolyline.size() > 2)
     {
         QPolygonF polygon(convertLineVecToPolygon(m_tempPolyline));
-        MapArea *area = new MapArea(polygon);
+        MapArea *area = new MapArea(polygon, m_uin);
         switch (addArea(area))
         {
         case MapArea::ceNone:
             setMode(Idle);
+            setMode(AreaAdd);
             break;
         case MapArea::ceIntersection:
             QMessageBox::warning(0, tr("Ошибка при создании области"),
@@ -825,7 +880,10 @@ void MapFloor::finalizeDoor()
 {
     MapDoor *door = new MapDoor(m_cursorCircle->pos());
     if (addDoor(door))
+    {
         setMode(Idle);
+        setMode(DoorAdd);
+    }
 }
 
 void MapFloor::deleteDoor(MapDoor *door)

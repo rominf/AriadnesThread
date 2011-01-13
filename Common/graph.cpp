@@ -88,6 +88,7 @@ void Graph::addNode(QPointF point, quint32 floorUin)
 
     bool nodeIsCreated = false;
     GraphNode *node;
+
     GraphNode *n;
     QStack<GraphNode*> stk;
     QVector<GraphNode*> vec;
@@ -112,7 +113,7 @@ void Graph::addNode(QPointF point, quint32 floorUin)
                 nodeIsCreated = true;
                 break;
             }
-            for (int i = 0; i !=n->arcsNumber(); i++)
+            for (int i = 0; i != n->arcsNumber(); i++)
             {
                 GraphNode *next = n->adjacentNode(n->arc(i));
                 if (!vec.contains(next))
@@ -129,6 +130,44 @@ void Graph::addNode(QPointF point, quint32 floorUin)
     {
         node = new GraphNode(point, floorUin);
         emit graphItemAdded(node);
+
+        // Checking: is one of arc's contain this node
+        stk.clear();
+        vec.clear();
+        for (int i = 0; i < m_startNodes.size(); i++)
+        {
+            GraphNode *startNode = m_startNodes.at(i);
+            stk.push(startNode);
+            vec.append(startNode);
+            while (!stk.isEmpty())
+            {
+                n = stk.pop();
+                for (int i = 0; i != n->arcsNumber(); i++)
+                {
+                    GraphArc *arc = n->arc(i);
+                    if ((Geometry::contain(node->pos(), arc->line())) &
+                        (arc->floorUin() == floorUin) & !arc->contain(node))
+                    {
+                        GraphArc *arc1 = new GraphArc(arc->node1(), node);
+                        emit graphItemAdded(arc1);
+                        GraphArc *arc2 = new GraphArc(arc->node2(), node);
+                        emit graphItemAdded(arc2);
+                        delete arc;
+                    }
+                    else
+                    {
+                        GraphNode *next = n->adjacentNode(arc);
+                        if (!vec.contains(next))
+                        {
+                            stk.push(next);
+                            vec.append(next);
+                        }
+                    }
+                }
+            }
+        }
+
+
     }
     // Adding arc
     if (m_lastNode)
@@ -264,8 +303,118 @@ void Graph::startAnew()
     m_lastNode = 0;
 }
 
+void Graph::way(QVector<GraphNode*> start, QVector<GraphNode*> finish)
+{
+    qreal min = INFINITY;
+    for (int i = 0; i != start.size(); i++)
+        min = qMin(djkstra(start.at(i), &finish, min), min);
+    paintWay(true);
+}
+
+void Graph::clearWay()
+{
+    paintWay(false);
+}
+
+qreal Graph::djkstra(GraphNode *start, QVector<GraphNode*> *finish,
+                     qreal minWayLength)
+{
+    typedef GraphNode* pGraphNode;
+    QMap<pGraphNode, qreal> dist;
+    QMap<pGraphNode, pGraphNode> prev;
+    QSet<pGraphNode> visit;
+    dist.insert(start, 0);
+    GraphNode *min = start;
+    while (min)
+    {
+        // Finding non visited node, which have minimum dest
+        min = 0;
+        QMap<pGraphNode, qreal>::iterator it = dist.begin();
+        for (; it != dist.end(); ++it)
+            if (!visit.contains(it.key()))
+            {
+                if (min)
+                {
+                    if (it.value() < dist.value(min))
+                        min = it.key();
+                }
+                else
+                    min = it.key();
+            }
+
+        if (min)
+        {
+            visit.insert(min);
+            for (int i = 0; i != min->arcsNumber(); i++)
+            {
+                GraphNode *adjacent = min->adjacentNode(min->arc(i));
+                bool update = false;
+                if (dist.contains(adjacent))
+                {
+                    if (dist.value(min) + min->arc(i)->lenght() <
+                        dist.value(adjacent))
+                        update = true;
+                }
+                else
+                    update = true;
+                if (update)
+                {
+                    dist[adjacent] = dist.value(min) + min->arc(i)->lenght();
+                    prev[adjacent] = min;
+                }
+
+            }
+        }
+    }
+    min = finish->at(0);
+    for (int i = 0; i != finish->size(); i++)
+        if (dist.value(finish->at(i)) < dist.value(min))
+            min = finish->at(i);
+    if (dist.value(min) < minWayLength)
+    {
+        m_way.clear();
+        GraphNode *node = min;
+        while (node != start)
+        {
+            m_way.prepend(node);
+            node = prev.value(node);
+        }
+        m_way.prepend(start);
+    }
+    return dist.value(min);
+}
+
 void Graph::setLastNode(GraphNode *node)
 {
     m_lastNode = node;
     emit lastNodeChanged(m_lastNode);
+}
+
+void Graph::paintWay(bool isActive)
+{
+    Qt::GlobalColor colorNode;
+    Qt::GlobalColor colorArc;
+    if (isActive)
+        colorNode = colorArc = Qt::red;
+    else
+    {
+        colorNode = Qt::white;
+        colorArc = Qt::black;
+    }
+    for (int i = 0; i != m_way.size(); i++)
+    {
+        GraphNode *node = m_way.at(i);
+        node->setBrush(colorNode);
+        if (isActive & !node->isVisible())
+            node->setVisible(true);
+
+        if (i < m_way.size() - 1)
+        {
+            GraphArc *arc = node->arc(m_way.at(i+1));
+            arc->setPen(QPen(colorArc));
+            if (isActive & !arc->isVisible())
+                arc->setVisible(true);
+        }
+
+    }
 }

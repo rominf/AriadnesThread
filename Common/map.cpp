@@ -58,9 +58,10 @@ void Map::setLastNode(GraphNode *node)
     for (int i = 0; i != m_floors.size(); i++)
         m_floors.at(i)->setLastNode(0);
     if (node)
-        for (int i = 0; i != m_floors.size(); i++)
-            if (m_floors.at(i)->uin() == node->floorUin())
-                m_floors.at(i)->setLastNode(node);
+        floorByUin(node->floorUin())->setLastNode(node);
+//        for (int i = 0; i != m_floors.size(); i++)
+//            if (m_floors.at(i)->uin() == node->floorUin())
+//                m_floors.at(i)->setLastNode(node);
 }
 
 void Map::addGraphItem(QGraphicsItem *item)
@@ -69,21 +70,25 @@ void Map::addGraphItem(QGraphicsItem *item)
     {
         GraphArc *arc = qgraphicsitem_cast<GraphArc*>(item);
         if (arc->node1()->floorUin() == arc->node2()->floorUin())
-        {
-            for (int i = 0; i != m_floors.size(); i++)
-                if (m_floors.at(i)->uin() == arc->node1()->floorUin())
-                    m_floors.at(i)->addItem(arc);
-        }
+//        {
+            floorByUin(arc->node1()->floorUin())->addItem(arc);
+//            for (int i = 0; i != m_floors.size(); i++)
+//                if (m_floors.at(i)->uin() == )
+//                    m_floors.at(i);
+//        }
     }
     if (item->type() == GraphNode::Type)
     {
         GraphNode *node = qgraphicsitem_cast<GraphNode*>(item);
-        for (int i = 0; i != m_floors.size(); i++)
-            if (m_floors.at(i)->uin() == node->floorUin())
-            {
-                m_floors.at(i)->addItem(node);
-                m_floors.at(i)->addPointNodesMagnetTo(node->pos());
-            }
+        MapFloor *floor = floorByUin(node->floorUin());
+        floor->addItem(node);
+        floor->addPointNodesMagnetTo(node->pos());
+//        for (int i = 0; i != m_floors.size(); i++)
+//            if (m_floors.at(i)->uin() == node->floorUin())
+//            {
+//                m_floors.at(i)->addItem(node);
+//                m_floors.at(i)->addPointNodesMagnetTo(node->pos());
+//            }
 //        m_floors[node->floor()]->setLastNode(m_graph->lastNode());
     }
 }
@@ -152,6 +157,38 @@ qreal Map::convertRealMToPix(qreal r) const
     return r*m_pixPerRealM;
 }
 
+QVector<GraphNode*> Map::getNodesFromItem(QGraphicsItem *item)
+{
+    MapArea *area = 0;
+    QVector<MapDoor*> doors;
+    QVector<GraphNode*> nodes;
+    switch (item->type())
+    {
+    case MapArea::Type:
+        area = qgraphicsitem_cast<MapArea*>(item);
+        break;
+    case MapDoor::Type:
+        doors.append(qgraphicsitem_cast<MapDoor*>(item));
+        break;
+    case GraphNode::Type:
+        nodes.append(qgraphicsitem_cast<GraphNode*>(item));
+        break;
+    }
+    if (area)
+        for (int i = 0; i != area->doorsNumber(); i++)
+            doors.append(area->door(i));
+    for (int i = 0; i != doors.size(); i++)
+    {
+        quint32 floorUin = doors.at(i)->parentArea(0)->floorUin();
+        QGraphicsItem *itemAt =
+                floorByUin(floorUin)->itemAt(doors.at(i)->pos());
+        if (itemAt != 0)
+            if (itemAt->type() == GraphNode::Type)
+                nodes.append(qgraphicsitem_cast<GraphNode*>(itemAt));
+    }
+    return nodes;
+}
+
 int Map::floorsNumber()
 {
 //    if (!m_floors.isEmpty())
@@ -184,14 +221,56 @@ void Map::removeFloor(int i)
     m_floors.remove(i);
 }
 
-MapFloor* Map::floor(int i) const
+MapFloor* Map::floor(const int i) const
 {
     return m_floors.at(i);
+}
+
+MapFloor* Map::floorByUin(const quint32 uin) const
+{
+    for (int i = 0; i != m_floors.size(); i++)
+        if (m_floors.at(i)->uin() == uin)
+            return m_floors.at(i);
+    return 0;
 }
 
 Graph* Map::graph() const
 {
     return m_graph;
+}
+
+void Map::setStart(QGraphicsItem *item)
+{
+    QVector<GraphNode*> nodes = getNodesFromItem(item);
+    if (!nodes.isEmpty())
+        m_startNodes = nodes;
+//    if (item->type() == GraphNode::Type)
+//    {
+//        m_startNodes.clear();
+//        m_startNodes.append(qgraphicsitem_cast<GraphNode*>(item));
+//    }
+}
+
+void Map::setFinish(QGraphicsItem *item)
+{
+    QVector<GraphNode*> nodes = getNodesFromItem(item);
+    if (!nodes.isEmpty())
+        m_finishNodes = nodes;
+//    if (item->type() == GraphNode::Type)
+//    {
+//        m_finishNodes.clear();
+//        m_finishNodes.append(qgraphicsitem_cast<GraphNode*>(item));
+//    }
+}
+
+void Map::way()
+{
+    m_graph->way(m_startNodes, m_finishNodes);
+}
+
+void Map::clearWay()
+{
+    m_graph->clearWay();
 }
 
 //QVector<QPointF*> Map::graphNodesCoordinates()

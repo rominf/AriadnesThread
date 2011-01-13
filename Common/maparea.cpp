@@ -1,10 +1,11 @@
 #include "maparea.h"
 
 const int MapArea::cFontSize = 16;
+const QString MapArea::cFontFamily = "Arial";
 quint32 MapArea::m_count = 0;
 
-MapArea::MapArea(const QPolygonF &polygon):
-        QGraphicsPolygonItem(polygon)
+MapArea::MapArea(const QPolygonF &polygon, const quint32 floorUin):
+        QGraphicsPolygonItem(polygon), m_floorUin(floorUin)
 {
     m_uin = ++m_count;
     m_inscription = new QGraphicsTextItem(this);
@@ -15,9 +16,9 @@ MapArea::MapArea(const QPolygonF &polygon):
     setBrush(QBrush(Qt::NoBrush));
 }
 
-MapArea::MapArea(const MapArea &area, const QString &before,
-                 const QString &after):
-        QGraphicsPolygonItem(area.polygon())
+MapArea::MapArea(const MapArea &area, const quint32 floorUin,
+                 const QString &before, const QString &after):
+        QGraphicsPolygonItem(area.polygon()), m_floorUin(floorUin)
 {
     setBrush(QBrush(Qt::NoBrush));
     m_uin = ++m_count;
@@ -31,11 +32,10 @@ MapArea::MapArea(const MapArea &area, const QString &before,
     m_number = newAreasNumber;
     m_name = area.m_name;
     m_description = area.m_description;
-    m_isNumberVisible = area.m_isNumberVisible;
-    m_isNameVisible = area.m_isNameVisible;
+    setInscription(area.m_inscription->toPlainText());
 //    updateTitle();
     for (int i = 0; i != area.m_areas.size(); i++)
-        addArea(new MapArea(*area.m_areas.at(i), before, after));
+        addArea(new MapArea(*area.m_areas.at(i), floorUin, before, after));
 }
 
 QDataStream &operator<<(QDataStream &output, const MapArea &area)
@@ -67,7 +67,7 @@ QDataStream &operator>>(QDataStream &input, MapArea &area)
     input >> last;
     for (int i = 0; i != last; i++)
     {
-        MapArea *tempArea = new MapArea(0);
+        MapArea *tempArea = new MapArea(0, area.m_floorUin);
         area.addArea(tempArea);
         input >> *tempArea;
     }
@@ -152,13 +152,14 @@ void MapArea::setInscription(const QString &inscription)
         return;
 
     QTextDocument *doc = new QTextDocument(inscription);
-    doc->setDefaultFont(QFont("Arial", cFontSize));
+    doc->setDefaultFont(QFont(cFontFamily, cFontSize));
     int fontSize = cFontSize;
-    qreal width = boundingRect().width();
-    qreal height = boundingRect().height();
+    qreal width = polygon().boundingRect().width();
+    qreal height = polygon().boundingRect().height();
     while (((doc->size().width() > width) |
             (doc->size().height() > height)) & (fontSize > 1))
-        doc->setDefaultFont(QFont("Arial", --fontSize));
+        doc->setDefaultFont(QFont(cFontFamily, --fontSize));
+//    doc->setDefaultFont(QFont(cFontFamily, ++fontSize));
     doc->setTextWidth(doc->size().width());
     QTextOption alignment(Qt::AlignHCenter);
     doc->setDefaultTextOption(alignment);
@@ -250,6 +251,11 @@ int MapArea::type() const
 quint32 MapArea::uin()
 {
     return m_uin;
+}
+
+quint32 MapArea::floorUin()
+{
+    return m_floorUin;
 }
 
 //void MapArea::updateTitle()

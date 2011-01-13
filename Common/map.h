@@ -21,8 +21,13 @@ public:
     void insertFloor(int i);
     void swapFloors(int x, int y);
     void removeFloor(int i);
-    MapFloor* floor(int i) const;
+    MapFloor* floor(const int i) const;
+    MapFloor* floorByUin(const quint32 uin) const;
     Graph* graph() const;
+    void setStart(QGraphicsItem *item);
+    void setFinish(QGraphicsItem *item);
+    void way();
+    void clearWay();
 //    QVector<QPointF*> graphNodesCoordinates();
 
 //    void graphStartAnew();
@@ -45,7 +50,9 @@ private slots:
 private:
     Graph *m_graph;
     QVector<MapFloor*> m_floors;
-    MapSelection *m_copy;
+//    MapSelection *m_copy;
+    QVector<GraphNode*> m_startNodes;
+    QVector<GraphNode*> m_finishNodes;
 
     qreal m_pixPerRealM;
     qreal m_pixPerDisplayM;
@@ -57,6 +64,7 @@ private:
     qreal convertPixToRealM(qreal r) const;
     qreal convertDisplayMToPix(qreal r) const;
     qreal convertRealMToPix(qreal r) const;
+    QVector<GraphNode*> getNodesFromItem(QGraphicsItem *item);
 };
 
 #endif // MAP_H

@@ -11,6 +11,7 @@ GraphArc::GraphArc(GraphNode *node1, GraphNode *node2):
     node2->addArc(this);
 //    setPen(QPen(Qt::black));
     setZValue(100500 - 2);
+    m_lenght = Geometry::dest(m_node1->pos(), m_node2->pos());
     m_uin = ++m_count;
 }
 
@@ -30,12 +31,30 @@ GraphNode* GraphArc::node2() const
     return m_node2;
 }
 
+bool GraphArc::contain(GraphNode *node) const
+{
+    return (m_node1 == node) | (m_node2 == node);
+}
+
+int GraphArc::lenght() const
+{
+    return m_lenght;
+}
+
 int GraphArc::type() const
 {
     return Type;
 }
 
-quint32 GraphArc::uin()
+quint32 GraphArc::floorUin() const
+{
+    if (m_node1->floorUin() == m_node2->floorUin())
+        return m_node1->floorUin();
+    else
+        return 0;
+}
+
+quint32 GraphArc::uin() const
 {
     return m_uin;
 }

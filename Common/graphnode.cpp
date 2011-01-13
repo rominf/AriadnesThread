@@ -60,6 +60,19 @@ GraphArc* GraphNode::arc(int i) const
     return m_arcs.at(i);
 }
 
+GraphArc* GraphNode::arc(GraphNode *adjacent) const
+{
+    for (int i = 0; i != m_arcs.size(); i++)
+        if (adjacentNode(m_arcs.at(i)) == adjacent)
+            return m_arcs.at(i);
+    return 0;
+}
+
+const QVector<GraphArc*> GraphNode::arcs() const
+{
+    return m_arcs;
+}
+
 void GraphNode::deleteArc(GraphArc *arc)
 {
     int i = m_arcs.indexOf(arc);
@@ -72,7 +85,7 @@ int GraphNode::arcsNumber()
     return m_arcs.size();
 }
 
-GraphNode* GraphNode::adjacentNode(GraphArc *arc)
+GraphNode* GraphNode::adjacentNode(GraphArc *arc) const
 {
     if ((arc->node1() != this) & (arc->node2() == this))
         return arc->node1();
