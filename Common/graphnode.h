@@ -19,6 +19,13 @@ public:
     ~GraphNode();
 
     enum {Type = QGraphicsItem::UserType + 4};
+    static const QPen cPenNormal;
+    static const QPen cPenSelected;
+    static const QPen cPenWay;
+    static const QBrush cBrushNormal;
+    static const QBrush cBrushSelected;
+    static const QBrush cBrushWay;
+
     quint32 floorUin();
     void addArc(GraphArc *arc);
     GraphArc* arc(int i) const;

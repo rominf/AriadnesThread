@@ -479,8 +479,8 @@ void MainWindow::createPanelVerticals()
     vblVerticals->addLayout(hblVerticalsButtons);
 
     wgtVerticalsList = new QListWidget();
-    connect(wgtVerticalsList, SIGNAL(currentRowChanged(int)),
-            SLOT(wgtVerticalsListCurrenItemChanged(int)));
+    connect(wgtVerticalsList, SIGNAL(itemActivated(QListWidgetItem*)),
+            SLOT(wgtVerticalsListItemActivated(QListWidgetItem*)));
     connect(wgtVerticalsList, SIGNAL(itemChanged(QListWidgetItem*)),
             SLOT(wgtVerticalsListItemChanged(QListWidgetItem*)));
     vblVerticals->addWidget(wgtVerticalsList);
@@ -656,6 +656,7 @@ void MainWindow::createGraphics()
     }
     else
     {
+        wgtVerticalsList->clear();
         modelFloorsList->setStringList(QStringList());
         curFloor = 0;
 //        cbxFloorSelect->clear();
@@ -1566,6 +1567,8 @@ void MainWindow::viewFloorsListItemChanged(QModelIndex index)
 void MainWindow::panelVerticalsVisibilityChanged(bool visible)
 {
     actPanelVerticals->setChecked(visible);
+    if (!visible)
+        map->deselectVertical();
 }
 
 void MainWindow::verticalAdd()
@@ -1589,8 +1592,9 @@ void MainWindow::verticalSetPassage(bool b)
     map->setPassageVertical(wgtVerticalsList->currentRow(), b);
 }
 
-void MainWindow::wgtVerticalsListCurrenItemChanged(int i)
+void MainWindow::wgtVerticalsListItemActivated(QListWidgetItem *item)
 {
+    int i = wgtVerticalsList->row(item);
     actVerticalSetPassage->setChecked(map->passageVertical(i));
     map->selectVertical(i);
 }

@@ -6,7 +6,7 @@ MapVertical::MapVertical()
 
 QDataStream &operator<<(QDataStream &output, const MapVertical &vertical)
 {
-    output << vertical.m_passage;
+    output << vertical.m_name << vertical.m_passage;
     QMap<quint32, quint32>::const_iterator it = vertical.m_areas.begin();
     for (; it != vertical.m_areas.end(); ++it)
         output << it.key() << it.value();
@@ -17,7 +17,7 @@ QDataStream &operator<<(QDataStream &output, const MapVertical &vertical)
 QDataStream &operator>>(QDataStream &input, MapVertical &vertical)
 {
     quint32 floorUin, uin;
-    input >> vertical.m_passage >> floorUin >> uin;
+    input >> vertical.m_name >> vertical.m_passage >> floorUin >> uin;
     while (floorUin != 0)
     {
         vertical.m_areas[floorUin] = uin;
@@ -30,6 +30,11 @@ QDataStream &operator>>(QDataStream &input, MapVertical &vertical)
 void MapVertical::addArea(quint32 floorUin, quint32 areaUin)
 {
     m_areas[floorUin] = areaUin;
+}
+
+void MapVertical::deleteArea(quint32 floorUin)
+{
+    m_areas.remove(floorUin);
 }
 
 quint32 MapVertical::area(const quint32 floorUin) const

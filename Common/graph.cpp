@@ -308,7 +308,13 @@ void Graph::way(QVector<GraphNode*> start, QVector<GraphNode*> finish)
     qreal min = INFINITY;
     for (int i = 0; i != start.size(); i++)
         min = qMin(djkstra(start.at(i), &finish, min), min);
-    paintWay(true);
+    if (!m_way.isEmpty())
+        paintWay(true);
+    else
+        QMessageBox::information(0, tr("Нахождение пути"),
+                                 tr("Путь между заданными объектами не найден."
+                                    "\nВершины графа, относящиеся к объектам, "
+                                    "лежат в разных компонентах связности."));
 }
 
 void Graph::clearWay()
@@ -366,22 +372,36 @@ qreal Graph::djkstra(GraphNode *start, QVector<GraphNode*> *finish,
             }
         }
     }
-    min = finish->at(0);
+    min = 0;
     for (int i = 0; i != finish->size(); i++)
-        if (dist.value(finish->at(i)) < dist.value(min))
-            min = finish->at(i);
-    if (dist.value(min) < minWayLength)
-    {
-        m_way.clear();
-        GraphNode *node = min;
-        while (node != start)
+        if (dist.contains(finish->at(i)))
         {
-            m_way.prepend(node);
-            node = prev.value(node);
+            if (min != 0)
+            {
+                if (dist.value(finish->at(i)) < dist.value(min))
+                    min = finish->at(i);
+            }
+            else
+                min = finish->at(i);
         }
-        m_way.prepend(start);
+
+    if (min != 0)
+    {
+        if (dist.value(min) < minWayLength)
+        {
+            m_way.clear();
+            GraphNode *node = min;
+            while (node != start)
+            {
+                m_way.prepend(node);
+                node = prev.value(node);
+            }
+            m_way.prepend(start);
+        }
+        return dist.value(min);
     }
-    return dist.value(min);
+    else
+        return INFINITY;
 }
 
 void Graph::setLastNode(GraphNode *node)
@@ -395,7 +415,7 @@ void Graph::paintWay(bool isActive)
     Qt::GlobalColor colorNode;
     Qt::GlobalColor colorArc;
     if (isActive)
-        colorNode = colorArc = Qt::red;
+        colorNode = colorArc = Qt::green;
     else
     {
         colorNode = Qt::white;
@@ -404,16 +424,30 @@ void Graph::paintWay(bool isActive)
     for (int i = 0; i != m_way.size(); i++)
     {
         GraphNode *node = m_way.at(i);
-        node->setBrush(colorNode);
-        if (isActive & !node->isVisible())
-            node->setVisible(true);
+        if (node)
+        {
+            if (isActive)
+            {
+                node->setBrush(GraphNode::cBrushWay);
+                node->setVisible(true);
+            }
+            else
+                node->setBrush(GraphNode::cBrushNormal);
+        }
 
         if (i < m_way.size() - 1)
         {
             GraphArc *arc = node->arc(m_way.at(i+1));
-            arc->setPen(QPen(colorArc));
-            if (isActive & !arc->isVisible())
-                arc->setVisible(true);
+            if (arc)
+            {
+                if (isActive)
+                {
+                    arc->setPen(GraphArc::cPenWay);
+                    arc->setVisible(true);
+                }
+                else
+                    arc->setPen(GraphArc::cPenNormal);
+            }
         }
 
     }

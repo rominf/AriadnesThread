@@ -12,6 +12,7 @@ class MapVertical
 public:
     MapVertical();
     void addArea(quint32 floorUin, quint32 areaUin);
+    void deleteArea(quint32 floorUin);
     quint32 area(const quint32 floorUin) const;
     void setName(const QString &name);
     QString name() const;

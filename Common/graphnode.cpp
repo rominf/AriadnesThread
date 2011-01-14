@@ -2,12 +2,22 @@
 
 const qreal GraphNode::cCircleR = 4.0;
 quint32 GraphNode::m_count = 0;
+const QPen GraphNode::cPenNormal = QPen(Qt::black);
+const QPen GraphNode::cPenSelected = QPen(QBrush(Qt::black), 2);
+const QPen GraphNode::cPenWay = QPen(Qt::black);
+const QBrush GraphNode::cBrushNormal = QBrush(Qt::blue);
+const QBrush GraphNode::cBrushSelected =
+        QBrush(QColor::fromRgb(255, 250, 205, 255));
+const QBrush GraphNode::cBrushWay = QBrush(Qt::darkGreen);
+
 
 GraphNode::GraphNode():
         QGraphicsEllipseItem(-cCircleR, -cCircleR, 2*cCircleR, 2*cCircleR)
 {
-    setBrush(QBrush(Qt::white));
+    setBrush(cBrushNormal);
+    setPen(cPenNormal);
     setZValue(100500 - 1);
+    m_uin = ++m_count;
 }
 
 GraphNode::GraphNode(const QPointF &point, quint32 floor):
@@ -15,7 +25,8 @@ GraphNode::GraphNode(const QPointF &point, quint32 floor):
         m_floor(floor)
 {
     setPos(point);
-    setBrush(QBrush(Qt::white));
+    setBrush(cBrushNormal);
+    setPen(cPenNormal);
     setZValue(100500 - 1);
     m_uin = ++m_count;
 }
