@@ -20,6 +20,7 @@ public:
     void addParentArea(MapArea *area);
     MapArea* parentArea(int i);
     int parentAreasNumber();
+    quint32 floorUin();
     QSet<quint32> parentAreasUins();
     bool isFinished() const;
     static void clearFinishedDoors();

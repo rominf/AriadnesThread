@@ -258,6 +258,8 @@ void MapFloor::mousePressEvent(QGraphicsSceneMouseEvent *event)
                     ((m_mode == Idle) | (m_mode == Selection)))
                 {
                     selectionIsNormal = true;
+                    if (item->type() == MapArea::Type)
+                        emit areaActivated(qgraphicsitem_cast<MapArea*>(item));
                     m_selection->addItem(item);
                     setMode(Selection);
                 }
@@ -514,6 +516,28 @@ void MapFloor::crossBaseSetVisible(bool visible)
 MapArea* MapFloor::area(int i)
 {
     return m_outlines[i];
+}
+
+MapArea* MapFloor::areaByUin(quint32 uin)
+{
+    MapArea *a;
+    QStack<MapArea*> stk;
+    for (int i = 0; i != m_outlines.size(); i++)
+        stk.push(m_outlines[i]);
+    while (!stk.isEmpty())
+    {
+        a = stk.pop();
+        if (a->uin() == uin)
+            return a;
+        for (int i = 0; i != a->areasNumber(); i++)
+            stk.push(a->area(i));
+    }
+    return 0;
+}
+
+void MapFloor::selectArea(quint32 area)
+{
+    m_selection->addItem(areaByUin(area));
 }
 
 QAbstractGraphicsShapeItem* MapFloor::selectedItem()

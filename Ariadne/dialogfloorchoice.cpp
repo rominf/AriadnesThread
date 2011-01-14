@@ -1,14 +1,17 @@
 #include "dialogfloorchoice.h"
 
 DialogFloorChoice::DialogFloorChoice(QWidget *parent, QStringListModel *floors,
-                                     QString labelText):
+                                     int floorSelected, QString labelText):
     QDialog(parent), m_floors(floors)
 {
     vblMain = new QVBoxLayout(this);
     m_label = new QLabel(labelText);
     vblMain->addWidget(m_label);
     m_cbxFloorChoice = new QComboBox();
+    m_cbxFloorChoice->setEditable(true);
+    m_cbxFloorChoice->setInsertPolicy(QComboBox::NoInsert);
     m_cbxFloorChoice->setModel(floors);
+    m_cbxFloorChoice->setCurrentIndex(floorSelected);
     vblMain->addWidget(m_cbxFloorChoice);
 
     hblButtons = new QHBoxLayout();

@@ -11,7 +11,10 @@ GraphArc::GraphArc(GraphNode *node1, GraphNode *node2):
     node2->addArc(this);
 //    setPen(QPen(Qt::black));
     setZValue(100500 - 2);
-    m_lenght = Geometry::dest(m_node1->pos(), m_node2->pos());
+    if (floorUin() != 0)    // If arc isn't between floors
+        m_lenght = Geometry::dest(m_node1->pos(), m_node2->pos());
+    else
+        m_lenght = 0;
     m_uin = ++m_count;
 }
 
