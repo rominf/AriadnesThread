@@ -66,6 +66,11 @@ int MapDoor::parentAreasNumber()
     return m_parentAreas.size();
 }
 
+quint32 MapDoor::floorUin()
+{
+    return m_parentAreas.at(0)->floorUin();
+}
+
 QSet<quint32> MapDoor::parentAreasUins()
 {
 //    QSet<quint32> uins;

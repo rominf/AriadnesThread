@@ -25,6 +25,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QListView>
+#include <QListWidget>
 #include <QMainWindow>
 #include <QMenu>
 #include <QMenu>
@@ -56,7 +57,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 //friend QDataStream & operator<<(QDataStream & output, const Map &map);
 public:
-    MainWindow(QWidget *parent = 0);
+    MainWindow(/*bool isAriadna = true, */QWidget *parent = 0);
     ~MainWindow();
     enum Element
     {
@@ -69,7 +70,9 @@ public:
         eFloorsSwitching = 64,
         ePanels = 128,
         eFloorsManagement = 256,
-        eAreasMarking = 512
+        eVerticals = 512,
+        eAreasMarking =1024,
+        eWay = 2048
     };
     Q_DECLARE_FLAGS(Elements, Element)
 //    const QStringListModel* modelFloorsList() const;
@@ -85,14 +88,17 @@ private slots:
     void exit();                        // Exit program
     void areaCopy();                    // Copy area to another floor
     void graphCopy();                   // Copy graph to another floor
+    void floorLower();
     void floorDown();                   // Set visible lower floor
     void floorUp();                     // Set visible higher floor
+    void floorUpper();
     void zoomOut();
     void zoomIn();
     void zoomFit();
     void handDrag(bool checked);
     void addBase();
     void layerBaseSetVisible(bool visible);
+    void layerCrossBaseSetVisible(bool visible);
     void layerGraphSetVisible(bool visible);
     void magnetToExtensions(bool b);
 //    void floorNameChange(const QString &); // Set current floor name
@@ -103,6 +109,7 @@ private slots:
     void actgrpPanelsTriggered(QAction *);    // Link between actgrpMode & switchMode
     void switchMode(MapFloor::Mode m);  // Apply app to proper mode
     void setActiveFloor(int i);         // Change visible floor
+
     void panelFloorsManagementVisibilityChanged(bool visible);
     void floorAdd();                    // Adding floor
     void floorDelete();
@@ -112,12 +119,26 @@ private slots:
     void viewFloorsListItemActivated(QModelIndex index);
     void viewFloorsListItemChanged(QModelIndex index);
     void mouseDoubleClicked();
+    void mouseMiddleButtonClicked(QGraphicsItem *item);
+
+    void panelVerticalsVisibilityChanged(bool visible);
+    void verticalAdd();
+    void verticalDelete();
+    void verticalSetPassage(bool b);
+    void wgtVerticalsListCurrenItemChanged(int i);
+    void wgtVerticalsListItemChanged(QListWidgetItem * item);
+
     void panelAreasMarkingVisibilityChanged(bool visible);
     void setAreaNumber();
     void setAreaName();
     void setAreaDescription();
     void setAreaInscription();
     void updateAreaInscription();
+
+    void panelWayVisibilityChanged(bool visible);
+    void setStart();
+    void setFinish();
+    void way();
 //    void chkAreaNumberVisibleStateChanged(int state);
 //    void chkAreaNameVisibleStateChanged(int state);
     void about();                       // Show info about my fantastic program
@@ -137,12 +158,13 @@ private:
     };
 
     ///////////////////////////////Variables////////////////////////////////////
+//    bool m_isAriadna;
     QString openFileName;
     MapFloor::Mode mode;
     int curFloor;
     quint32 defaultFloor;
     bool autoAreasRenaming;
-    bool isFirstAreasMarking;
+//    bool isFirstAreasMarking;
 
     ///////////////////////////////Enums////////////////////////////////////////
 
@@ -162,14 +184,17 @@ private:
     QAction *actQuit;
     QAction *actAreaCopy;
     QAction *actGraphCopy;
+    QAction *actFloorLower;
     QAction *actFloorDown;
     QAction *actFloorUp;
+    QAction *actFloorUpper;
     QAction *actZoomOut;
     QAction *actZoomIn;
     QAction *actZoomFit;
     QAction *actHandDrag;
     QAction *actAddBase;
     QAction *actLayerBase;
+    QAction *actLayerCrossBase;
     QAction *actLayerGraph;
     QAction *actMagnetToExtensions;
     QAction *actAddWall;
@@ -184,7 +209,19 @@ private:
     QAction *actFloorMoveDown;
     QAction *actFloorMoveUp;
     QAction *actFloorSetDefault;
+
+    QAction *actPanelVerticals;
+    QAction *actVerticalAdd;
+    QAction *actVerticalDelete;
+    QAction *actVerticalSetPassage;
+
     QAction *actPanelAreasMarking;
+
+    QAction *actPanelWay;
+    QAction *actSetStart;
+    QAction *actSetFinish;
+    QAction *actWay;
+
     QActionGroup *actgrpPanels;
     // QAction *actAboutQT;
 
@@ -225,6 +262,21 @@ private:
     QToolButton *btnFloorSetDefault;
     QListView *viewFloorsList;
 
+    // Dock Verticals
+    QDockWidget *dckwgtVerticals;
+    QWidget *wgtVerticals;
+    QVBoxLayout *vblVerticals;
+    QHBoxLayout *hblVerticalsButtons;
+    QToolButton *btnVerticalAdd;
+    QToolButton *btnVerticalDelete;
+    QToolButton *btnVerticalSetPassage;
+    QListWidget *wgtVerticalsList;
+//    QListView *viewFloorsList;
+//    QToolButton *btnFloorMoveDown;
+//    QToolButton *btnFloorMoveUp;
+//    QToolButton *btnFloorSetDefault;
+
+
     // Dock AreasMarking
     QDockWidget *dckwgtAreasMarking;
     QWidget *wgtAreasMarking;
@@ -243,6 +295,14 @@ private:
 //    QCheckBox *chkAreaNumberVisible;
 //    QCheckBox *chkAreaNameVisible;
 
+    // Dock Way
+    QDockWidget *dckwgtWay;
+    QWidget *wgtWay;
+    QVBoxLayout *vblWay;
+    QToolButton *btnSetStart;
+    QToolButton *btnSetFinish;
+    QToolButton *btnWay;
+
     // Graphics
     QGraphicsView *view;
     QGraphicsPixmapItem *pImage;
@@ -253,7 +313,9 @@ private:
     void createMenus();
     void createToolBars();
     void createPanelFloorsManagement();
+    void createPanelVerticals();
     void createPanelAreasMarking();
+    void createPanelWay();
     void blockAndFreePanelAreasMarking();
     void createGraphics();
     void setState(Elements elem, State visible, State enable);

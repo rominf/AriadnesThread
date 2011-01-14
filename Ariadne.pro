@@ -13,7 +13,8 @@ HEADERS += \
     Common/grapharc.h \
     Common/graph.h \
     Common/graphnode.h \
-    Ariadne/dialogfloorchoice.h
+    Ariadne/dialogfloorchoice.h \
+    Common/mapvertical.h
 
 SOURCES += \
     Common/map.cpp \
@@ -29,7 +30,8 @@ SOURCES += \
     Common/grapharc.cpp \
     Common/graph.cpp \
     Common/graphnode.cpp \
-    Ariadne/dialogfloorchoice.cpp
+    Ariadne/dialogfloorchoice.cpp \
+    Common/mapvertical.cpp
 
 RESOURCES += \
     MapIcons.qrc

@@ -8,9 +8,9 @@
         <file alias="AppIcon">Icons/AppIcon.png</file>
         <file alias="AreaCopy">Icons/AreaCopy.png</file>
         <file alias="AreasMarking">Icons/AreasMarking.png</file>
-        <file alias="FloorAdd">Icons/FloorAdd.png</file>
+        <file alias="Add">Icons/Add.png</file>
         <file alias="FloorDefault">Icons/FloorDefault.png</file>
-        <file alias="FloorDelete">Icons/FloorDelete.png</file>
+        <file alias="Delete">Icons/Delete.png</file>
         <file alias="FloorDown">Icons/FloorDown.png</file>
         <file alias="FloorsManagement">Icons/FloorsManagement.png</file>
         <file alias="FloorUp">Icons/FloorUp.png</file>
@@ -27,5 +27,14 @@
         <file alias="ZoomIn">Icons/ZoomIn.png</file>
         <file alias="ZoomOut">Icons/ZoomOut.png</file>
         <file alias="HandDrag">Icons/HandDrag.png</file>
+        <file alias="FloorLower">Icons/FloorLower.png</file>
+        <file alias="FloorUpper">Icons/FloorUpper.png</file>
+        <file alias="LayerCrossBase">Icons/LayerCrossBase.png</file>
+        <file alias="Ariadne">Icons/Ariadne.png</file>
+        <file alias="SetFinish">Icons/SetFinish.png</file>
+        <file alias="SetStart">Icons/SetStart.png</file>
+        <file alias="Way">Icons/Way.png</file>
+        <file alias="Verticals">Icons/Verticals.png</file>
+        <file alias="SetPassage">Icons/SetPassage.png</file>
     </qresource>
 </RCC>

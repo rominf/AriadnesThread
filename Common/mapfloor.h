@@ -56,7 +56,9 @@ public:
 //    bool isBaseVisible();
     void baseSetVisible(bool visible);
     void crossBaseSetVisible(bool visible);
-    MapArea* area(int i = 0);
+    MapArea* area(int i);
+    MapArea* areaByUin(quint32 uin);
+    void selectArea(quint32 area);
     QAbstractGraphicsShapeItem* selectedItem();
     virtual void addItem (QGraphicsItem *item);
     MapArea::CreateError addArea(MapArea *area);
@@ -71,6 +73,7 @@ signals:
     void modeChanged(MapFloor::Mode);
     void mouseDoubleClicked();
     void mouseMiddleButtonClicked(QGraphicsItem *item);
+    void areaActivated(MapArea *area);
     void addedNode(QPointF point, quint32 floor);
     void deletedNode(GraphNode *node);
     void graphStartedAnew();

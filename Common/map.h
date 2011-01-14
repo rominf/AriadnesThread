@@ -6,6 +6,7 @@
 #include "graph.h"
 #include "graphnode.h"
 #include "mapfloor.h"
+#include "mapvertical.h"
 
 class Map : public QObject
 {
@@ -23,6 +24,15 @@ public:
     void removeFloor(int i);
     MapFloor* floor(const int i) const;
     MapFloor* floorByUin(const quint32 uin) const;
+    void addVertical();
+    void deleteVertical(const int vertNum);
+    int verticalsNumber();
+    MapVertical* vertical(const int vertNum) const;
+    void setNameVertical(const int vertNum, const QString &name);
+    void setPassageVertical(const int vertNum, const bool b);
+    bool passageVertical(const int vertNum) const;
+    void selectVertical(const int vertNum);
+    void deselectVertical();
     Graph* graph() const;
     void setStart(QGraphicsItem *item);
     void setFinish(QGraphicsItem *item);
@@ -39,6 +49,7 @@ public slots:
     void graphStartAnew();
 
 private slots:
+    void areaActivated(MapArea *area);
     void addNode(QPointF point, quint32 floorUin);
     void deleteNode(GraphNode *node);
     void setLastNode(GraphNode *node);
@@ -50,6 +61,8 @@ private slots:
 private:
     Graph *m_graph;
     QVector<MapFloor*> m_floors;
+    QVector<MapVertical*> m_verticals;
+    int m_selectedVertical;
 //    MapSelection *m_copy;
     QVector<GraphNode*> m_startNodes;
     QVector<GraphNode*> m_finishNodes;

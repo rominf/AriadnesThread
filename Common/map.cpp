@@ -8,7 +8,7 @@ m_pixSizeX(mapPixSizeX), m_pixSizeY(mapPixSizeY)
 {
     // Count map geometry
     m_realMPerDisplayM = m_pixPerDisplayM / m_pixPerRealM;
-
+    m_selectedVertical = -1;
     m_graph = new Graph();
     connect(m_graph, SIGNAL(graphItemAdded(QGraphicsItem*)),
             SLOT(addGraphItem(QGraphicsItem*)));
@@ -26,6 +26,10 @@ QDataStream & operator<<(QDataStream &output, const Map &map)
     output << map.m_pixSizeX << map.m_pixSizeY << map.m_pixPerRealM << last;
     for (int i = 0; i != last; i++)
         output << *map.m_floors.at(i);
+    last = map.m_verticals.size();
+    output << last;
+    for (int i = 0; i != last; i++)
+        output << *map.m_verticals.at(i);
     output << *map.m_graph;
     return output;
 }
@@ -39,8 +43,57 @@ QDataStream & operator>>(QDataStream &input, Map &map)
         map.insertFloor(i);
         input >> *map.m_floors[i];
     }
+    input >> last;
+    for (int i = 0; i != last; i++)
+    {
+        MapVertical *vertical = new MapVertical();
+        input >> *vertical;
+        map.m_verticals.append(vertical);
+    }
     input >> *map.m_graph;
     return input;
+}
+
+void Map::areaActivated(MapArea *area)
+{
+    if (m_selectedVertical > -1)
+    {
+        m_verticals.at(m_selectedVertical)->addArea(
+                area->floorUin(), area->uin());
+        MapVertical *vertical = m_verticals.at(m_selectedVertical);
+        QVector<MapDoor*> doors;
+        if (vertical->passage() == true)
+        {
+            for (int i = 0; i != m_floors.size(); i++)
+            {
+                MapArea *area = m_floors.at(i)->areaByUin(
+                        vertical->area(m_floors.at(i)->uin()));
+                if (area != 0)
+                    doors.append(area->door(0));
+            }
+            if (!doors.isEmpty())
+                for (int i = 0; i != doors.size() - 1; i++)
+                {
+                    MapDoor *door1 = doors.at(i);
+                    MapDoor *door2 = doors.at(i+1);
+                    QGraphicsItem *item1 =
+                            floorByUin(door1->floorUin())->itemAt(door1->pos());
+                    QGraphicsItem *item2 =
+                            floorByUin(door2->floorUin())->itemAt(door2->pos());
+                    if ((item1 != 0) & (item2 != 0))
+                        if ((item1->type() == GraphNode::Type) &
+                            (item2->type() == GraphNode::Type))
+                        {
+                            GraphNode *n1 = qgraphicsitem_cast<GraphNode*>(item1);
+                            GraphNode *n2 = qgraphicsitem_cast<GraphNode*>(item2);
+//                            for (int j = 0; j != n1->arcsNumber(); j++)
+//                                if (n1->arc(j)->floorUin() == 0)
+//                                    delete n1->arc(j);
+                            new GraphArc(n1, n2);
+                        }
+                }
+        }
+    }
 }
 
 void Map::addNode(QPointF point, quint32 floorUin)
@@ -201,6 +254,8 @@ void Map::insertFloor(int i)
 {
     MapFloor *floor = new MapFloor(QRectF(0, 0, m_pixSizeX, m_pixSizeY), this);
     m_floors.insert(i, floor);
+    connect(floor, SIGNAL(areaActivated(MapArea*)),
+            SLOT(areaActivated(MapArea*)));
     connect(floor, SIGNAL(addedNode(QPointF,quint32)),
             SLOT(addNode(QPointF,quint32)));
     connect(floor, SIGNAL(deletedNode(GraphNode*)),
@@ -232,6 +287,98 @@ MapFloor* Map::floorByUin(const quint32 uin) const
         if (m_floors.at(i)->uin() == uin)
             return m_floors.at(i);
     return 0;
+}
+
+void Map::addVertical()
+{
+    m_verticals.append(new MapVertical());
+    selectVertical(m_verticals.size() - 1);
+}
+
+void Map::deleteVertical(const int vertNum)
+{
+    MapVertical *vertical = m_verticals.at(vertNum);
+    delete vertical;
+    m_verticals.remove(vertNum);
+}
+
+int Map::verticalsNumber()
+{
+    return m_verticals.size();
+}
+
+MapVertical* Map::vertical(const int vertNum) const
+{
+    return m_verticals.at(vertNum);
+}
+
+void Map::setNameVertical(const int vertNum, const QString &name)
+{
+    m_verticals.at(vertNum)->setName(name);
+}
+
+void Map::setPassageVertical(const int vertNum, const bool b)
+{
+    MapVertical *vertical = m_verticals.at(vertNum);
+    QVector<MapDoor*> doors;
+    if (vertical->passage() != b)
+    {
+        vertical->setPassage(b);
+        for (int i = 0; i != m_floors.size(); i++)
+        {
+            MapArea *area = m_floors.at(i)->areaByUin(
+                    vertical->area(m_floors.at(i)->uin()));
+            if (area != 0)
+                doors.append(area->door(0));
+        }
+        if (!doors.isEmpty())
+            for (int i = 0; i != doors.size() - 1; i++)
+            {
+                MapDoor *door1 = doors.at(i);
+                MapDoor *door2 = doors.at(i+1);
+                QGraphicsItem *item1 =
+                        floorByUin(door1->floorUin())->itemAt(door1->pos());
+                QGraphicsItem *item2 =
+                        floorByUin(door2->floorUin())->itemAt(door2->pos());
+                if ((item1 != 0) & (item2 != 0))
+                    if ((item1->type() == GraphNode::Type) &
+                        (item2->type() == GraphNode::Type))
+                    {
+                        GraphNode *n1 = qgraphicsitem_cast<GraphNode*>(item1);
+                        GraphNode *n2 = qgraphicsitem_cast<GraphNode*>(item2);
+                        if (b)
+                            new GraphArc(n1, n2);
+                        else
+                            delete n1->arc(n2);
+                    }
+            }
+    }
+}
+
+bool Map::passageVertical(const int vertNum) const
+{
+    return m_verticals.at(vertNum)->passage();
+}
+
+void Map::selectVertical(const int vertNum)
+{
+    m_selectedVertical = vertNum;
+    for (int i = 0; i != m_floors.size(); i++)
+    {
+        quint32 area = m_verticals.at(vertNum)->area(m_floors.at(i)->uin());
+        if (area)
+            m_floors.at(i)->selectArea(area);
+    }
+}
+
+//const QVector<MapVertical*> Map::verticals()
+//{
+//    return m_verticals;
+//}
+
+void Map::deselectVertical()
+{
+    m_selectedVertical = -1;
 }
 
 Graph* Map::graph() const

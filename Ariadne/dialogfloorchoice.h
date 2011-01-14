@@ -14,7 +14,7 @@ class DialogFloorChoice : public QDialog
     Q_OBJECT
 public:
     explicit DialogFloorChoice(QWidget *parent, QStringListModel *floors,
-                               QString labelText);
+                               int floorSelected, QString labelText);
     int floor() const;
 
 signals:
