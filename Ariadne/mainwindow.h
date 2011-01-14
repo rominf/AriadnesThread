@@ -125,8 +125,8 @@ private slots:
     void verticalAdd();
     void verticalDelete();
     void verticalSetPassage(bool b);
-    void wgtVerticalsListCurrenItemChanged(int i);
-    void wgtVerticalsListItemChanged(QListWidgetItem * item);
+    void wgtVerticalsListItemActivated(QListWidgetItem* item);
+    void wgtVerticalsListItemChanged(QListWidgetItem* item);
 
     void panelAreasMarkingVisibilityChanged(bool visible);
     void setAreaNumber();

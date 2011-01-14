@@ -25,14 +25,15 @@ private:
     QVector<GraphNode*> m_nodes;
     QBrush *brushNormalArea;
     QBrush *brushNormalDoor;
-    QBrush *brushNormalNode;
     QBrush *brushSelectedArea;
     QBrush *brushSelectedDoor;
-    QBrush *brushSelectedNode;
+//    QBrush *brushSelectedNode;
     QPen *penNormal;
     QPen *penSelectedArea;
     QPen *penSelectedDoor;
-    QPen *penSelectedNode;
+
+    QBrush brushNode;
+    QPen penNode;
 };
 
 #endif // MAPSELECTION_H

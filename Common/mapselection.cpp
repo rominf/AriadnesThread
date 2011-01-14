@@ -5,17 +5,17 @@ MapSelection::MapSelection(bool multiselection):
 {
     brushNormalArea = new QBrush(Qt::NoBrush);
     brushNormalDoor = new QBrush(Qt::white);
-    brushNormalNode = new QBrush(Qt::white);
+//    brushNormalNode = new QBrush(Qt::white);
     brushSelectedArea = new QBrush(QColor::fromRgb(255, 250, 205, 127));
     brushSelectedDoor = new QBrush(QColor::fromRgb(255, 250, 205, 255));
-    brushSelectedNode = new QBrush(QColor::fromRgb(255, 250, 205, 255));
+//    brushSelectedNode = new QBrush(QColor::fromRgb(255, 250, 205, 255));
     penNormal = new QPen(Qt::SolidLine);
     penSelectedArea = new QPen(Qt::SolidLine);
     penSelectedArea->setWidthF(4);
     penSelectedDoor = new QPen(Qt::SolidLine);
     penSelectedDoor->setWidthF(3);
-    penSelectedNode = new QPen(Qt::SolidLine);
-    penSelectedNode->setWidthF(2);
+//    penSelectedNode = new QPen(Qt::SolidLine);
+//    penSelectedNode->setWidthF(2);
 //    penSelected->setCapStyle(Qt::RoundCap);
 }
 
@@ -27,10 +27,10 @@ void MapSelection::addItem(QGraphicsItem *item)
         if ((item->type() == MapArea::Type) | (item->type() == MapDoor::Type) |
             (item->type() == GraphNode::Type))
             shapeItem = qgraphicsitem_cast<QAbstractGraphicsShapeItem*>(item);
-        else
-            if (item->type() == QGraphicsTextItem::Type)
-                shapeItem = qgraphicsitem_cast<QAbstractGraphicsShapeItem*>(
-                        item->parentItem());
+//        else
+//            if (item->type() == QGraphicsTextItem::Type)
+//                shapeItem = qgraphicsitem_cast<QAbstractGraphicsShapeItem*>(
+//                        item->parentItem());
 
         switch (shapeItem->type())
         {
@@ -46,8 +46,10 @@ void MapSelection::addItem(QGraphicsItem *item)
             break;
         case GraphNode::Type:
             m_nodes.append(qgraphicsitem_cast<GraphNode*>(shapeItem));
-            shapeItem->setBrush(*brushSelectedNode);
-            shapeItem->setPen(*penSelectedNode);
+            brushNode = shapeItem->brush();
+            penNode = shapeItem->pen();
+            shapeItem->setBrush(GraphNode::cBrushSelected);
+            shapeItem->setPen(GraphNode::cPenSelected);
             break;
         default:
             return;
@@ -81,8 +83,8 @@ void MapSelection::removeItem(QGraphicsItem *item)
     case GraphNode::Type:
     {
         GraphNode *node = qgraphicsitem_cast<GraphNode*>(item);
-        node->setBrush(*brushNormalNode);
-        node->setPen(*penNormal);
+        node->setBrush(brushNode/*GraphNode::cBrushNormal*/);
+        node->setPen(penNode/*GraphNode::cPenNormal*/);
         int i = m_nodes.indexOf(node);
         if (i > -1)
             m_nodes.remove(i);

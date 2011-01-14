@@ -14,10 +14,15 @@ public:
     ~GraphArc();
 
     enum {Type = QGraphicsItem::UserType + 3};
+    static const QPen cPenNormal;
+    static const QPen cPenSelected;
+    static const QPen cPenWay;
+
     GraphNode *node1() const;
     GraphNode *node2() const;
     bool contain(GraphNode *node) const;
-    int lenght() const;
+    void setLenght(const qreal lenght);
+    qreal lenght() const;
     int type() const;
     quint32 floorUin() const;
     quint32 uin() const;
