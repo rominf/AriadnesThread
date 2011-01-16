@@ -13,7 +13,15 @@ class Graph: public QObject
     friend QDataStream &operator<<(QDataStream &output, const Graph &graph);
     friend QDataStream &operator>>(QDataStream &input, Graph &graph);
 public:
+//    static const qreal cLengthStairs = ;
+
     Graph();
+//    enum WayPermission
+//    {
+//        GraphArc::None,
+
+//    };
+
 //    void addFreeNode(QPointF *point);
     void deleteArc(GraphArc *arc);
     void addNode(QPointF point, quint32 floorUin/*, GraphNode *linkedNode*/);
@@ -22,10 +30,17 @@ public:
     void copyFloor(quint32 fromUin, quint32 toUin);
     void setVisible(bool visible);
     void startAnew();
-    void way(QVector<GraphNode*> start, QVector<GraphNode*> finish);
+    void makeWay(const QVector<GraphNode*> start,
+                 const QVector<GraphNode*> finish,
+                 const GraphArc::WayPermissions permissions);
+    void paintWay(bool isActive = true);
     void clearWay();
-    qreal djkstra(GraphNode *start, QVector<GraphNode*> *finish,
-                  qreal minWayLength);
+    QVector<GraphNode*> way() const;
+//    bool wayInfo(qreal &lengthPix, int &stairsDownNumber, int &stairsUpNumber,
+//                 int &liftsNumber, qreal &time) const;
+    qreal djkstra(GraphNode *start, const QVector<GraphNode*> *finish,
+                  const GraphArc::WayPermissions permissions,
+                  const qreal minWayLength);
 signals:
     void graphItemAdded(QGraphicsItem *item);
     void graphItemDeleted(QGraphicsItem *item);
@@ -35,9 +50,9 @@ private:
     QVector<GraphNode*> m_startNodes;
     QVector<GraphNode*> m_way;
     GraphNode *m_lastNode;
+    bool m_visible;
 
     void setLastNode(GraphNode *node);
-    void paintWay(bool isActive = true);
 //    bool m_isFirstNode;
 //    QVector<QPointF*> m_nodesCoordinates;
 //    void nodesCoordinates();

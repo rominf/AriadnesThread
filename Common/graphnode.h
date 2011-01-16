@@ -7,12 +7,13 @@
 #include "grapharc.h"
 #include "mapdoor.h"
 
-class GraphArc;
 class MapFloor;
+class MapDoor;
+class GraphArc;
 class GraphNode : public QGraphicsEllipseItem
 {
-    friend QDataStream &operator<<(QDataStream &output, const GraphNode &node);
-    friend QDataStream &operator>>(QDataStream &input, GraphNode &node);
+    friend QDataStream& operator<<(QDataStream &output, const GraphNode &node);
+    friend QDataStream& operator>>(QDataStream &input, GraphNode &node);
 public:
     GraphNode();
     GraphNode(const QPointF &point, quint32 floor);
@@ -26,23 +27,29 @@ public:
     static const QBrush cBrushSelected;
     static const QBrush cBrushWay;
 
-    quint32 floorUin();
+    GraphArc* arc(const int i) const;
+    GraphArc* arc(const GraphNode *adjacent, const bool oneWay = false) const;
+//    const QVector<GraphArc*> arcs() const;
     void addArc(GraphArc *arc);
-    GraphArc* arc(int i) const;
-    GraphArc* arc(GraphNode *adjacent) const;
-    const QVector<GraphArc*> arcs() const;
     void deleteArc(GraphArc *arc);
-    int arcsNumber();
-    GraphNode* adjacentNode(GraphArc *arc) const;
+    int arcsNumber() const;
+    GraphNode* adjacentNode(const GraphArc *arc) const;
+    MapDoor* door() const;
+    void setDoor(MapDoor *door);
+    quint32 floorUin() const;
+    quint32 uin() const;
     int type() const;
-    quint32 uin();
 private:
     static const qreal cCircleR;
-    quint32 m_floor;
-    QVector<GraphArc*> m_arcs;
-    quint32 m_uin;
 
     static quint32 m_count; // Counter for making uins
+
+    QVector<GraphArc*> m_arcs;
+    MapDoor *m_door;
+    quint32 m_floor;
+    quint32 m_uin;
+
+
 };
 
 #endif // GRAPHNODE_H

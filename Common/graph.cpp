@@ -3,6 +3,7 @@
 Graph::Graph()
 {
     m_lastNode = 0;
+    m_visible = true;
 }
 
 QDataStream & operator<<(QDataStream &output, const Graph &graph)
@@ -38,10 +39,10 @@ QDataStream & operator<<(QDataStream &output, const Graph &graph)
             if (!arcs.contains(arc))
             {
                 arcs.append(arc);
-                output << arc->node1()->uin() << arc->node2()->uin();
+                output << *arc;
             }
         }
-    output << 0 << 0;     // For marking end of arcs
+    output << false << GraphArc::VerticalType(-1) << 0 << 0; // End of arcs
     return output;
 }
 
@@ -63,12 +64,15 @@ QDataStream & operator>>(QDataStream &input, Graph &graph)
     }
     GraphArc *arc;
     quint32 node1uin, node2uin;
-    input >> node1uin >> node2uin;
+    int type;
+    bool b = false;
+    input >> b >> type >> node1uin >> node2uin;
     while (node1uin != 0)
     {
-        arc = new GraphArc(nodes[node1uin], nodes[node2uin]);
+        arc = new GraphArc(nodes.value(node1uin), nodes.value(node2uin),
+                           GraphArc::VerticalType(type), b);
         emit graph.graphItemAdded(arc);
-        input >> node1uin >> node2uin;
+        input >> b >> type >> node1uin >> node2uin;
     }
     return input;
 }
@@ -264,6 +268,7 @@ void Graph::copyFloor(quint32 fromUin, quint32 toUin)
 
 void Graph::setVisible(bool visible)
 {
+    m_visible = visible;
     GraphNode *n;
     QStack<GraphNode*> stk;
     QVector<GraphNode*> vec;
@@ -303,27 +308,44 @@ void Graph::startAnew()
     m_lastNode = 0;
 }
 
-void Graph::way(QVector<GraphNode*> start, QVector<GraphNode*> finish)
+void Graph::makeWay(const QVector<GraphNode *> start,
+                const QVector<GraphNode *> finish,
+                const GraphArc::WayPermissions permissions)
 {
+    clearWay();
     qreal min = INFINITY;
     for (int i = 0; i != start.size(); i++)
-        min = qMin(djkstra(start.at(i), &finish, min), min);
-    if (!m_way.isEmpty())
-        paintWay(true);
-    else
-        QMessageBox::information(0, tr("Нахождение пути"),
-                                 tr("Путь между заданными объектами не найден."
-                                    "\nВершины графа, относящиеся к объектам, "
-                                    "лежат в разных компонентах связности."));
+        min = qMin(djkstra(start.at(i), &finish, permissions, min),
+                   min);
+//    if (!m_way.isEmpty())
+//        paintWay(true);
+//    else
+//        QMessageBox::information(0, tr("Нахождение пути"),
+//                                 tr("Путь между заданными объектами не найден."
+//                                    "\nВершины графа, относящиеся к объектам, "
+//                                    "лежат в разных компонентах связности."));
 }
 
 void Graph::clearWay()
 {
     paintWay(false);
+    m_way.clear();
 }
 
-qreal Graph::djkstra(GraphNode *start, QVector<GraphNode*> *finish,
-                     qreal minWayLength)
+QVector<GraphNode*> Graph::way() const
+{
+    return m_way;
+}
+
+//bool Graph::wayInfo(qreal &lengthPix, int &stairsDownNumber,
+//                    int &stairsUpNumber, int &liftsNumber, qreal &time) const
+//{
+
+//}
+
+qreal Graph::djkstra(GraphNode *start, const QVector<GraphNode *> *finish,
+                     const GraphArc::WayPermissions permissions,
+                     const qreal minWayLength)
 {
     typedef GraphNode* pGraphNode;
     QMap<pGraphNode, qreal> dist;
@@ -353,22 +375,28 @@ qreal Graph::djkstra(GraphNode *start, QVector<GraphNode*> *finish,
             visit.insert(min);
             for (int i = 0; i != min->arcsNumber(); i++)
             {
-                GraphNode *adjacent = min->adjacentNode(min->arc(i));
-                bool update = false;
-                if (dist.contains(adjacent))
+                GraphArc::VerticalType vertType = min->arc(i)->verticalType();
+                if ((((permissions & vertType) > 0) |
+                     (vertType == GraphArc::None)) & min->arc(i)->isRight(min))
                 {
-                    if (dist.value(min) + min->arc(i)->lenght() <
-                        dist.value(adjacent))
+                    GraphNode *adjacent = min->adjacentNode(min->arc(i));
+                    qreal distPerMin = dist.value(min) + min->arc(i)->lenght();
+                    bool update = false;
+                    if (dist.contains(adjacent))
+                    {
+                        if (distPerMin < dist.value(adjacent))
+                            update = true;
+                    }
+                    else
                         update = true;
+                    if (update)
+                    {
+                        dist[adjacent] = distPerMin;
+                        prev[adjacent] = min;
+                    }
                 }
-                else
-                    update = true;
-                if (update)
-                {
-                    dist[adjacent] = dist.value(min) + min->arc(i)->lenght();
-                    prev[adjacent] = min;
-                }
-
+//                else
+//                    visit.insert(min->adjacentNode(min->arc(i)));
             }
         }
     }
@@ -432,7 +460,11 @@ void Graph::paintWay(bool isActive)
                 node->setVisible(true);
             }
             else
+            {
                 node->setBrush(GraphNode::cBrushNormal);
+                node->setVisible(m_visible);
+            }
+
         }
 
         if (i < m_way.size() - 1)
@@ -446,7 +478,10 @@ void Graph::paintWay(bool isActive)
                     arc->setVisible(true);
                 }
                 else
+                {
                     arc->setPen(GraphArc::cPenNormal);
+                    arc->setVisible(m_visible);
+                }
             }
         }
 

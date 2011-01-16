@@ -13,11 +13,12 @@ MapFloor::MapFloor(const QRectF &sceneRect, QObject *parent) :
     m_border->setBrush(QBrush(Qt::white));
     m_border->setZValue(-2.0);
     m_base = 0;
+    addBase(MapBase::cFakeFileName);
     m_crossBase = new QGraphicsRectItem(sceneRect, 0, this);
     m_crossBase->setBrush(QBrush(Qt::NoBrush));
     m_crossBase->setOpacity(0.5);
     m_crossBase->setZValue(-1.0);
-    addBase(MapBase::cFakeFileName);
+
     m_tempLine = 0;
     m_cursorCircle = new QGraphicsEllipseItem(
             -cCursorCircleR, -cCursorCircleR,
@@ -416,11 +417,14 @@ void MapFloor::keyPressEvent(QKeyEvent *event)
                     break;
                 case GraphNode::Type:
                 {
-                    int i = m_graphNodes.indexOf(shapeItem->pos());
+                    GraphNode *node = qgraphicsitem_cast<GraphNode*>(shapeItem);
+                    int i = m_graphNodes.indexOf(node->pos());
                     if (i > -1)
-                        if (itemAt(shapeItem->pos()) == shapeItem)
+                        if (node->door() == 0)
                             m_graphNodes.remove(i);
-                    takeAwayGraphicsLineItem(m_tempLine);
+//                        if (itemAt(shapeItem->pos()) == shapeItem)
+//                            m_graphNodes.remove(i);
+//                    takeAwayGraphicsLineItem(m_tempLine);
                     emit deletedNode(qgraphicsitem_cast<GraphNode*>(shapeItem));
                     break;
                 }
@@ -932,6 +936,8 @@ void MapFloor::finalizeDoor()
 
 void MapFloor::deleteDoor(MapDoor *door)
 {
+    if (door->node())
+        emit deletedNode(door->node());
     for (int i = 0; i != door->parentAreasNumber(); i++)
         door->parentArea(i)->deleteDoor(door);
     removeItem(door);

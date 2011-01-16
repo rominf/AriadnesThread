@@ -1,13 +1,16 @@
 #include "map.h"
 #include <QDataStream>
 
+qreal Map::m_lengthStairsDown = cSpeedMPerMin*cTimeStairsDown;
+qreal Map::m_lengthStairsUp = cSpeedMPerMin*cTimeStairsUp;
+
 Map::Map(qreal mapPixPerRealM, qreal mapPixPerDisplayM,
-         qreal mapPixSizeX, qreal mapPixSizeY, QObject *parent) : QObject(parent),
+         qreal mapPixSizeX, qreal mapPixSizeY, QObject *parent): QObject(parent),
 m_pixPerRealM(mapPixPerRealM), m_pixPerDisplayM(mapPixPerDisplayM),
 m_pixSizeX(mapPixSizeX), m_pixSizeY(mapPixSizeY)
 {
     // Count map geometry
-    m_realMPerDisplayM = m_pixPerDisplayM / m_pixPerRealM;
+//    m_realMPerDisplayM = m_pixPerDisplayM / m_pixPerRealM;
     m_selectedVertical = -1;
     m_graph = new Graph();
     connect(m_graph, SIGNAL(graphItemAdded(QGraphicsItem*)),
@@ -52,7 +55,7 @@ QDataStream & operator>>(QDataStream &input, Map &map)
     }
     input >> *map.m_graph;
     for (int i = 0; i != map.m_verticals.size(); i++)
-        map.setPassageVertical(i, map.m_verticals.at(i)->passage());
+        map.setTypeVertical(i, map.m_verticals.at(i)->type());
     return input;
 }
 
@@ -65,8 +68,8 @@ void Map::areaActivated(MapArea *area, bool activated)
                     area->floorUin(), area->uin());
         else
             m_verticals.at(m_selectedVertical)->deleteArea(area->floorUin());
-        setPassageVertical(m_selectedVertical,
-                           m_verticals.at(m_selectedVertical)->passage());
+        setTypeVertical(m_selectedVertical,
+                        m_verticals.at(m_selectedVertical)->type());
     }
 }
 
@@ -108,6 +111,13 @@ void Map::addGraphItem(QGraphicsItem *item)
     {
         GraphNode *node = qgraphicsitem_cast<GraphNode*>(item);
         MapFloor *floor = floorByUin(node->floorUin());
+        QGraphicsItem *item = floor->itemAt(node->pos());
+        if (item)
+            if (item->type() == MapDoor::Type)
+            {
+                MapDoor *door = qgraphicsitem_cast<MapDoor*>(item);
+                door->setNode(node);
+            }
         floor->addItem(node);
         floor->addPointNodesMagnetTo(node->pos());
 //        for (int i = 0; i != m_floors.size(); i++)
@@ -206,12 +216,14 @@ QVector<GraphNode*> Map::getNodesFromItem(QGraphicsItem *item)
             doors.append(area->door(i));
     for (int i = 0; i != doors.size(); i++)
     {
-        quint32 floorUin = doors.at(i)->parentArea(0)->floorUin();
-        QGraphicsItem *itemAt =
-                floorByUin(floorUin)->itemAt(doors.at(i)->pos());
-        if (itemAt != 0)
-            if (itemAt->type() == GraphNode::Type)
-                nodes.append(qgraphicsitem_cast<GraphNode*>(itemAt));
+//        quint32 floorUin = doors.at(i)->parentArea(0)->floorUin();
+//        QGraphicsItem *itemAt =
+//                itemAt(doors.at(i)->pos());
+//        if (itemAt != 0)
+//            if (itemAt->type() == GraphNode::Type)
+//                nodes.append(qgraphicsitem_cast<GraphNode*>(itemAt));
+        if (doors.at(i)->node() != 0)
+            nodes.append(doors.at(i)->node());
     }
     return nodes;
 }
@@ -285,65 +297,100 @@ int Map::verticalsNumber()
 
 MapVertical* Map::vertical(const int vertNum) const
 {
-    return m_verticals.at(vertNum);
+    if (vertNum > -1)
+        return m_verticals.at(vertNum);
+    else
+        return 0;
 }
 
 void Map::setNameVertical(const int vertNum, const QString &name)
 {
-    m_verticals.at(vertNum)->setName(name);
+    if (vertNum > -1)
+        m_verticals.at(vertNum)->setName(name);
 }
 
-void Map::setPassageVertical(const int vertNum, const bool passage)
+void Map::setTypeVertical(const int vertNum, const GraphArc::VerticalType type)
 {
     if (vertNum > -1)
     {
         MapVertical *vertical = m_verticals.at(vertNum);
         QVector<MapDoor*> doors;
-        m_verticals.at(vertNum)->setPassage(passage);
+        m_verticals.at(vertNum)->setType(type);
         for (int i = 0; i != m_floors.size(); i++)
         {
             MapArea *area = m_floors.at(i)->areaByUin(
                     vertical->area(m_floors.at(i)->uin()));
             if (area != 0)
-                doors.append(area->door(0));
+            {
+                doors.append(area->door(area->doorsNumber()-1));
+                if (area->doorsNumber() > 1)
+                    area->setBrush(Qt::red);
+            }
+
         }
         if (!doors.isEmpty())
             for (int i = 0; i != doors.size(); i++)
             {
-                MapDoor *door = doors.at(i);
-                QGraphicsItem *item =
-                        floorByUin(door->floorUin())->itemAt(door->pos());
-                if (item != 0)
-                    if (item->type() == GraphNode::Type)
-                    {
-                        GraphNode *n = qgraphicsitem_cast<GraphNode*>(item);
-                        int j = 0;
-                        while (j != n->arcsNumber())
-                            if (n->arc(j)->floorUin() == 0)
-                                delete n->arc(j);
-                            else
-                                j++;
-                    }
+//                MapDoor *door = doors.at(i);
+                GraphNode *n = doors.at(i)->node();
+                if (n)
+                {
+                    int j = 0;
+                    while (j != n->arcsNumber())
+                        if (n->arc(j)->floorUin() == 0)
+                            delete n->arc(j);
+                        else
+                            j++;
+                }
+//                QGraphicsItem *item =
+//                        floorByUin(door->floorUin())->itemAt(door->pos());
+//                if (item != 0)
+//                    if (item->type() == GraphNode::Type)
+//                    {
+//                        GraphNode *n = qgraphicsitem_cast<GraphNode*>(item);
+//                        int j = 0;
+//                        while (j != n->arcsNumber())
+//                            if (n->arc(j)->floorUin() == 0)
+//                                delete n->arc(j);
+//                            else
+//                                j++;
+//                    }
             }
         if (!doors.isEmpty())
             for (int i = 0; i != doors.size() - 1; i++)
-            {
-                MapDoor *door1 = doors.at(i);
-                MapDoor *door2 = doors.at(i+1);
-                QGraphicsItem *item1 =
-                        floorByUin(door1->floorUin())->itemAt(door1->pos());
-                QGraphicsItem *item2 =
-                        floorByUin(door2->floorUin())->itemAt(door2->pos());
-                if ((item1 != 0) & (item2 != 0))
-                    if ((item1->type() == GraphNode::Type) &
-                        (item2->type() == GraphNode::Type))
+                if ((doors.at(i)->node() != 0) & (doors.at(i+1)->node() != 0) &
+                    ((type == GraphArc::Stairs) | (type == GraphArc::Lift)))
+                {
+                    GraphNode *node1 = doors.at(i)->node();
+                    GraphNode *node2 = doors.at(i+1)->node();
+                    if (type == GraphArc::Lift)
                     {
-                        GraphArc *arc = new GraphArc(
-                                qgraphicsitem_cast<GraphNode*>(item1),
-                                qgraphicsitem_cast<GraphNode*>(item2));
-                        arc->setLenght(convertRealMToPix(50));
+                        GraphArc *arc = new GraphArc(node1, node2, type);
+                        arc->setLenght(
+                                convertRealMToPix(cSpeedMPerMin * cTimeLift));
                     }
-            }
+                    if (type == GraphArc::Stairs)
+                    {
+                        GraphArc *arc1 = new GraphArc(node1, node2, type, true);
+                        arc1->setLenght(convertRealMToPix(m_lengthStairsDown));
+                        GraphArc *arc2 = new GraphArc(node2, node1, type, true);
+                        arc2->setLenght(convertRealMToPix(m_lengthStairsUp));
+                    }
+                }
+//                QGraphicsItem *item1 =
+//                        floorByUin(door1->floorUin())->itemAt(door1->pos());
+//                QGraphicsItem *item2 =
+//                        floorByUin(door2->floorUin())->itemAt(door2->pos());
+//                if ((item1 != 0) & (item2 != 0))
+//                    if ((item1->type() == GraphNode::Type) &
+//                        (item2->type() == GraphNode::Type))
+//                    {
+//                        GraphArc *arc = new GraphArc(
+//                                qgraphicsitem_cast<GraphNode*>(item1),
+//                                qgraphicsitem_cast<GraphNode*>(item2));
+//                        arc->setLenght(convertRealMToPix(50));
+//                    }
+//            }
     }
 //    }
 //    MapVertical *vertical = m_verticals.at(vertNum);
@@ -382,9 +429,9 @@ void Map::setPassageVertical(const int vertNum, const bool passage)
 //    }
 }
 
-bool Map::passageVertical(const int vertNum) const
+GraphArc::VerticalType Map::typeVertical(const int vertNum) const
 {
-    return m_verticals.at(vertNum)->passage();
+    return m_verticals.at(vertNum)->type();
 }
 
 void Map::selectVertical(const int vertNum)
@@ -444,14 +491,66 @@ void Map::setFinish(QGraphicsItem *item)
 //    }
 }
 
-void Map::way()
+bool Map::startAndFinishValid() const
 {
-    m_graph->way(m_startNodes, m_finishNodes);
+    return !m_startNodes.isEmpty() & !m_finishNodes.isEmpty();
+}
+
+void Map::way(const GraphArc::WayPermissions permissions)
+{
+    if (!m_startNodes.isEmpty() & !m_finishNodes.isEmpty())
+        m_graph->makeWay(m_startNodes, m_finishNodes, permissions);
+}
+
+void Map::paintWay()
+{
+    m_graph->paintWay(true);
 }
 
 void Map::clearWay()
 {
     m_graph->clearWay();
+}
+
+bool Map::wayInfo(qreal &length, int &stairsDownNumber, int &stairsUpNumber,
+                  int &liftsNumber, qreal &time) const
+{
+    qreal lengthPix = 0;
+    stairsDownNumber = 0;
+    stairsUpNumber = 0;
+    liftsNumber = 0;
+    time = 0;
+//    qreal lengthStairsDown = cTimeStairsDown * cSpeedMPerMin;
+//    qreal lengthStairsUp = cTimeStairsUp * cSpeedMPerMin;
+    QVector<GraphNode*> way = graph()->way();
+    if (!way.isEmpty())
+    {
+        for (int i = 0; i != way.size() - 1; i++)
+        {
+            GraphArc *arc = way.at(i)->arc(way.at(i+1), true);
+            switch (arc->verticalType())
+            {
+            case GraphArc::None:
+                lengthPix += arc->lenght();
+                break;
+            case GraphArc::Stairs:
+                if (convertPixToRealM(arc->lenght()) == m_lengthStairsDown)
+                    stairsDownNumber++;
+                if (convertPixToRealM(arc->lenght()) == m_lengthStairsUp)
+                    stairsUpNumber++;
+                break;
+            case GraphArc::Lift:
+                liftsNumber++;
+                break;
+            case GraphArc::Room:
+                break;
+            }
+        }
+        length = convertPixToRealM(lengthPix);
+        time = length/cSpeedMPerMin + stairsDownNumber*cTimeStairsDown +
+               stairsUpNumber*cTimeStairsUp + liftsNumber*cTimeLift;
+    }
+    return !way.isEmpty();
 }
 
 //QVector<QPointF*> Map::graphNodesCoordinates()

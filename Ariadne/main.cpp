@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     translator->load(QString("qt_") + locale);
     a.installTranslator(translator);
 
-    MainWindow w/*(false)*/;
+    MainWindow w/*(MainWindow::pViewer)*/;
     w.show();
 
     return a.exec();

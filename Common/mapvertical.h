@@ -3,6 +3,7 @@
 
 #include <QMap>
 #include "maparea.h"
+#include "grapharc.h"
 
 class MapVertical
 {
@@ -16,12 +17,13 @@ public:
     quint32 area(const quint32 floorUin) const;
     void setName(const QString &name);
     QString name() const;
-    void setPassage(const bool b);
-    bool passage() const;
+    void setType(const GraphArc::VerticalType type);
+    GraphArc::VerticalType type() const;
 private:
     QMap<quint32, quint32> m_areas;
     QString m_name;
-    bool m_passage;
+//    bool m_passage;
+    GraphArc::VerticalType m_type;
 };
 
 #endif // MAPVERTICAL_H

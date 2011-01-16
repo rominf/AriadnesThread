@@ -10,6 +10,7 @@ MapDoor::MapDoor(const MapDoor &door):
 {
     QPointF point = door.pos();
     setPos(point.x(), point.y());
+    m_node = 0;
     m_uin = ++m_count;
     setBrush(QBrush(Qt::white));
 }
@@ -19,6 +20,7 @@ MapDoor::MapDoor(const QPointF &point):
                              2*cCircleR, 2*cCircleR)
 {
     setPos(point.x(), point.y());
+    m_node = 0;
     m_uin = ++m_count;
     setBrush(QBrush(Qt::white));
 }
@@ -64,6 +66,18 @@ MapArea* MapDoor::parentArea(int i)
 int MapDoor::parentAreasNumber()
 {
     return m_parentAreas.size();
+}
+
+GraphNode* MapDoor::node()
+{
+    return m_node;
+}
+
+void MapDoor::setNode(GraphNode *node)
+{
+    m_node = node;
+    if (node->door() != this)
+        node->setDoor(this);
 }
 
 quint32 MapDoor::floorUin()

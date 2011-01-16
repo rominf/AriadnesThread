@@ -15,8 +15,8 @@
 class MapDoor;
 class MapArea : public QGraphicsPolygonItem
 {
-    friend QDataStream &operator<<(QDataStream &output, const MapArea &area);
-    friend QDataStream &operator>>(QDataStream &input, MapArea &area);
+    friend QDataStream& operator<<(QDataStream &output, const MapArea &area);
+    friend QDataStream& operator>>(QDataStream &input, MapArea &area);
 
 public:
     explicit MapArea(const QPolygonF &polygon, const quint32 floorUin);

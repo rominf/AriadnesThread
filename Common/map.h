@@ -29,15 +29,19 @@ public:
     int verticalsNumber();
     MapVertical* vertical(const int vertNum) const;
     void setNameVertical(const int vertNum, const QString &name);
-    void setPassageVertical(const int vertNum, const bool b);
-    bool passageVertical(const int vertNum) const;
+    void setTypeVertical(const int vertNum, GraphArc::VerticalType);
+    GraphArc::VerticalType typeVertical(const int vertNum) const;
     void selectVertical(const int vertNum);
     void deselectVertical();
     Graph* graph() const;
     void setStart(QGraphicsItem *item);
     void setFinish(QGraphicsItem *item);
-    void way();
+    bool startAndFinishValid() const;
+    void way(const GraphArc::WayPermissions permissions);
+    void paintWay();
     void clearWay();
+    bool wayInfo(qreal &length, int &stairsDownNumber, int &stairsUpNumber,
+                 int &liftsNumber, qreal &time) const;
 //    QVector<QPointF*> graphNodesCoordinates();
 
 //    void graphStartAnew();
@@ -59,6 +63,13 @@ private slots:
 //    void graphNodesChanged(QVector<QPointF*> &nodes, int floor);
 
 private:
+    static const qreal cSpeedMPerMin = 85;
+    static const qreal cTimeStairsDown = 0.5;
+    static const qreal cTimeStairsUp = 1;
+    static const qreal cTimeLift = 0.5;
+    static qreal m_lengthStairsDown;
+    static qreal m_lengthStairsUp;
+
     Graph *m_graph;
     QVector<MapFloor*> m_floors;
     QVector<MapVertical*> m_verticals;
@@ -69,7 +80,7 @@ private:
 
     qreal m_pixPerRealM;
     qreal m_pixPerDisplayM;
-    qreal m_realMPerDisplayM;
+//    qreal m_realMPerDisplayM;
     qreal m_pixSizeX;
     qreal m_pixSizeY;
 
