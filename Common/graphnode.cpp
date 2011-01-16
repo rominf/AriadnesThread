@@ -17,6 +17,7 @@ GraphNode::GraphNode():
     setBrush(cBrushNormal);
     setPen(cPenNormal);
     setZValue(100500 - 1);
+    m_door = 0;
     m_uin = ++m_count;
 }
 
@@ -28,6 +29,7 @@ GraphNode::GraphNode(const QPointF &point, quint32 floor):
     setBrush(cBrushNormal);
     setPen(cPenNormal);
     setZValue(100500 - 1);
+    m_door = 0;
     m_uin = ++m_count;
 }
 
@@ -56,7 +58,19 @@ QDataStream & operator>>(QDataStream &input, GraphNode &node)
     return input;
 }
 
-quint32 GraphNode::floorUin()
+MapDoor* GraphNode::door() const
+{
+    return m_door;
+}
+
+void GraphNode::setDoor(MapDoor *door)
+{
+    m_door = door;
+    if (door->node() != this)
+        door->setNode(this);
+}
+
+quint32 GraphNode::floorUin() const
 {
     return m_floor;
 }
@@ -71,18 +85,19 @@ GraphArc* GraphNode::arc(int i) const
     return m_arcs.at(i);
 }
 
-GraphArc* GraphNode::arc(GraphNode *adjacent) const
+GraphArc* GraphNode::arc(const GraphNode *adjacent, const bool oneWay) const
 {
     for (int i = 0; i != m_arcs.size(); i++)
-        if (adjacentNode(m_arcs.at(i)) == adjacent)
+        if ((adjacentNode(m_arcs.at(i)) == adjacent) &
+            !(oneWay & !m_arcs.at(i)->isRight(this)))
             return m_arcs.at(i);
     return 0;
 }
 
-const QVector<GraphArc*> GraphNode::arcs() const
-{
-    return m_arcs;
-}
+//const QVector<GraphArc*> GraphNode::arcs() const
+//{
+//    return m_arcs;
+//}
 
 void GraphNode::deleteArc(GraphArc *arc)
 {
@@ -91,12 +106,12 @@ void GraphNode::deleteArc(GraphArc *arc)
         m_arcs.remove(i);
 }
 
-int GraphNode::arcsNumber()
+int GraphNode::arcsNumber() const
 {
     return m_arcs.size();
 }
 
-GraphNode* GraphNode::adjacentNode(GraphArc *arc) const
+GraphNode* GraphNode::adjacentNode(const GraphArc *arc) const
 {
     if ((arc->node1() != this) & (arc->node2() == this))
         return arc->node1();
@@ -112,7 +127,7 @@ int GraphNode::type() const
     return Type;
 }
 
-quint32 GraphNode::uin()
+quint32 GraphNode::uin() const
 {
     return m_uin;
 }

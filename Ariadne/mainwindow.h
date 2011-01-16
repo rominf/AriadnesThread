@@ -57,7 +57,12 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 //friend QDataStream & operator<<(QDataStream & output, const Map &map);
 public:
-    MainWindow(/*bool isAriadna = true, */QWidget *parent = 0);
+    enum Program
+    {
+        pFull, pViewer, pViewerTerminal
+    };
+    MainWindow(MainWindow::Program program = MainWindow::pFull,
+               QWidget *parent = 0);
     ~MainWindow();
     enum Element
     {
@@ -75,6 +80,7 @@ public:
         eWay = 2048
     };
     Q_DECLARE_FLAGS(Elements, Element)
+
 //    const QStringListModel* modelFloorsList() const;
 
 protected:
@@ -124,9 +130,10 @@ private slots:
     void panelVerticalsVisibilityChanged(bool visible);
     void verticalAdd();
     void verticalDelete();
-    void verticalSetPassage(bool b);
-    void wgtVerticalsListItemActivated(QListWidgetItem* item);
-    void wgtVerticalsListItemChanged(QListWidgetItem* item);
+    void verticalSetType(int type);
+    void lstwgtVerticalsItemActivated(QListWidgetItem* item);
+//    void wgtVerticalsListCurrentRowChanged(int row);
+    void lstwgtVerticalsItemChanged(QListWidgetItem* item);
 
     void panelAreasMarkingVisibilityChanged(bool visible);
     void setAreaNumber();
@@ -138,6 +145,7 @@ private slots:
     void panelWayVisibilityChanged(bool visible);
     void setStart();
     void setFinish();
+    void lstwgtWaysItemActivated(QListWidgetItem* item);
     void way();
 //    void chkAreaNumberVisibleStateChanged(int state);
 //    void chkAreaNameVisibleStateChanged(int state);
@@ -158,7 +166,7 @@ private:
     };
 
     ///////////////////////////////Variables////////////////////////////////////
-//    bool m_isAriadna;
+    MainWindow::Program m_program;
     QString openFileName;
     MapFloor::Mode mode;
     int curFloor;
@@ -213,14 +221,16 @@ private:
     QAction *actPanelVerticals;
     QAction *actVerticalAdd;
     QAction *actVerticalDelete;
-    QAction *actVerticalSetPassage;
+//    QAction *actVerticalSetPassage;
 
     QAction *actPanelAreasMarking;
 
     QAction *actPanelWay;
     QAction *actSetStart;
     QAction *actSetFinish;
-    QAction *actWay;
+//    QAction *actAllowStairs;
+//    QAction *actAllowLifts;
+//    QAction *actWay;
 
     QActionGroup *actgrpPanels;
     // QAction *actAboutQT;
@@ -269,8 +279,9 @@ private:
     QHBoxLayout *hblVerticalsButtons;
     QToolButton *btnVerticalAdd;
     QToolButton *btnVerticalDelete;
-    QToolButton *btnVerticalSetPassage;
-    QListWidget *wgtVerticalsList;
+//    QToolButton *btnVerticalSetPassage;
+    QComboBox *cbxVerticalType;
+    QListWidget *lstwgtVerticals;
 //    QListView *viewFloorsList;
 //    QToolButton *btnFloorMoveDown;
 //    QToolButton *btnFloorMoveUp;
@@ -299,9 +310,14 @@ private:
     QDockWidget *dckwgtWay;
     QWidget *wgtWay;
     QVBoxLayout *vblWay;
+    QHBoxLayout *hblWayButtons;
     QToolButton *btnSetStart;
     QToolButton *btnSetFinish;
-    QToolButton *btnWay;
+    QListWidget *lstwgtWays;
+//    QToolButton *btnAllowStairs;
+//    QToolButton *btnAllowLifts;
+//    QToolButton *btnWay;
+    QLabel *lblWayInfo;
 
     // Graphics
     QGraphicsView *view;

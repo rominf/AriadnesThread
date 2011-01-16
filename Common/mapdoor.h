@@ -5,8 +5,10 @@
 #include <QGraphicsEllipseItem>
 
 #include "maparea.h"
+#include "graphnode.h"
 
 class MapArea;
+class GraphNode;
 class MapDoor : public QGraphicsEllipseItem
 {
     friend QDataStream &operator<<(QDataStream &output, const MapDoor &door);
@@ -17,9 +19,11 @@ public:
     MapDoor(const QPointF &point);
 
     enum {Type = QGraphicsItem::UserType + 2};
-    void addParentArea(MapArea *area);
     MapArea* parentArea(int i);
+    void addParentArea(MapArea *area);
     int parentAreasNumber();
+    GraphNode* node();
+    void setNode(GraphNode *node);
     quint32 floorUin();
     QSet<quint32> parentAreasUins();
     bool isFinished() const;
@@ -28,13 +32,17 @@ public:
 private:
     static const qreal cCircleR;
 
-    QVector<MapArea*> m_parentAreas;
-    QSet<quint32> m_parentAreasUins;
-    quint32 m_uin;
+    static QSet<quint32> m_finishedDoors;
     static quint32 m_count;
 
+    QVector<MapArea*> m_parentAreas;
+    QSet<quint32> m_parentAreasUins;
+    GraphNode *m_node;
+    quint32 m_uin;
+
+
 //    static QSet<MapDoor*> m_finishedDoors;
-    static QSet<quint32> m_finishedDoors;
+
 //    static quint32 releaseDoor(const MapDoor *door, int i);
 };
 

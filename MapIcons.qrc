@@ -36,5 +36,7 @@
         <file alias="Way">Icons/Way.png</file>
         <file alias="Verticals">Icons/Verticals.png</file>
         <file alias="SetPassage">Icons/SetPassage.png</file>
+        <file alias="AllowStairs">Icons/AllowStairs.png</file>
+        <file alias="AllowLifts">Icons/AllowLifts.png</file>
     </qresource>
 </RCC>
