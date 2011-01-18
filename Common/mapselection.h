@@ -14,7 +14,7 @@ public:
     MapSelection(bool multiselection = false);
     void addItem(QGraphicsItem *item);
     void removeItem(QGraphicsItem *item);
-    QAbstractGraphicsShapeItem* item();
+    QGraphicsItem* item();
     bool isEmpty();
     void clear();
 
@@ -23,17 +23,17 @@ private:
     QVector<MapArea*> m_areas;
     QVector<MapDoor*> m_doors;
     QVector<GraphNode*> m_nodes;
+    QVector<GraphArc*> m_arcs;
     QBrush *brushNormalArea;
     QBrush *brushNormalDoor;
     QBrush *brushSelectedArea;
     QBrush *brushSelectedDoor;
-//    QBrush *brushSelectedNode;
     QPen *penNormal;
     QPen *penSelectedArea;
     QPen *penSelectedDoor;
 
-    QBrush brushNode;
-    QPen penNode;
+    QBrush brush;
+    QPen pen;
 };
 
 #endif // MAPSELECTION_H

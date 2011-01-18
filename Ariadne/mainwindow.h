@@ -157,7 +157,7 @@ private:
     static const qreal cPixPerRealM = 10;
     static const qreal cZoom = 1.1;
     static const int cDockWidth = 150;
-    static const bool isExtraShortcutsEnabled = true;
+    static const bool isExtraShortcutsEnabled = false;
     enum State
     {
         stSave = -1,

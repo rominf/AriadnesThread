@@ -242,20 +242,29 @@ void MapFloor::mousePressEvent(QGraphicsSceneMouseEvent *event)
             break;
         }
         case DoorAdd:
-                finalizeDoor();
-                break;
+            finalizeDoor();
+            break;
         case NodeAdd:
+            m_cursorCircle->setVisible(false);
             emit addedNode(m_cursorCircle->pos(), m_uin);
+            m_cursorCircle->setVisible(true);
             break;
         default:
         {
-            QGraphicsItem *item = itemAt(event->scenePos());
+            /*QGraphicsItem *item = itemAt(event->scenePos())*/;
+            QList<QGraphicsItem*> list = items(event->scenePos().x() - 0.5,
+                                               event->scenePos().y() - 0.5,
+                                               1, 1, Qt::IntersectsItemShape,
+                                               Qt::DescendingOrder);
+            QGraphicsItem *item = list.at(0);
+//            if (Geometry::getPerpendicularBase(event->scenePos(), ))
             bool selectionIsNormal = false;
             if (item)
                 if (((item->type() == MapArea::Type) |
                      (item->type() == QGraphicsTextItem::Type) |
                      (item->type() == MapDoor::Type) |
-                     (item->type() == GraphNode::Type)) &
+                     (item->type() == GraphNode::Type) |
+                     (item->type() == GraphArc::Type)) &
                     ((m_mode == Idle) | (m_mode == Selection)))
                 {
                     selectionIsNormal = true;
@@ -397,7 +406,7 @@ void MapFloor::keyPressEvent(QKeyEvent *event)
             {
                 int i = m_graphNodes.indexOf(m_lastNode->pos());
                 if (i > -1)
-                    if (itemAt(m_lastNode->pos()) == m_lastNode)
+                    if (m_lastNode->door() == 0)
                         m_graphNodes.remove(i);
                 takeAwayGraphicsLineItem(m_tempLine);
                 emit deletedNode(m_lastNode);
@@ -405,19 +414,19 @@ void MapFloor::keyPressEvent(QKeyEvent *event)
         default:
             if (!m_selection->isEmpty())
             {
-                QAbstractGraphicsShapeItem *shapeItem = m_selection->item();
+                QGraphicsItem *item = m_selection->item();
                 m_selection->clear();
-                switch (shapeItem->type())
+                switch (item->type())
                 {
                 case MapArea::Type:
-                    deleteArea(qgraphicsitem_cast<MapArea*>(shapeItem));
+                    deleteArea(qgraphicsitem_cast<MapArea*>(item));
                     break;
                 case MapDoor::Type:
-                    deleteDoor(qgraphicsitem_cast<MapDoor*>(shapeItem));
+                    deleteDoor(qgraphicsitem_cast<MapDoor*>(item));
                     break;
                 case GraphNode::Type:
                 {
-                    GraphNode *node = qgraphicsitem_cast<GraphNode*>(shapeItem);
+                    GraphNode *node = qgraphicsitem_cast<GraphNode*>(item);
                     int i = m_graphNodes.indexOf(node->pos());
                     if (i > -1)
                         if (node->door() == 0)
@@ -425,7 +434,13 @@ void MapFloor::keyPressEvent(QKeyEvent *event)
 //                        if (itemAt(shapeItem->pos()) == shapeItem)
 //                            m_graphNodes.remove(i);
 //                    takeAwayGraphicsLineItem(m_tempLine);
-                    emit deletedNode(qgraphicsitem_cast<GraphNode*>(shapeItem));
+                    emit deletedNode(node);
+                    break;
+                }
+                case GraphArc::Type:
+                {
+                    GraphArc *arc = qgraphicsitem_cast<GraphArc*>(item);
+                    emit deletedArc(arc);
                     break;
                 }
                 }
@@ -564,7 +579,7 @@ void MapFloor::resetSelection()
     m_selection->clear();
 }
 
-QAbstractGraphicsShapeItem* MapFloor::selectedItem()
+QGraphicsItem* MapFloor::selectedItem()
 {
     return m_selection->item();
 }

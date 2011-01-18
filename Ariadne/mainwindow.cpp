@@ -103,20 +103,22 @@ void MainWindow::createActions()
 
     actFloorLower = new QAction(QIcon(":/FloorLower"), tr("Cамый низ"), this);
     connect(actFloorLower, SIGNAL(triggered()), SLOT(floorLower()));
-    actFloorLower->setShortcuts(shortcuts(tr("Ctrl+Shift+Down"), Qt::Key_End));
+//    actFloorLower->setShortcuts(shortcuts(tr("Ctrl+Shift+Down"), Qt::Key_End));
+    actFloorLower->setShortcut(Qt::Key_End);
 
     actFloorDown = new QAction(QIcon(":/FloorDown"), tr("Этаж &ниже"), this);
     connect(actFloorDown, SIGNAL(triggered()), SLOT(floorDown()));
-    actFloorDown->setShortcuts(shortcuts(tr("Ctrl+Down"), Qt::Key_PageDown));
+//    actFloorDown->setShortcuts(shortcuts(tr("Ctrl+Down"), Qt::Key_PageDown));
+    actFloorDown->setShortcut(Qt::Key_PageDown);
 
     actFloorUp = new QAction(QIcon(":/FloorUp"), tr("Этаж &выше"),
                                    this);
     connect(actFloorUp, SIGNAL(triggered()), SLOT(floorUp()));
-    actFloorUp->setShortcuts(shortcuts(tr("Ctrl+Up"), Qt::Key_PageUp));
+    actFloorUp->setShortcut(Qt::Key_PageUp);
 
     actFloorUpper = new QAction(QIcon(":/FloorUpper"), tr("Cамый верх"), this);
     connect(actFloorUpper, SIGNAL(triggered()), SLOT(floorUpper()));
-    actFloorUpper->setShortcuts(shortcuts(tr("Ctrl+Shift+Up"), Qt::Key_Home));
+    actFloorUpper->setShortcut(Qt::Key_Home);
 
 
     actZoomOut= new QAction(QIcon(":/ZoomOut"), tr("У&меньшить"), this);
@@ -1578,7 +1580,7 @@ void MainWindow::setActiveFloor(int i)
     if ((i >= 0)&(i < map->floorsNumber()))
     {
         if ((curFloor >= 0) & (curFloor != i) &
-            (curFloor <= map->floorsNumber()))
+            (curFloor < map->floorsNumber()))
         {
             map->floor(curFloor)->disconnect(
                     SIGNAL(modeChanged(MapFloor::Mode)));
