@@ -60,7 +60,7 @@ public:
     MapArea* areaByUin(quint32 uin);
     void selectArea(quint32 area);
     void resetSelection();
-    QAbstractGraphicsShapeItem* selectedItem();
+    QGraphicsItem* selectedItem();
     virtual void addItem (QGraphicsItem *item);
     MapArea::CreateError addArea(MapArea *area);
     bool addDoor(MapDoor *door);
@@ -77,6 +77,7 @@ signals:
     void areaActivated(MapArea *area, bool activated);
     void addedNode(QPointF point, quint32 floor);
     void deletedNode(GraphNode *node);
+    void deletedArc(GraphArc *arc);
     void graphStartedAnew();
 
 protected:

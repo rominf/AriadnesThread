@@ -24,15 +24,16 @@ void MapSelection::addItem(QGraphicsItem *item)
         if (!m_multiselection)
             clear();
         QAbstractGraphicsShapeItem *shapeItem = 0;
-        if ((item->type() == MapArea::Type) | (item->type() == MapDoor::Type) |
-            (item->type() == GraphNode::Type))
+        int type = item->type();
+        if ((type == MapArea::Type) | (type == MapDoor::Type) |
+            (type == GraphNode::Type))
             shapeItem = qgraphicsitem_cast<QAbstractGraphicsShapeItem*>(item);
 //        else
 //            if (item->type() == QGraphicsTextItem::Type)
 //                shapeItem = qgraphicsitem_cast<QAbstractGraphicsShapeItem*>(
 //                        item->parentItem());
 
-        switch (shapeItem->type())
+        switch (type)
         {
         case MapArea::Type:
             m_areas.append(qgraphicsitem_cast<MapArea*>(shapeItem));
@@ -46,11 +47,19 @@ void MapSelection::addItem(QGraphicsItem *item)
             break;
         case GraphNode::Type:
             m_nodes.append(qgraphicsitem_cast<GraphNode*>(shapeItem));
-            brushNode = shapeItem->brush();
-            penNode = shapeItem->pen();
+            brush = shapeItem->brush();
+            pen = shapeItem->pen();
             shapeItem->setBrush(GraphNode::cBrushSelected);
             shapeItem->setPen(GraphNode::cPenSelected);
             break;
+        case GraphArc::Type:
+        {
+            GraphArc *arc = qgraphicsitem_cast<GraphArc*>(item);
+            m_arcs.append(arc);
+            pen = arc->pen();
+            arc->setPen(GraphArc::cPenSelected);
+            break;
+        }
         default:
             return;
         }
@@ -83,11 +92,20 @@ void MapSelection::removeItem(QGraphicsItem *item)
     case GraphNode::Type:
     {
         GraphNode *node = qgraphicsitem_cast<GraphNode*>(item);
-        node->setBrush(brushNode/*GraphNode::cBrushNormal*/);
-        node->setPen(penNode/*GraphNode::cPenNormal*/);
+        node->setBrush(brush/*GraphNode::cBrushNormal*/);
+        node->setPen(pen/*GraphNode::cPenNormal*/);
         int i = m_nodes.indexOf(node);
         if (i > -1)
             m_nodes.remove(i);
+        break;
+    }
+    case GraphArc::Type:
+        {
+        GraphArc *arc = qgraphicsitem_cast<GraphArc*>(item);
+        arc->setPen(pen);
+        int i = m_arcs.indexOf(arc);
+        if (i > -1)
+            m_arcs.remove(i);
         break;
     }
     default:
@@ -95,7 +113,7 @@ void MapSelection::removeItem(QGraphicsItem *item)
     }
 }
 
-QAbstractGraphicsShapeItem* MapSelection::item()
+QGraphicsItem* MapSelection::item()
 {
     if (!m_multiselection)
     {
@@ -105,13 +123,16 @@ QAbstractGraphicsShapeItem* MapSelection::item()
             return m_doors[0];
         if (m_nodes.size() == 1)
             return m_nodes[0];
+        if (m_arcs.size() == 1)
+            return m_arcs[0];
     }
     return 0;
 }
 
 bool MapSelection::isEmpty()
 {
-    return m_areas.isEmpty() & m_doors.isEmpty() & m_nodes.isEmpty();
+    return m_areas.isEmpty() & m_doors.isEmpty() &
+            m_nodes.isEmpty() & m_arcs.isEmpty();
 }
 
 void MapSelection::clear()
@@ -122,4 +143,6 @@ void MapSelection::clear()
         removeItem(m_doors[0]);
     while (m_nodes.size() != 0)
         removeItem(m_nodes[0]);
+    while (m_arcs.size() != 0)
+        removeItem(m_arcs[0]);
 }

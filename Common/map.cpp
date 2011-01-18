@@ -83,6 +83,11 @@ void Map::deleteNode(GraphNode *node)
     m_graph->deleteNode(node);
 }
 
+void Map::deleteArc(GraphArc *arc)
+{
+    m_graph->deleteArc(arc);
+}
+
 void Map::setLastNode(GraphNode *node)
 {
     for (int i = 0; i != m_floors.size(); i++)
@@ -246,8 +251,8 @@ void Map::insertFloor(int i)
             SLOT(addNode(QPointF,quint32)));
     connect(floor, SIGNAL(deletedNode(GraphNode*)),
             SLOT(deleteNode(GraphNode*)));
-    connect(floor, SIGNAL(graphStartedAnew()),
-            SLOT(graphStartAnew()));
+    connect(floor, SIGNAL(deletedArc(GraphArc*)), SLOT(deleteArc(GraphArc*)));
+    connect(floor, SIGNAL(graphStartedAnew()), SLOT(graphStartAnew()));
 }
 
 void Map::swapFloors(int x, int y)

@@ -56,6 +56,7 @@ private slots:
     void areaActivated(MapArea *area, bool activated);
     void addNode(QPointF point, quint32 floorUin);
     void deleteNode(GraphNode *node);
+    void deleteArc(GraphArc *arc);
     void setLastNode(GraphNode *node);
     void addGraphItem(QGraphicsItem *item);
 //    void deleteGraphItem(QGraphicsItem *item);
