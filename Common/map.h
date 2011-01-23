@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QDataStream>
 #include "graph.h"
-//#include "graphnode.h"
+#include "grapharc.h"
 #include "mapfloor.h"
 #include "mapvertical.h"
 
@@ -31,6 +31,7 @@ public:
     MapVertical* vertical(const int vertNum) const;
     void setNameVertical(const int vertNum, const QString &name);
     void setTypeVertical(const int vertNum, GraphArc::VerticalType);
+    void updateVertical(const int vertNum);
     GraphArc::VerticalType typeVertical(const int vertNum) const;
     void selectVertical(const int vertNum);
     void deselectVertical();

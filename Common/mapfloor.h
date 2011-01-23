@@ -60,9 +60,10 @@ public:
     void crossBaseSetVisible(bool visible);
     MapArea* area(int i);
     MapArea* areaByUin(quint32 uin);
-    void selectArea(MapArea *area);
-    void resetSelection();
-    QGraphicsItem* selectedItem();
+//    void selectArea(MapArea *area);
+//    void resetSelection();
+//    QGraphicsItem* selectedItem();
+    MapSelection* selection();
     virtual void addItem (QGraphicsItem *item);
     MapArea::CreateError addArea(MapArea *area);
     bool addDoor(MapDoor *door);
@@ -76,7 +77,6 @@ signals:
     void modeChanged(MapFloor::Mode);
     void mouseDoubleClicked();
     void mouseMiddleButtonClicked(QGraphicsItem *item);
-    void areaActivated(MapArea *area, bool activated);
     void addedNode(QPointF point, quint32 floor);
     void deletedNode(GraphNode *node);
     void deletedArc(GraphArc *arc);
