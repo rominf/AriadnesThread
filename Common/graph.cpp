@@ -12,14 +12,14 @@ QDataStream & operator<<(QDataStream &output, const Graph &graph)
     QVector<GraphArc*> arcs;
     GraphNode *n;
     QStack<GraphNode*> stk;
-    for (int i = 0; i < graph.m_startNodes.size(); i++)
+    for (int i = 0; i < graph.m_nodes.size(); i++)
     {
-        stk.push(graph.m_startNodes.at(i));
-        nodes.append(graph.m_startNodes.at(i));
+        stk.push(graph.m_nodes.at(i));
+        nodes.append(graph.m_nodes.at(i));
         while (!stk.isEmpty())
         {
             n = stk.pop();
-            output << *n  << graph.m_startNodes.contains(n);
+            output << *n  << graph.m_nodes.contains(n);
             for (int i = 0; i !=n->arcsNumber(); i++)
             {
                 GraphNode *next = n->adjacentNode(n->arc(i));
@@ -57,7 +57,7 @@ QDataStream & operator>>(QDataStream &input, Graph &graph)
     {
         nodes.insert(node->uin(), node);
         if (isStartNode)
-            graph.m_startNodes.append(node);
+            graph.m_nodes.append(node);
         emit graph.graphItemAdded(node);
         node = new GraphNode();
         input >> *node >> isStartNode;
@@ -96,9 +96,9 @@ void Graph::addNode(QPointF point, quint32 floorUin)
     GraphNode *n;
     QStack<GraphNode*> stk;
     QVector<GraphNode*> vec;
-    for (int i = 0; i < m_startNodes.size(); i++)
+    for (int i = 0; i < m_nodes.size(); i++)
     {
-        GraphNode *startNode = m_startNodes.at(i);
+        GraphNode *startNode = m_nodes.at(i);
         stk.push(startNode);
         vec.append(startNode);
         while (!stk.isEmpty())
@@ -107,9 +107,9 @@ void Graph::addNode(QPointF point, quint32 floorUin)
             // Removing surplus nodes
             if (n != startNode)
             {
-                int i = m_startNodes.indexOf(n);
+                int i = m_nodes.indexOf(n);
                 if (i > -1)
-                    m_startNodes.remove(i);
+                    m_nodes.remove(i);
             }
             if ((n->pos() == point) & (n->floorUin() == floorUin))
             {
@@ -138,9 +138,9 @@ void Graph::addNode(QPointF point, quint32 floorUin)
         // Checking: is one of arc's contain this node
         stk.clear();
         vec.clear();
-        for (int i = 0; i < m_startNodes.size(); i++)
+        for (int i = 0; i < m_nodes.size(); i++)
         {
-            GraphNode *startNode = m_startNodes.at(i);
+            GraphNode *startNode = m_nodes.at(i);
             stk.push(startNode);
             vec.append(startNode);
             while (!stk.isEmpty())
@@ -190,7 +190,7 @@ void Graph::addNode(QPointF point, quint32 floorUin)
         }
     }
     else
-        m_startNodes.append(node);
+        m_nodes.append(node);
     setLastNode(node);
 }
 
@@ -208,15 +208,15 @@ void Graph::deleteNode(GraphNode *node)
         else
             setLastNode(0);
     }
-    int i = m_startNodes.indexOf(node);
+    int i = m_nodes.indexOf(node);
     if (i > -1)
-        m_startNodes.remove(i);
+        m_nodes.remove(i);
     GraphNode *adjNode;
     for (int i = 0; i != node->arcsNumber(); i++)
     {
         adjNode = node->adjacentNode(node->arc(i));
-        if (!m_startNodes.contains(adjNode))
-            m_startNodes.append(adjNode);
+        if (!m_nodes.contains(adjNode))
+            m_nodes.append(adjNode);
     }
     emit graphItemDeleted(node);
     delete node;
@@ -228,10 +228,10 @@ void Graph::copyFloor(quint32 fromUin, quint32 toUin)
     QStack<GraphNode*> stk;
     QVector<GraphNode*> vec;
 
-    int startNodesNumber = m_startNodes.size();
+    int startNodesNumber = m_nodes.size();
     for (int i = 0; i != startNodesNumber; i++)
     {
-        GraphNode *startNode = m_startNodes.at(i);
+        GraphNode *startNode = m_nodes.at(i);
         stk.push(startNode);
         vec.append(startNode);
         while (!stk.isEmpty())
@@ -272,9 +272,9 @@ void Graph::setVisible(bool visible)
     GraphNode *n;
     QStack<GraphNode*> stk;
     QVector<GraphNode*> vec;
-    for (int i = 0; i < m_startNodes.size(); i++)
+    for (int i = 0; i < m_nodes.size(); i++)
     {
-        GraphNode *startNode = m_startNodes.at(i);
+        GraphNode *startNode = m_nodes.at(i);
         stk.push(startNode);
         vec.append(startNode);
         while (!stk.isEmpty())
@@ -283,9 +283,9 @@ void Graph::setVisible(bool visible)
             // Removing surplus nodes
             if (n != startNode)
             {
-                int i = m_startNodes.indexOf(n);
+                int i = m_nodes.indexOf(n);
                 if (i > -1)
-                    m_startNodes.remove(i);
+                    m_nodes.remove(i);
             }
             n->setVisible(visible);
             int size = n->arcsNumber();
@@ -308,15 +308,28 @@ void Graph::startAnew()
     m_lastNode = 0;
 }
 
-void Graph::makeWay(const QVector<GraphNode *> start,
-                const QVector<GraphNode *> finish,
-                const GraphArc::WayPermissions permissions)
+void Graph::setStartNodes(const QVector<GraphNode *> nodes)
+{
+    m_startNodes = nodes;
+}
+
+void Graph::setFinishNodes(const QVector<GraphNode *> nodes)
+{
+    m_finishNodes = nodes;
+}
+
+bool Graph::isStartAndFinishNodesValid() const
+{
+    return !m_startNodes.isEmpty() & !m_finishNodes.isEmpty();
+}
+
+void Graph::makeWay(const GraphArc::WayPermissions permissions)
 {
     clearWay();
     qreal min = INFINITY;
-    for (int i = 0; i != start.size(); i++)
-        min = qMin(djkstra(start.at(i), &finish, permissions, min),
-                   min);
+    for (int i = 0; i != m_startNodes.size(); i++)
+        min = qMin(djkstra(
+                m_startNodes.at(i), &m_finishNodes, permissions, min), min);
 //    if (!m_way.isEmpty())
 //        paintWay(true);
 //    else

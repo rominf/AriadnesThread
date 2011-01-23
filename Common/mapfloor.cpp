@@ -2,11 +2,15 @@
 
 const qreal MapFloor::OutlineZValue = 0.0;
 quint32 MapFloor::m_count = 0;
+QMap<int, QString> MapFloor::cModesNames;
 
 MapFloor::MapFloor(const QRectF &sceneRect, QObject *parent) :
     QGraphicsScene(sceneRect, parent),
     cCursorCircleR(7.0)
 {
+    cModesNames.insert(AreaAdd, tr("добавление области"));
+    cModesNames.insert(DoorAdd, tr("добавление двери"));
+    cModesNames.insert(NodeAdd, tr("добавление вершины графа"));
     m_mode = Idle;
     m_magnetToExtensions = false;
     m_border = new QGraphicsRectItem(sceneRect, 0, this);
@@ -127,6 +131,11 @@ QDataStream &operator>>(QDataStream &input, MapFloor &floor)
     return input;
 }
 
+const QString MapFloor::modeName(Mode mode)
+{
+    return cModesNames.value(mode);
+}
+
 QString MapFloor::name() const
 {
     return m_name;
@@ -168,7 +177,7 @@ void MapFloor::setMode(Mode m)
 //            break;
         case AreaAdd:
         case DoorAdd:
-        case WallAdd:
+//        case WallAdd:
             m_selection->clear();
             areasToLineVec();
             break;
@@ -197,16 +206,16 @@ void MapFloor::mousePressEvent(QGraphicsSceneMouseEvent *event)
     case Qt::LeftButton:
         switch (m_mode)
         {
-        case WallAdd:
-            if (!(m_tempLine))
-            {
-                m_tempLine = new QGraphicsLineItem(
-                        QLineF(m_cursorCircle->pos(),
-                               m_cursorCircle->pos()));
-                m_tempLine->setZValue(100500 - 5);
-                addItem(m_tempLine);
-            }
-            break;
+//        case WallAdd:
+//            if (!(m_tempLine))
+//            {
+//                m_tempLine = new QGraphicsLineItem(
+//                        QLineF(m_cursorCircle->pos(),
+//                               m_cursorCircle->pos()));
+//                m_tempLine->setZValue(100500 - 5);
+//                addItem(m_tempLine);
+//            }
+//            break;
         case AreaAdd:
         {
             QPointF p1;
@@ -256,7 +265,9 @@ void MapFloor::mousePressEvent(QGraphicsSceneMouseEvent *event)
                                                event->scenePos().y() - 0.5,
                                                1, 1, Qt::IntersectsItemShape,
                                                Qt::DescendingOrder);
-            QGraphicsItem *item = list.at(0);
+            QGraphicsItem *item = 0;
+            if (!list.isEmpty())
+                item = list.at(0);
 //            if (Geometry::getPerpendicularBase(event->scenePos(), ))
             bool selectionIsNormal = false;
             if (item)
@@ -323,14 +334,14 @@ void MapFloor::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         QPointF point = QPointF(0, 0);
         switch (m_mode)
         {
-        case WallAdd:
-            if (m_tempLine)
-                point = m_tempLine->line().p1();
-            line = getLine(QLineF(point, pos), (m_tempLine == 0),
-                           miLines | miTops, event->modifiers());
-            if (m_tempLine)
-                m_tempLine->setLine(line);
-            break;
+//        case WallAdd:
+//            if (m_tempLine)
+//                point = m_tempLine->line().p1();
+//            line = getLine(QLineF(point, pos), (m_tempLine == 0),
+//                           miLines | miTops, event->modifiers());
+//            if (m_tempLine)
+//                m_tempLine->setLine(line);
+//            break;
         case AreaAdd:
             if (!m_tempPolyline.isEmpty())
                 point = m_tempPolyline.back()->line().p1();
@@ -354,7 +365,7 @@ void MapFloor::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         default:
             break; // Ignore other :)
         }
-        if ((m_mode >= WallAdd) & (m_mode <= NodeAdd))
+        if ((m_mode >= AreaAdd) & (m_mode <= NodeAdd))
         {
             m_cursorCircle->show();
             m_cursorCircle->setPos(line.p2());
@@ -379,9 +390,9 @@ void MapFloor::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
         removeLastFromTempPolyline();
         finalizeArea();
         break;
-    case WallAdd:
-        finalizeWall();
-        break;
+//    case WallAdd:
+//        finalizeWall();
+//        break;
     default:
         break; // Ignore other :)
     }
@@ -459,9 +470,9 @@ void MapFloor::keyPressEvent(QKeyEvent *event)
         case DoorAdd:
             finalizeDoor();
             break;
-        case WallAdd:
-            finalizeWall();
-            break;
+//        case WallAdd:
+//            finalizeWall();
+//            break;
         case NodeAdd:
             setMode(Idle);
 //            emit graphStartedAnew();
@@ -569,9 +580,10 @@ MapArea* MapFloor::areaByUin(quint32 uin)
     return 0;
 }
 
-void MapFloor::selectArea(quint32 area)
+void MapFloor::selectArea(MapArea *area)
 {
-    m_selection->addItem(areaByUin(area));
+    if (area)
+        m_selection->addItem(area);
 }
 
 void MapFloor::resetSelection()

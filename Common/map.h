@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QDataStream>
 #include "graph.h"
-#include "graphnode.h"
+//#include "graphnode.h"
 #include "mapfloor.h"
 #include "mapvertical.h"
 
@@ -26,6 +26,7 @@ public:
     MapFloor* floorByUin(const quint32 uin) const;
     void addVertical();
     void deleteVertical(const int vertNum);
+    void swapVerticals(int x, int y);
     int verticalsNumber();
     MapVertical* vertical(const int vertNum) const;
     void setNameVertical(const int vertNum, const QString &name);
@@ -33,10 +34,13 @@ public:
     GraphArc::VerticalType typeVertical(const int vertNum) const;
     void selectVertical(const int vertNum);
     void deselectVertical();
+    bool areaCopy(MapArea *area, int floorFromIndex, int floorToIndex);
+    bool areasAutoRenaming() const;
+    void setAreasAutoRenaming(bool enabled);
     Graph* graph() const;
     void setStart(QGraphicsItem *item);
     void setFinish(QGraphicsItem *item);
-    bool startAndFinishValid() const;
+    bool isStartAndFinishNodesValid() const;
     void way(const GraphArc::WayPermissions permissions);
     void paintWay();
     void clearWay();
@@ -74,10 +78,11 @@ private:
     Graph *m_graph;
     QVector<MapFloor*> m_floors;
     QVector<MapVertical*> m_verticals;
+    bool m_areasAutoRenaming;
     int m_selectedVertical;
 //    MapSelection *m_copy;
-    QVector<GraphNode*> m_startNodes;
-    QVector<GraphNode*> m_finishNodes;
+//    QVector<GraphNode*> m_startNodes;
+//    QVector<GraphNode*> m_finishNodes;
 
     qreal m_pixPerRealM;
     qreal m_pixPerDisplayM;

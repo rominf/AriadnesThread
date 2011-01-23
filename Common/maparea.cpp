@@ -17,25 +17,24 @@ MapArea::MapArea(const QPolygonF &polygon, const quint32 floorUin):
 }
 
 MapArea::MapArea(const MapArea &area, const quint32 floorUin,
-                 const QString &before, const QString &after):
+                 const QString &floorFromName, const QString &floorToName):
         QGraphicsPolygonItem(area.polygon()), m_floorUin(floorUin)
 {
     setBrush(QBrush(Qt::NoBrush));
     m_uin = ++m_count;
     m_inscription = new QGraphicsTextItem(this);
     QString oldAreasNumber = area.m_number;
-    QString newAreasNumber;
-    if (oldAreasNumber.indexOf(before) == 0)
-        newAreasNumber = oldAreasNumber.replace(before, after);
-    else
-        newAreasNumber = oldAreasNumber;
+    QString newAreasNumber = oldAreasNumber;
+    if (oldAreasNumber.indexOf(floorFromName) == 0)
+        newAreasNumber.replace(0, floorFromName.length(), floorToName);
     m_number = newAreasNumber;
     m_name = area.m_name;
     m_description = area.m_description;
-    setInscription(area.m_inscription->toPlainText());
+    setInscription(area.m_inscription->toPlainText().replace(
+            oldAreasNumber, newAreasNumber));
 //    updateTitle();
     for (int i = 0; i != area.m_areas.size(); i++)
-        addArea(new MapArea(*area.m_areas.at(i), floorUin, before, after));
+        addArea(new MapArea(*area.m_areas.at(i), floorUin, floorFromName, floorToName));
 }
 
 QDataStream &operator<<(QDataStream &output, const MapArea &area)

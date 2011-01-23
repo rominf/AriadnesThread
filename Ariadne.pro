@@ -1,4 +1,4 @@
- 
+QT += svg
 
 HEADERS += \
     Common/map.h \
