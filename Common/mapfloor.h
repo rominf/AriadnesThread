@@ -8,6 +8,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QKeyEvent>
 #include <QLineF>
+#include <QMap>
 #include <QMessageBox>
 #include <QObject>
 #include <QPixmap>
@@ -36,7 +37,7 @@ public:
     static const qreal OutlineZValue;
     enum Mode
     {
-        Idle, WallAdd, AreaAdd, DoorAdd, NodeAdd, Selection
+        Idle, /*WallAdd, */AreaAdd, DoorAdd, NodeAdd, Selection
     };
     enum MagnetItem
     {
@@ -47,6 +48,7 @@ public:
     };
     Q_DECLARE_FLAGS(MagnetItems, MagnetItem)
 
+    static const QString modeName(Mode mode);
     QString name() const;
     void setName(const QString &floorName);
     MapFloor::Mode mode();
@@ -58,7 +60,7 @@ public:
     void crossBaseSetVisible(bool visible);
     MapArea* area(int i);
     MapArea* areaByUin(quint32 uin);
-    void selectArea(quint32 area);
+    void selectArea(MapArea *area);
     void resetSelection();
     QGraphicsItem* selectedItem();
     virtual void addItem (QGraphicsItem *item);
@@ -91,6 +93,7 @@ protected:
 
 private:
     const qreal cCursorCircleR;
+    static QMap<int, QString> cModesNames;
 
     Mode m_mode;
     bool m_magnetToExtensions;

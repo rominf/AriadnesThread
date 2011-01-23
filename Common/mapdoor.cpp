@@ -76,8 +76,9 @@ GraphNode* MapDoor::node()
 void MapDoor::setNode(GraphNode *node)
 {
     m_node = node;
-    if (node->door() != this)
-        node->setDoor(this);
+    if (node)
+        if (node->door() != this)
+            node->setDoor(this);
 }
 
 quint32 MapDoor::floorUin()

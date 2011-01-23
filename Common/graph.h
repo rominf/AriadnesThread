@@ -30,9 +30,10 @@ public:
     void copyFloor(quint32 fromUin, quint32 toUin);
     void setVisible(bool visible);
     void startAnew();
-    void makeWay(const QVector<GraphNode*> start,
-                 const QVector<GraphNode*> finish,
-                 const GraphArc::WayPermissions permissions);
+    void setStartNodes(const QVector<GraphNode*> nodes);
+    void setFinishNodes(const QVector<GraphNode*> nodes);
+    bool isStartAndFinishNodesValid() const;
+    void makeWay(const GraphArc::WayPermissions permissions);
     void paintWay(bool isActive = true);
     void clearWay();
     QVector<GraphNode*> way() const;
@@ -47,7 +48,9 @@ signals:
     void lastNodeChanged(GraphNode *node);
 //    void graphNodesChanged(QVector<QPointF*> &nodes, int floor);
 private:
+    QVector<GraphNode*> m_nodes;
     QVector<GraphNode*> m_startNodes;
+    QVector<GraphNode*> m_finishNodes;
     QVector<GraphNode*> m_way;
     GraphNode *m_lastNode;
     bool m_visible;

@@ -11,6 +11,8 @@ m_pixSizeX(mapPixSizeX), m_pixSizeY(mapPixSizeY)
 {
     // Count map geometry
 //    m_realMPerDisplayM = m_pixPerDisplayM / m_pixPerRealM;
+    // ### Make autoAreasRenaming editable by user
+    m_areasAutoRenaming = true;
     m_selectedVertical = -1;
     m_graph = new Graph();
     connect(m_graph, SIGNAL(graphItemAdded(QGraphicsItem*)),
@@ -80,6 +82,8 @@ void Map::addNode(QPointF point, quint32 floorUin)
 
 void Map::deleteNode(GraphNode *node)
 {
+    if (node->door())
+        node->door()->setNode(0);;
     m_graph->deleteNode(node);
 }
 
@@ -295,6 +299,13 @@ void Map::deleteVertical(const int vertNum)
     m_verticals.remove(vertNum);
 }
 
+void Map::swapVerticals(int x, int y)
+{
+    MapVertical *vertical = m_verticals.at(x);
+    m_verticals[x] = m_verticals[y];
+    m_verticals[y] = vertical;
+}
+
 int Map::verticalsNumber()
 {
     return m_verticals.size();
@@ -319,69 +330,85 @@ void Map::setTypeVertical(const int vertNum, const GraphArc::VerticalType type)
     if (vertNum > -1)
     {
         MapVertical *vertical = m_verticals.at(vertNum);
-        QVector<MapDoor*> doors;
         m_verticals.at(vertNum)->setType(type);
-        for (int i = 0; i != m_floors.size(); i++)
+        if ((type == GraphArc::Stairs) | (type == GraphArc::Lift))
         {
-            MapArea *area = m_floors.at(i)->areaByUin(
-                    vertical->area(m_floors.at(i)->uin()));
-            if (area != 0)
+            QVector<MapDoor*> doors;
+            for (int i = 0; i != m_floors.size(); i++)
             {
-                doors.append(area->door(area->doorsNumber()-1));
-                if (area->doorsNumber() > 1)
-                    area->setBrush(Qt::red);
-            }
+                MapArea *area = m_floors.at(i)->areaByUin(
+                        vertical->area(m_floors.at(i)->uin()));
+                if (area != 0)
+                {
+                    if (area->doorsNumber() > 0)
+                    {
+                        for (int i = 0; i != area->doorsNumber() - 1; i++)
+                        {
+                            GraphNode *node1 = area->door(i)->node();
+                            GraphNode *node2 = area->door(i+1)->node();
+                            if ((node1 != 0) & (node2 != 0))
+                            {
+                                GraphArc *arc =
+                                        new GraphArc(node1, node2, type);
+                                arc->setLenght(0);
+                            }
+                        }
+                        doors.append(area->door(0));
+                        if (area->doorsNumber() > 1)
+                            area->setBrush(Qt::red);
+                    }
+                }
 
-        }
-        if (!doors.isEmpty())
-            for (int i = 0; i != doors.size(); i++)
-            {
-//                MapDoor *door = doors.at(i);
-                GraphNode *n = doors.at(i)->node();
-                if (n)
-                {
-                    int j = 0;
-                    while (j != n->arcsNumber())
-                        if (n->arc(j)->floorUin() == 0)
-                            delete n->arc(j);
-                        else
-                            j++;
-                }
-//                QGraphicsItem *item =
-//                        floorByUin(door->floorUin())->itemAt(door->pos());
-//                if (item != 0)
-//                    if (item->type() == GraphNode::Type)
-//                    {
-//                        GraphNode *n = qgraphicsitem_cast<GraphNode*>(item);
-//                        int j = 0;
-//                        while (j != n->arcsNumber())
-//                            if (n->arc(j)->floorUin() == 0)
-//                                delete n->arc(j);
-//                            else
-//                                j++;
-//                    }
             }
-        if (!doors.isEmpty())
-            for (int i = 0; i != doors.size() - 1; i++)
-                if ((doors.at(i)->node() != 0) & (doors.at(i+1)->node() != 0) &
-                    ((type == GraphArc::Stairs) | (type == GraphArc::Lift)))
+            if (!doors.isEmpty())
+                for (int i = 0; i != doors.size(); i++)
                 {
-                    GraphNode *node1 = doors.at(i)->node();
-                    GraphNode *node2 = doors.at(i+1)->node();
-                    if (type == GraphArc::Lift)
+    //                MapDoor *door = doors.at(i);
+                    GraphNode *n = doors.at(i)->node();
+                    if (n)
                     {
-                        GraphArc *arc = new GraphArc(node1, node2, type);
-                        arc->setLenght(
-                                convertRealMToPix(cSpeedMPerMin * cTimeLift));
+                        int j = 0;
+                        while (j != n->arcsNumber())
+                            if (n->arc(j)->floorUin() == 0)
+                                delete n->arc(j);
+                            else
+                                j++;
                     }
-                    if (type == GraphArc::Stairs)
-                    {
-                        GraphArc *arc1 = new GraphArc(node1, node2, type, true);
-                        arc1->setLenght(convertRealMToPix(m_lengthStairsDown));
-                        GraphArc *arc2 = new GraphArc(node2, node1, type, true);
-                        arc2->setLenght(convertRealMToPix(m_lengthStairsUp));
-                    }
+    //                QGraphicsItem *item =
+    //                        floorByUin(door->floorUin())->itemAt(door->pos());
+    //                if (item != 0)
+    //                    if (item->type() == GraphNode::Type)
+    //                    {
+    //                        GraphNode *n = qgraphicsitem_cast<GraphNode*>(item);
+    //                        int j = 0;
+    //                        while (j != n->arcsNumber())
+    //                            if (n->arc(j)->floorUin() == 0)
+    //                                delete n->arc(j);
+    //                            else
+    //                                j++;
+    //                    }
                 }
+            if (!doors.isEmpty())
+                for (int i = 0; i != doors.size() - 1; i++)
+                    if ((doors.at(i)->node() != 0) & (doors.at(i+1)->node() != 0))
+                    {
+                        GraphNode *node1 = doors.at(i)->node();
+                        GraphNode *node2 = doors.at(i+1)->node();
+                        if (type == GraphArc::Lift)
+                        {
+                            GraphArc *arc = new GraphArc(node1, node2, type);
+                            arc->setLenght(
+                                    convertRealMToPix(cSpeedMPerMin * cTimeLift));
+                        }
+                        if (type == GraphArc::Stairs)
+                        {
+                            GraphArc *arc1 = new GraphArc(node1, node2, type, true);
+                            arc1->setLenght(convertRealMToPix(m_lengthStairsDown));
+                            GraphArc *arc2 = new GraphArc(node2, node1, type, true);
+                            arc2->setLenght(convertRealMToPix(m_lengthStairsUp));
+                        }
+                    }
+        }
 //                QGraphicsItem *item1 =
 //                        floorByUin(door1->floorUin())->itemAt(door1->pos());
 //                QGraphicsItem *item2 =
@@ -447,9 +474,16 @@ void Map::selectVertical(const int vertNum)
     m_selectedVertical = vertNum;
     for (int i = 0; i != m_floors.size(); i++)
     {
-        quint32 area = m_verticals.at(vertNum)->area(m_floors.at(i)->uin());
-        if (area)
-            m_floors.at(i)->selectArea(area);
+        quint32 floorUin = m_floors.at(i)->uin();
+        quint32 areaUin = m_verticals.at(vertNum)->area(floorUin);
+        if (areaUin)
+        {
+            MapArea *area = m_floors.at(i)->areaByUin(areaUin);
+            if (area)
+                m_floors.at(i)->selectArea(area);
+            else
+                m_verticals.at(vertNum)->deleteArea(floorUin);
+        }
     }
     for (int i = 0; i != m_floors.size(); i++)
         m_floors.at(i)->blockSignals(false);
@@ -467,6 +501,70 @@ void Map::deselectVertical()
         m_floors.at(i)->resetSelection();
 }
 
+bool Map::areaCopy(MapArea *area, int floorFromIndex, int floorToIndex)
+{
+    MapFloor *floorFrom = m_floors.at(floorFromIndex);
+    MapFloor *floorTo = m_floors.at(floorToIndex);
+    if (floorFromIndex != floorToIndex)
+    {
+        MapArea *newArea;
+        if (m_areasAutoRenaming)
+            newArea = new MapArea(*area, floorTo->uin(),
+                                  floorFrom->name(), floorTo->name());
+        else
+            newArea = new MapArea(*area, floorTo->uin(), "", "");
+        switch (floorTo->addArea(newArea))
+        {
+        case MapArea::ceNone:
+        {
+            MapArea *a;
+            QStack<MapArea*> stk;
+            stk.push(area);
+            while (!stk.isEmpty())
+            {
+                a = stk.pop();
+                for (int i = 0; i != a->doorsNumber(); i++)
+                {
+                    MapDoor *door = new MapDoor(*a->door(i));
+                    floorTo->addDoor(door);
+                }
+                int size = a->areasNumber();
+                for (int i = 0; i !=size; i++)
+                    stk.push(a->area(i));
+            }
+            return true;
+            break;
+        }
+        case MapArea::ceIntersection:
+            QMessageBox::warning(
+                    0, tr("Ошибка при копировании области"), tr("На ") +
+                    floorTo->name() + tr(" этаже недостаточно места для "
+                                         "вставки области."));
+            break;
+        case MapArea::ceAreaExist:
+            QMessageBox::warning(
+                    0, tr("Ошибка при копировании области"), tr("На ") +
+                    floorTo->name() + tr(" этаже уже есть данная область."));
+            break;
+        }
+    }
+    else
+        QMessageBox::warning(
+                0, tr("Ошибка при копировании области"), tr("На ") +
+                floorTo->name() + tr(" этаже уже есть данная область."));
+    return false;
+}
+
+bool Map::areasAutoRenaming() const
+{
+    return m_areasAutoRenaming;
+}
+
+void Map::setAreasAutoRenaming(bool enabled)
+{
+    m_areasAutoRenaming = enabled;
+}
+
 Graph* Map::graph() const
 {
     return m_graph;
@@ -476,7 +574,8 @@ void Map::setStart(QGraphicsItem *item)
 {
     QVector<GraphNode*> nodes = getNodesFromItem(item);
     if (!nodes.isEmpty())
-        m_startNodes = nodes;
+        m_graph->setStartNodes(nodes);
+//        m_startNodes = nodes;
 //    if (item->type() == GraphNode::Type)
 //    {
 //        m_startNodes.clear();
@@ -488,7 +587,8 @@ void Map::setFinish(QGraphicsItem *item)
 {
     QVector<GraphNode*> nodes = getNodesFromItem(item);
     if (!nodes.isEmpty())
-        m_finishNodes = nodes;
+        m_graph->setFinishNodes(nodes);
+//        m_finishNodes = nodes;
 //    if (item->type() == GraphNode::Type)
 //    {
 //        m_finishNodes.clear();
@@ -496,15 +596,15 @@ void Map::setFinish(QGraphicsItem *item)
 //    }
 }
 
-bool Map::startAndFinishValid() const
+bool Map::isStartAndFinishNodesValid() const
 {
-    return !m_startNodes.isEmpty() & !m_finishNodes.isEmpty();
+    return m_graph->isStartAndFinishNodesValid();
 }
 
 void Map::way(const GraphArc::WayPermissions permissions)
 {
-    if (!m_startNodes.isEmpty() & !m_finishNodes.isEmpty())
-        m_graph->makeWay(m_startNodes, m_finishNodes, permissions);
+    if (isStartAndFinishNodesValid())
+        m_graph->makeWay(permissions);
 }
 
 void Map::paintWay()

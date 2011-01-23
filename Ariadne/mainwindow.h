@@ -69,15 +69,15 @@ public:
         eFile = 1,
         eEdit = 2,
         eView = 4,
-        eLayers = 8,
+        eGo = 8,
+//        eLayers = 8,
         eAdd  = 16,
         eHelp = 32,
-        eFloorsSwitching = 64,
-        ePanels = 128,
-        eFloorsManagement = 256,
-        eVerticals = 512,
-        eAreasMarking =1024,
-        eWay = 2048
+        ePanels = 64,
+        eFloorsManagement = 128,
+        eVerticals = 256,
+        eAreasMarking =512,
+        eWay = 1024
     };
     Q_DECLARE_FLAGS(Elements, Element)
 
@@ -108,7 +108,7 @@ private slots:
     void layerGraphSetVisible(bool visible);
     void magnetToExtensions(bool b);
 //    void floorNameChange(const QString &); // Set current floor name
-    void addWall();                     // Adding wall
+//    void addWall();                     // Adding wall
     void addArea();                     // Adding area
     void addDoor();                     // Adding door
     void addNode();                     // Adding graph node
@@ -122,7 +122,7 @@ private slots:
     void floorMoveDown();
     void floorMoveUp();
     void floorSetDefault();
-    void viewFloorsListItemActivated(QModelIndex index);
+    void viewFloorsListCurrentItemChanged(const QModelIndex &current, const QModelIndex &previous);
     void viewFloorsListItemChanged(QModelIndex index);
     void mouseDoubleClicked();
     void mouseMiddleButtonClicked(QGraphicsItem *item);
@@ -130,8 +130,10 @@ private slots:
     void panelVerticalsVisibilityChanged(bool visible);
     void verticalAdd();
     void verticalDelete();
+    void verticalMoveDown();
+    void verticalMoveUp();
     void verticalSetType(int type);
-    void lstwgtVerticalsItemActivated(QListWidgetItem* item);
+    void lstwgtVerticalsCurrentItemChanged(QListWidgetItem *current, QListWidgetItem *previous);
 //    void wgtVerticalsListCurrentRowChanged(int row);
     void lstwgtVerticalsItemChanged(QListWidgetItem* item);
 
@@ -145,7 +147,7 @@ private slots:
     void panelWayVisibilityChanged(bool visible);
     void setStart();
     void setFinish();
-    void lstwgtWaysItemActivated(QListWidgetItem* item);
+    void lstwgtWaysCurrentItemChanged(QListWidgetItem *current, QListWidgetItem *previous);
     void way();
 //    void chkAreaNumberVisibleStateChanged(int state);
 //    void chkAreaNameVisibleStateChanged(int state);
@@ -171,7 +173,6 @@ private:
     MapFloor::Mode mode;
     int curFloor;
     quint32 defaultFloor;
-    bool autoAreasRenaming;
 //    bool isFirstAreasMarking;
 
     ///////////////////////////////Enums////////////////////////////////////////
@@ -205,7 +206,7 @@ private:
     QAction *actLayerCrossBase;
     QAction *actLayerGraph;
     QAction *actMagnetToExtensions;
-    QAction *actAddWall;
+//    QAction *actAddWall;
     QAction *actAddArea;
     QAction *actAddDoor;
     QAction *actAddNode;
@@ -221,6 +222,8 @@ private:
     QAction *actPanelVerticals;
     QAction *actVerticalAdd;
     QAction *actVerticalDelete;
+    QAction *actVerticalMoveDown;
+    QAction *actVerticalMoveUp;
 //    QAction *actVerticalSetPassage;
 
     QAction *actPanelAreasMarking;
@@ -239,17 +242,20 @@ private:
     // Menus
     QMenu *menuFile;
     QMenu *menuEdit;
-    QMenu *menuPanels;
-    QMenu *menuAdd;
+    QMenu *menuView;
+    QMenu *menuGo;
+//    QMenu *menuLayers;
+//    QMenu *menuAdd;
+//    QMenu *menuPanels;
     QMenu *menuHelp;
 
     // Toolbars
     QToolBar *tbrFile;
-    QToolBar *tbrEdit;
-    QToolBar *tbrFloorsSwitching;
-    QComboBox *cbxFloorSelect;
+//    QToolBar *tbrEdit;
     QToolBar *tbrView;
-    QToolBar *tbrLayers;
+    QToolBar *tbrGo;
+    QComboBox *cbxFloorSelect;
+//    QToolBar *tbrLayers;
     QToolBar *tbrAdd;
     QToolBar *tbrPanels;
     /*QToolBar *tbrFloorNameChange;
@@ -279,6 +285,8 @@ private:
     QHBoxLayout *hblVerticalsButtons;
     QToolButton *btnVerticalAdd;
     QToolButton *btnVerticalDelete;
+    QToolButton *btnVerticalMoveDown;
+    QToolButton *btnVerticalMoveUp;
 //    QToolButton *btnVerticalSetPassage;
     QComboBox *cbxVerticalType;
     QListWidget *lstwgtVerticals;
@@ -337,6 +345,7 @@ private:
     void setState(Elements elem, State visible, State enable);
     qreal displayPixPerM(qreal pix, qreal mm) const;
     void swapFloors(int x, int y);
+    void swapVerticals(int x, int y);
     MapFloor::Mode getMode();
     void mapSave(QString &fileName);
 };
