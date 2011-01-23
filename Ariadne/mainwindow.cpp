@@ -389,8 +389,10 @@ void MainWindow::createToolBars()
     tbrView->addAction(actZoomIn);
     tbrView->addAction(actZoomFit);
 //    tbrView->addAction(actAddBase);
-//    tbrView->addAction(actHandDrag);
-//    tbrView->addAction(actMagnetToExtensions);
+    tbrView->addAction(actHandDrag);
+//    actHandDrag->setVisible(false);
+    tbrView->addAction(actMagnetToExtensions);
+//    actMagnetToExtensions->setVisible(false);
 
     tbrGo = addToolBar(tr("Переключение этажей"));
 //    addToolBar(Qt::BottomToolBarArea, tbrFloorsSwitching);
@@ -815,11 +817,11 @@ void MainWindow::setState(Elements elem, State visible, State enable)
                 actAddBase->setVisible(visible);
                 actMagnetToExtensions->setVisible(visible);
             }
-            else
-            {
-                actAddBase->setVisible(false);
-                actMagnetToExtensions->setVisible(false);
-            }
+//            else
+//            {
+//                actAddBase->setVisible(false);
+//                actMagnetToExtensions->setVisible(false);
+//            }
             actHandDrag->setVisible(visible);
 
             if (m_program == pFull)
@@ -1285,11 +1287,11 @@ void MainWindow::exit()
 
 void MainWindow::areaCopy()
 {
-    if (map->floor(curFloor)->selectedItem() != 0)
-        if (map->floor(curFloor)->selectedItem()->type() == MapArea::Type)
+    if (map->floor(curFloor)->selection()->item() != 0)
+        if (map->floor(curFloor)->selection()->item()->type() == MapArea::Type)
         {
             MapArea *oldArea = qgraphicsitem_cast<MapArea*>(
-                    map->floor(curFloor)->selectedItem());
+                    map->floor(curFloor)->selection()->item());
             int i;
             if (curFloor > 0)
                 i = curFloor - 1;
@@ -1568,14 +1570,14 @@ void MainWindow::switchMode(MapFloor::Mode m)
     case MapFloor::Selection:
         {
             bool selectionIsValid = false;
-            if (map->floor(curFloor)->selectedItem() != 0)
-                if (map->floor(curFloor)->selectedItem()->type() ==
+            if (map->floor(curFloor)->selection()->item() != 0)
+                if (map->floor(curFloor)->selection()->item()->type() ==
                                                                 MapArea::Type)
                 {
                     selectionIsValid = true;
                     setState(eAreasMarking | eWay, stSave, stTrue);
                     MapArea *area = qgraphicsitem_cast<MapArea*>(
-                            map->floor(curFloor)->selectedItem());
+                            map->floor(curFloor)->selection()->item());
                     bool isModified = false;
                     isModified = (!area->number().isEmpty() |
                                   !area->name().isEmpty() |
@@ -1643,7 +1645,7 @@ void MainWindow::setActiveFloor(int i)
                 SLOT(mouseMiddleButtonClicked(QGraphicsItem*)));
         setFocus();
         bool switchToSelection = false;
-        if (map->floor(i)->selectedItem() != 0)
+        if (map->floor(i)->selection()->item() != 0)
             if ((mode == MapFloor::Idle) | (mode == MapFloor::Selection))
             {
                 switchMode(MapFloor::Selection);
@@ -1805,11 +1807,11 @@ void MainWindow::panelAreasMarkingVisibilityChanged(bool visible)
 void MainWindow::setAreaNumber()
 {
     if (map->floorsNumber() > 0)
-        if (map->floor(curFloor)->selectedItem() != 0)
-            if (map->floor(curFloor)->selectedItem()->type() == MapArea::Type)
+        if (map->floor(curFloor)->selection()->item() != 0)
+            if (map->floor(curFloor)->selection()->item()->type() == MapArea::Type)
             {
                 MapArea *area = qgraphicsitem_cast<MapArea*>(
-                        map->floor(curFloor)->selectedItem());
+                        map->floor(curFloor)->selection()->item());
                 area->setNumber(ldtAreaNumber->text());
                 if (m_program == pFull)
                     if (!ptdtAreaInscription->document()->isModified())
@@ -1820,11 +1822,11 @@ void MainWindow::setAreaNumber()
 void MainWindow::setAreaName()
 {
     if (map->floorsNumber() > 0)
-        if (map->floor(curFloor)->selectedItem() != 0)
-            if (map->floor(curFloor)->selectedItem()->type() == MapArea::Type)
+        if (map->floor(curFloor)->selection()->item() != 0)
+            if (map->floor(curFloor)->selection()->item()->type() == MapArea::Type)
             {
                 MapArea *area = qgraphicsitem_cast<MapArea*>(
-                        map->floor(curFloor)->selectedItem());
+                        map->floor(curFloor)->selection()->item());
                 area->setName(ldtAreaName->text());
                 if (m_program == pFull)
                     if (!ptdtAreaInscription->document()->isModified())
@@ -1835,11 +1837,11 @@ void MainWindow::setAreaName()
 void MainWindow::setAreaDescription()
 {
     if (map->floorsNumber() > 0)
-        if (map->floor(curFloor)->selectedItem() != 0)
-            if (map->floor(curFloor)->selectedItem()->type() == MapArea::Type)
+        if (map->floor(curFloor)->selection()->item() != 0)
+            if (map->floor(curFloor)->selection()->item()->type() == MapArea::Type)
             {
                 MapArea *area = qgraphicsitem_cast<MapArea*>(
-                        map->floor(curFloor)->selectedItem());
+                        map->floor(curFloor)->selection()->item());
                 area->setDescription(
                         ptdtAreaDescription->document()->toPlainText());
                 if (m_program == pFull)
@@ -1851,11 +1853,11 @@ void MainWindow::setAreaDescription()
 void MainWindow::setAreaInscription()
 {
     if (map->floorsNumber() > 0)
-        if (map->floor(curFloor)->selectedItem() != 0)
-            if (map->floor(curFloor)->selectedItem()->type() == MapArea::Type)
+        if (map->floor(curFloor)->selection()->item() != 0)
+            if (map->floor(curFloor)->selection()->item()->type() == MapArea::Type)
             {
                 MapArea *area = qgraphicsitem_cast<MapArea*>(
-                        map->floor(curFloor)->selectedItem());
+                        map->floor(curFloor)->selection()->item());
                 area->setInscription(
                         ptdtAreaInscription->document()->toPlainText());
             }
@@ -1894,7 +1896,7 @@ void MainWindow::setStart()
 {
     if (mode == MapFloor::Selection)
     {
-        map->setStart(map->floor(curFloor)->selectedItem());
+        map->setStart(map->floor(curFloor)->selection()->item());
         way();
     }
 }
@@ -1903,7 +1905,7 @@ void MainWindow::setFinish()
 {
     if (mode == MapFloor::Selection)
     {
-        map->setFinish(map->floor(curFloor)->selectedItem());
+        map->setFinish(map->floor(curFloor)->selection()->item());
         way();
     }
 }

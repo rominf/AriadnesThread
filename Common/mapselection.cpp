@@ -21,8 +21,11 @@ MapSelection::MapSelection(bool multiselection):
 
 void MapSelection::addItem(QGraphicsItem *item)
 {
-        if (!m_multiselection)
-            clear();
+    bool b = item != this->item();
+    if (!m_multiselection)
+        clear();
+    if (b)
+    {
         QAbstractGraphicsShapeItem *shapeItem = 0;
         int type = item->type();
         if ((type == MapArea::Type) | (type == MapDoor::Type) |
@@ -39,6 +42,7 @@ void MapSelection::addItem(QGraphicsItem *item)
             m_areas.append(qgraphicsitem_cast<MapArea*>(shapeItem));
             shapeItem->setBrush(*brushSelectedArea);
             shapeItem->setPen(*penSelectedArea);
+            emit areaActivated(m_areas.at(0), true);
             break;
         case MapDoor::Type:
             m_doors.append(qgraphicsitem_cast<MapDoor*>(shapeItem));
@@ -63,6 +67,7 @@ void MapSelection::addItem(QGraphicsItem *item)
         default:
             return;
         }
+    }
 }
 
 void MapSelection::removeItem(QGraphicsItem *item)
@@ -72,6 +77,7 @@ void MapSelection::removeItem(QGraphicsItem *item)
     case MapArea::Type:
     {
         MapArea *area = qgraphicsitem_cast<MapArea*>(item);
+        emit areaActivated(m_areas.at(0), false);
         area->setBrush(*brushNormalArea);
         area->setPen(*penNormal);
         int i = m_areas.indexOf(area);

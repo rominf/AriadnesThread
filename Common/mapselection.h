@@ -1,6 +1,7 @@
 #ifndef MAPSELECTION_H
 #define MAPSELECTION_H
 
+#include <QObject>
 #include <QBrush>
 #include <QPen>
 #include <QVector>
@@ -8,8 +9,9 @@
 #include "maparea.h"
 #include "mapdoor.h"
 
-class MapSelection
+class MapSelection: public QObject
 {
+    Q_OBJECT
 public:
     MapSelection(bool multiselection = false);
     void addItem(QGraphicsItem *item);
@@ -17,7 +19,8 @@ public:
     QGraphicsItem* item();
     bool isEmpty();
     void clear();
-
+signals:
+    void areaActivated(MapArea *area, bool activated);
 private:
     bool m_multiselection;
     QVector<MapArea*> m_areas;

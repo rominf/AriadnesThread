@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     a.installTranslator(translator);
     a.setWindowIcon(QIcon(":/Ariadne"));
 
-    MainWindow w(MainWindow::pViewer);
+    MainWindow w/*(MainWindow::pViewer)*/;
     w.show();
 
     return a.exec();
