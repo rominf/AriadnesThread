@@ -40,12 +40,16 @@ void MapSelection::addItem(QGraphicsItem *item)
         {
         case MapArea::Type:
             m_areas.append(qgraphicsitem_cast<MapArea*>(shapeItem));
+            brush = shapeItem->brush();
+            pen = shapeItem->pen();
             shapeItem->setBrush(*brushSelectedArea);
             shapeItem->setPen(*penSelectedArea);
             emit areaActivated(m_areas.at(0), true);
             break;
         case MapDoor::Type:
             m_doors.append(qgraphicsitem_cast<MapDoor*>(shapeItem));
+            brush = shapeItem->brush();
+            pen = shapeItem->pen();
             shapeItem->setBrush(*brushSelectedDoor);
             shapeItem->setPen(*penSelectedDoor);
             break;
@@ -78,8 +82,8 @@ void MapSelection::removeItem(QGraphicsItem *item)
     {
         MapArea *area = qgraphicsitem_cast<MapArea*>(item);
         emit areaActivated(m_areas.at(0), false);
-        area->setBrush(*brushNormalArea);
-        area->setPen(*penNormal);
+        area->setBrush(brush/**brushNormalArea*/);
+        area->setPen(pen/**penNormal*/);
         int i = m_areas.indexOf(area);
         if (i > -1)
             m_areas.remove(i);
@@ -88,8 +92,8 @@ void MapSelection::removeItem(QGraphicsItem *item)
     case MapDoor::Type:
     {
         MapDoor *door = qgraphicsitem_cast<MapDoor*>(item);
-        door->setBrush(*brushNormalDoor);
-        door->setPen(*penNormal);
+        door->setBrush(brush/**brushNormalDoor*/);
+        door->setPen(pen/**penNormal*/);
         int i = m_doors.indexOf(door);
         if (i > -1)
             m_doors.remove(i);
