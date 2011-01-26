@@ -1329,16 +1329,16 @@ void MainWindow::graphCopy()
             i = curFloor + 1;
         else
         {
-            QMessageBox::warning(0, tr("Ошибка при копировании области"),
+            QMessageBox::warning(0, tr("Ошибка при копировании графа"),
                                  tr("В здании только 1 этаж. Копирование "
-                                    "области на этаж, на котором она "
+                                    "графа на этаж, на котором он "
                                     "находится невозможно."));
             return;
         }
     DialogFloorChoice* dialog = new DialogFloorChoice(
             this, modelFloorsList, i, tr("Выберите этаж, на который будет"
                                          "\nскопирована часть графа,"
-                                         "\n находящегося на данном этаже:"));
+                                         "\nнаходящаяся на данном этаже:"));
     if (dialog->exec() == QDialog::Accepted)
     {
         int floor = dialog->floor();
@@ -1347,6 +1347,13 @@ void MainWindow::graphCopy()
             map->graph()->copyFloor(map->floor(curFloor)->uin(),
                                     map->floor(floor)->uin());
             setActiveFloor(floor);
+        }
+        else
+        {
+            QMessageBox::warning(0, tr("Ошибка при копировании графа"),
+                                 tr("Выбран этаж, совпадающий с текущим. "
+                                    "Выберите другой этаж."));
+            return;
         }
     }
 }
@@ -1802,6 +1809,8 @@ void MainWindow::mouseMiddleButtonClicked(QGraphicsItem *item)
 void MainWindow::panelAreasMarkingVisibilityChanged(bool visible)
 {
     actPanelAreasMarking->setChecked(visible);
+    if (visible)
+        ldtAreaNumber->setFocus();
 }
 
 void MainWindow::setAreaNumber()

@@ -12,7 +12,7 @@ MapDoor::MapDoor(const MapDoor &door):
     setPos(point.x(), point.y());
     m_node = 0;
     m_uin = ++m_count;
-    setBrush(QBrush(Qt::white));
+    setBrush(QBrush(Qt::red));
 }
 
 MapDoor::MapDoor(const QPointF &point):
@@ -22,7 +22,7 @@ MapDoor::MapDoor(const QPointF &point):
     setPos(point.x(), point.y());
     m_node = 0;
     m_uin = ++m_count;
-    setBrush(QBrush(Qt::white));
+    setBrush(QBrush(Qt::red));
 }
 
 QDataStream &operator<<(QDataStream &output, const MapDoor &door)
@@ -77,8 +77,15 @@ void MapDoor::setNode(GraphNode *node)
 {
     m_node = node;
     if (node)
+    {
         if (node->door() != this)
+        {
+            setBrush(QBrush(Qt::white));
             node->setDoor(this);
+        }
+    }
+    else
+        setBrush(QBrush(Qt::red));
 }
 
 quint32 MapDoor::floorUin()
