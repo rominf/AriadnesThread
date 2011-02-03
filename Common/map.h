@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QDataStream>
+#include "global.h"
 #include "graph.h"
 #include "grapharc.h"
 #include "mapfloor.h"
@@ -17,6 +18,18 @@ class Map : public QObject
 public:
     explicit Map(qreal mapPixPerRealM, qreal mapPixPerDisplayM,
                  qreal mapPixSizeX, qreal mapPixSizeY, QObject *parent);
+    struct WayInfo
+    {
+        int floorsNumber;
+        qreal length;
+        int stairsNumber;
+        int stairsFloorsDownNumber;
+        int stairsFloorsUpNumber;
+        int liftsNumber;
+        int liftsFloorsDownNumber;
+        int liftsFloorsUpNumber;
+    };
+
     void setPixPerDisplayM(qreal r);
     int floorsNumber();
     void insertFloor(int i);
@@ -24,6 +37,7 @@ public:
     void removeFloor(int i);
     MapFloor* floor(const int i) const;
     MapFloor* floorByUin(const quint32 uin) const;
+    int floorNumber(MapFloor* floor) const;
     void addVertical();
     void deleteVertical(const int vertNum);
     void swapVerticals(int x, int y);
@@ -38,6 +52,7 @@ public:
     bool areaCopy(MapArea *area, int floorFromIndex, int floorToIndex);
     bool areasAutoRenaming() const;
     void setAreasAutoRenaming(bool enabled);
+    QList<MapArea*> findAreas(const QRegExp str) const;
     Graph* graph() const;
     void setStart(QGraphicsItem *item);
     void setFinish(QGraphicsItem *item);
@@ -45,8 +60,8 @@ public:
     void way(const GraphArc::WayPermissions permissions);
     void paintWay();
     void clearWay();
-    bool wayInfo(qreal &length, int &stairsDownNumber, int &stairsUpNumber,
-                 int &liftsNumber, qreal &time) const;
+    bool isWayExist() const;
+    WayInfo* wayInfo() const;
 //    QVector<QPointF*> graphNodesCoordinates();
 
 //    void graphStartAnew();
@@ -79,6 +94,8 @@ private:
     Graph *m_graph;
     QVector<MapFloor*> m_floors;
     QVector<MapVertical*> m_verticals;
+    MapSelection *m_start;
+    MapSelection *m_finish;
     bool m_areasAutoRenaming;
     int m_selectedVertical;
 //    MapSelection *m_copy;

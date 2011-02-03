@@ -3,6 +3,7 @@
 DialogMapSize::DialogMapSize(QWidget *parent) :
     QDialog(parent)
 {
+    setWindowTitle(tr("Габаритные размеры"));
     m_sbxMSizeX = new QDoubleSpinBox(this);
     m_sbxMSizeX->setRange(cMinMSizeX, cMaxMSizeX);
     m_sbxMSizeX->setValue(cMSizeX);

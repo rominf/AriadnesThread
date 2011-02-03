@@ -3,11 +3,10 @@
 const qreal GraphNode::cCircleR = 4.0;
 quint32 GraphNode::m_count = 0;
 const QPen GraphNode::cPenNormal = QPen(Qt::black);
-const QPen GraphNode::cPenSelected = QPen(QBrush(Qt::black), 2);
+//const QPen GraphNode::cPenSelected = QPen(QBrush(Qt::black), 2);
 const QPen GraphNode::cPenWay = QPen(Qt::black);
 const QBrush GraphNode::cBrushNormal = QBrush(Qt::blue);
-const QBrush GraphNode::cBrushSelected =
-        QBrush(QColor::fromRgb(255, 250, 205, 255));
+//const QBrush GraphNode::cBrushSelected = QBrush(Global::colorSelected);
 const QBrush GraphNode::cBrushWay = QBrush(Qt::darkGreen);
 
 

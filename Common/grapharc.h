@@ -19,9 +19,16 @@ public:
         Lift = 2,
         Room = 4
     };
+    enum VerticalDirection
+    {
+        Undefined = 0,
+        Down = 1,
+        Up = 2
+    };
     Q_DECLARE_FLAGS(WayPermissions, VerticalType)
-    GraphArc(GraphNode *node1, GraphNode *node2,
-             const VerticalType type = None, const bool oneWay = false);
+    GraphArc(GraphNode *node1, GraphNode *node2, const VerticalType type = None,
+             const VerticalDirection direction = Undefined/*,
+             const bool oneWay = false*/);
     ~GraphArc();
 
     enum {Type = QGraphicsItem::UserType + 3};
@@ -38,6 +45,7 @@ public:
     void setLenght(const qreal lenght);
     qreal lenght() const;
     GraphArc::VerticalType verticalType() const;
+    GraphArc::VerticalDirection verticalDirection() const;
     int type() const;
     quint32 floorUin() const;
     quint32 uin() const;
@@ -45,7 +53,8 @@ private:
     GraphNode *m_node1;
     GraphNode *m_node2;
     VerticalType m_verticalType;
-    bool m_oneWay;
+    VerticalDirection m_verticalDirection;
+//    bool m_oneWay;
     int m_lenght;
     quint32 m_uin;
 

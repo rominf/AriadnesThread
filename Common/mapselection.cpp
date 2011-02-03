@@ -1,19 +1,19 @@
 #include "mapselection.h"
 
-MapSelection::MapSelection(bool multiselection):
-        m_multiselection(multiselection)
+MapSelection::MapSelection(QColor color, bool multiselection):
+        m_color(color), m_multiselection(multiselection)
 {
-    brushNormalArea = new QBrush(Qt::NoBrush);
-    brushNormalDoor = new QBrush(Qt::white);
+//    brushNormalArea = new QBrush(Qt::NoBrush);
+//    brushNormalDoor = new QBrush(Qt::white);
 //    brushNormalNode = new QBrush(Qt::white);
-    brushSelectedArea = new QBrush(QColor::fromRgb(255, 250, 205, 127));
-    brushSelectedDoor = new QBrush(QColor::fromRgb(255, 250, 205, 255));
+//    brushSelectedArea = new QBrush(QColor::fromRgb(255, 250, 205, 127));
+//    brushSelectedDoor = new QBrush(QColor::fromRgb(255, 250, 205, 255));
 //    brushSelectedNode = new QBrush(QColor::fromRgb(255, 250, 205, 255));
-    penNormal = new QPen(Qt::SolidLine);
-    penSelectedArea = new QPen(Qt::SolidLine);
-    penSelectedArea->setWidthF(4);
-    penSelectedDoor = new QPen(Qt::SolidLine);
-    penSelectedDoor->setWidthF(3);
+//    penNormal = new QPen(Qt::SolidLine);
+//    penSelectedArea = new QPen(Qt::SolidLine);
+//    penSelectedArea->setWidthF(4);
+//    penSelectedDoor = new QPen(Qt::SolidLine);
+//    penSelectedDoor->setWidthF(3);
 //    penSelectedNode = new QPen(Qt::SolidLine);
 //    penSelectedNode->setWidthF(2);
 //    penSelected->setCapStyle(Qt::RoundCap);
@@ -40,32 +40,32 @@ void MapSelection::addItem(QGraphicsItem *item)
         {
         case MapArea::Type:
             m_areas.append(qgraphicsitem_cast<MapArea*>(shapeItem));
-            brush = shapeItem->brush();
-            pen = shapeItem->pen();
-            shapeItem->setBrush(*brushSelectedArea);
-            shapeItem->setPen(*penSelectedArea);
+            m_brush = shapeItem->brush();
+            m_pen = shapeItem->pen();
+            shapeItem->setPen(QPen(QBrush(Qt::black), 3));
+            shapeItem->setBrush(QBrush(m_color));
             emit areaActivated(m_areas.at(0), true);
             break;
         case MapDoor::Type:
             m_doors.append(qgraphicsitem_cast<MapDoor*>(shapeItem));
-            brush = shapeItem->brush();
-            pen = shapeItem->pen();
-            shapeItem->setBrush(*brushSelectedDoor);
-            shapeItem->setPen(*penSelectedDoor);
+            m_brush = shapeItem->brush();
+            m_pen = shapeItem->pen();
+            shapeItem->setPen(QPen(QBrush(Qt::black), 2));
+            shapeItem->setBrush(QBrush(m_color));
             break;
         case GraphNode::Type:
             m_nodes.append(qgraphicsitem_cast<GraphNode*>(shapeItem));
-            brush = shapeItem->brush();
-            pen = shapeItem->pen();
-            shapeItem->setBrush(GraphNode::cBrushSelected);
-            shapeItem->setPen(GraphNode::cPenSelected);
+            m_brush = shapeItem->brush();
+            m_pen = shapeItem->pen();
+            shapeItem->setPen(QPen(QBrush(Qt::black), 2));
+            shapeItem->setBrush(QBrush(m_color));
             break;
         case GraphArc::Type:
         {
             GraphArc *arc = qgraphicsitem_cast<GraphArc*>(item);
             m_arcs.append(arc);
-            pen = arc->pen();
-            arc->setPen(GraphArc::cPenSelected);
+            m_pen = arc->pen();
+            arc->setPen(QPen(QBrush(Qt::black), 2));
             break;
         }
         default:
@@ -82,8 +82,8 @@ void MapSelection::removeItem(QGraphicsItem *item)
     {
         MapArea *area = qgraphicsitem_cast<MapArea*>(item);
         emit areaActivated(m_areas.at(0), false);
-        area->setBrush(brush/**brushNormalArea*/);
-        area->setPen(pen/**penNormal*/);
+        area->setBrush(m_brush/**brushNormalArea*/);
+        area->setPen(m_pen/**penNormal*/);
         int i = m_areas.indexOf(area);
         if (i > -1)
             m_areas.remove(i);
@@ -92,8 +92,8 @@ void MapSelection::removeItem(QGraphicsItem *item)
     case MapDoor::Type:
     {
         MapDoor *door = qgraphicsitem_cast<MapDoor*>(item);
-        door->setBrush(brush/**brushNormalDoor*/);
-        door->setPen(pen/**penNormal*/);
+        door->setBrush(m_brush/**brushNormalDoor*/);
+        door->setPen(m_pen/**penNormal*/);
         int i = m_doors.indexOf(door);
         if (i > -1)
             m_doors.remove(i);
@@ -102,8 +102,8 @@ void MapSelection::removeItem(QGraphicsItem *item)
     case GraphNode::Type:
     {
         GraphNode *node = qgraphicsitem_cast<GraphNode*>(item);
-        node->setBrush(brush/*GraphNode::cBrushNormal*/);
-        node->setPen(pen/*GraphNode::cPenNormal*/);
+        node->setBrush(m_brush/*GraphNode::cBrushNormal*/);
+        node->setPen(m_pen/*GraphNode::cPenNormal*/);
         int i = m_nodes.indexOf(node);
         if (i > -1)
             m_nodes.remove(i);
@@ -112,7 +112,7 @@ void MapSelection::removeItem(QGraphicsItem *item)
     case GraphArc::Type:
         {
         GraphArc *arc = qgraphicsitem_cast<GraphArc*>(item);
-        arc->setPen(pen);
+        arc->setPen(m_pen);
         int i = m_arcs.indexOf(arc);
         if (i > -1)
             m_arcs.remove(i);

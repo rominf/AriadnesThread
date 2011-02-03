@@ -42,7 +42,7 @@ QDataStream & operator<<(QDataStream &output, const Graph &graph)
                 output << *arc;
             }
         }
-    output << false << GraphArc::VerticalType(-1) << 0 << 0; // End of arcs
+    output << GraphArc::None << GraphArc::Undefined << 0 << 0; // End of arcs
     return output;
 }
 
@@ -65,14 +65,18 @@ QDataStream & operator>>(QDataStream &input, Graph &graph)
     GraphArc *arc;
     quint32 node1uin, node2uin;
     int type;
+    int direction = 0;
     bool b = false;
-    input >> b >> type >> node1uin >> node2uin;
+    input >> type >> direction >> node1uin >> node2uin;
+//    input >> b >> type >> node1uin >> node2uin;
     while (node1uin != 0)
     {
         arc = new GraphArc(nodes.value(node1uin), nodes.value(node2uin),
-                           GraphArc::VerticalType(type), b);
+                           GraphArc::VerticalType(type),
+                           GraphArc::VerticalDirection(direction)/*, b*/);
         emit graph.graphItemAdded(arc);
-        input >> b >> type >> node1uin >> node2uin;
+        input >> type >> direction >> node1uin >> node2uin;
+//        input >> b >> type >> node1uin >> node2uin;
     }
     return input;
 }
@@ -364,6 +368,7 @@ qreal Graph::djkstra(GraphNode *start, const QVector<GraphNode *> *finish,
     QMap<pGraphNode, qreal> dist;
     QMap<pGraphNode, pGraphNode> prev;
     QSet<pGraphNode> visit;
+    dist.insert(0, INFINITY);
     dist.insert(start, 0);
     GraphNode *min = start;
     while (min)
@@ -373,15 +378,15 @@ qreal Graph::djkstra(GraphNode *start, const QVector<GraphNode *> *finish,
         QMap<pGraphNode, qreal>::iterator it = dist.begin();
         for (; it != dist.end(); ++it)
             if (!visit.contains(it.key()))
-            {
-                if (min)
-                {
+//            {
+//                if (min)
+//                {
                     if (it.value() < dist.value(min))
                         min = it.key();
-                }
-                else
-                    min = it.key();
-            }
+//                }
+//                else
+//                    min = it.key();
+//            }
 
         if (min)
         {
@@ -396,10 +401,11 @@ qreal Graph::djkstra(GraphNode *start, const QVector<GraphNode *> *finish,
                     qreal distPerMin = dist.value(min) + min->arc(i)->lenght();
                     bool update = false;
                     if (dist.contains(adjacent))
-                    {
-                        if (distPerMin < dist.value(adjacent))
-                            update = true;
-                    }
+//                    {
+                          update = distPerMin < dist.value(adjacent);
+//                        if (distPerMin < dist.value(adjacent))
+//                            update = true;
+//                    }
                     else
                         update = true;
                     if (update)
@@ -416,15 +422,15 @@ qreal Graph::djkstra(GraphNode *start, const QVector<GraphNode *> *finish,
     min = 0;
     for (int i = 0; i != finish->size(); i++)
         if (dist.contains(finish->at(i)))
-        {
-            if (min != 0)
-            {
+//        {
+//            if (min != 0)
+//            {
                 if (dist.value(finish->at(i)) < dist.value(min))
                     min = finish->at(i);
-            }
-            else
-                min = finish->at(i);
-        }
+//            }
+//            else
+//                min = finish->at(i);
+//        }
 
     if (min != 0)
     {
@@ -453,50 +459,56 @@ void Graph::setLastNode(GraphNode *node)
 
 void Graph::paintWay(bool isActive)
 {
-    Qt::GlobalColor colorNode;
-    Qt::GlobalColor colorArc;
-    if (isActive)
-        colorNode = colorArc = Qt::green;
-    else
+    if (!m_way.isEmpty())
     {
-        colorNode = Qt::white;
-        colorArc = Qt::black;
-    }
-    for (int i = 0; i != m_way.size(); i++)
-    {
-        GraphNode *node = m_way.at(i);
+        QPen penArc;
+        QPen penNode = Global::pen;
+        QBrush brushNode;
+        bool visible;
+        if (isActive)
+            visible = true;
+        else
+            visible = m_visible;
+        if (isActive)
+        {
+            penArc = GraphArc::cPenWay;
+            brushNode = GraphNode::cBrushWay;
+        }
+        else
+        {
+            penArc = GraphArc::cPenNormal;
+            brushNode = GraphNode::cBrushNormal;
+        }
+        for (int i = 0; i != m_way.size() - 1; i++)
+        {
+            GraphNode *node = m_way.at(i);
+            if (node)
+            {
+                node->setPen(penNode);
+                node->setBrush(brushNode);
+                node->setVisible(visible);
+            }
+
+    //        if (i < m_way.size() - 1)
+    //        {
+                GraphArc *arc = node->arc(m_way.at(i+1));
+                if (arc)
+                {
+                    arc->setPen(penArc);
+                    if (isActive)
+                        arc->setVisible(true);
+                    else
+                        arc->setVisible(m_visible);
+                }
+    //        }
+
+        }
+        GraphNode *node = m_way.at(m_way.size() - 1);
         if (node)
         {
-            if (isActive)
-            {
-                node->setBrush(GraphNode::cBrushWay);
-                node->setVisible(true);
-            }
-            else
-            {
-                node->setBrush(GraphNode::cBrushNormal);
-                node->setVisible(m_visible);
-            }
-
+            node->setPen(penNode);
+            node->setBrush(QBrush(Qt::red));
+            node->setVisible(visible);
         }
-
-        if (i < m_way.size() - 1)
-        {
-            GraphArc *arc = node->arc(m_way.at(i+1));
-            if (arc)
-            {
-                if (isActive)
-                {
-                    arc->setPen(GraphArc::cPenWay);
-                    arc->setVisible(true);
-                }
-                else
-                {
-                    arc->setPen(GraphArc::cPenNormal);
-                    arc->setVisible(m_visible);
-                }
-            }
-        }
-
     }
 }

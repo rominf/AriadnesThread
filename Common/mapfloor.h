@@ -14,6 +14,7 @@
 #include <QPixmap>
 #include <QRectF>
 #include <QStack>
+#include "global.h"
 #include "geometry.h"
 #include "graphnode.h"
 #include "maparea.h"
@@ -57,7 +58,7 @@ public:
     void addBase(QString fileName);
 //    bool isBaseVisible();
     void baseSetVisible(bool visible);
-    void crossBaseSetVisible(bool visible);
+    void gridSetVisible(bool visible);
     MapArea* area(int i);
     MapArea* areaByUin(quint32 uin);
 //    void selectArea(MapArea *area);
@@ -72,6 +73,7 @@ public:
 //    void setGraphNodes(QVector<QPointF*> &nodes);
     void magnetToExtensions(bool b);
     void setLastNode(GraphNode *node);
+    QList<MapArea*> findAreas(const QRegExp &str) const;
     quint32 uin();
 signals:
     void modeChanged(MapFloor::Mode);

@@ -3,7 +3,7 @@
 
 #include <QBrush>
 #include <QGraphicsEllipseItem>
-
+#include "global.h"
 #include "maparea.h"
 #include "graphnode.h"
 
@@ -19,6 +19,12 @@ public:
     MapDoor(const QPointF &point);
 
     enum {Type = QGraphicsItem::UserType + 2};
+    static const QPen cPenNormal;
+    static const QPen cPenSelected;
+    static const QBrush cBrushNormal;
+    static const QBrush cBrushIsntConnectedWithNode;
+    static const QBrush cBrushSelected;
+
     MapArea* parentArea(int i);
     void addParentArea(MapArea *area);
     int parentAreasNumber();

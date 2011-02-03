@@ -31,6 +31,7 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QMotifStyle>
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QPushButton>
@@ -46,6 +47,7 @@
 #include <QVBoxLayout>
 #include <QVBoxLayout>
 #include <QWidget>
+#include "../Common/global.h"
 #include "../Common/map.h"
 #include "../Common/mapfloor.h"
 #include "dialogmapsize.h"
@@ -61,8 +63,7 @@ public:
     {
         pFull, pViewer, pViewerTerminal
     };
-    MainWindow(MainWindow::Program program = MainWindow::pFull,
-               QWidget *parent = 0);
+    MainWindow(QWidget *parent = 0);
     ~MainWindow();
     enum Element
     {
@@ -74,10 +75,11 @@ public:
         eAdd  = 16,
         eHelp = 32,
         ePanels = 64,
-        eFloorsManagement = 128,
+        eFloors = 128,
         eVerticals = 256,
-        eAreasMarking =512,
-        eWay = 1024
+        eAreasProperties =512,
+        eSearch = 1024,
+        eWays = 2048
     };
     Q_DECLARE_FLAGS(Elements, Element)
 
@@ -101,10 +103,11 @@ private slots:
     void zoomOut();
     void zoomIn();
     void zoomFit();
+    void zoomOn(QGraphicsItem *item);
     void handDrag(bool checked);
     void addBase();
     void layerBaseSetVisible(bool visible);
-    void layerCrossBaseSetVisible(bool visible);
+    void layerGridSetVisible(bool visible);
     void layerGraphSetVisible(bool visible);
     void magnetToExtensions(bool b);
 //    void floorNameChange(const QString &); // Set current floor name
@@ -116,7 +119,7 @@ private slots:
     void switchMode(MapFloor::Mode m);  // Apply app to proper mode
     void setActiveFloor(int i);         // Change visible floor
 
-    void panelFloorsManagementVisibilityChanged(bool visible);
+    void panelFloorsVisibilityChanged(bool visible);
     void floorAdd();                    // Adding floor
     void floorDelete();
     void floorMoveDown();
@@ -137,17 +140,23 @@ private slots:
 //    void wgtVerticalsListCurrentRowChanged(int row);
     void lstwgtVerticalsItemChanged(QListWidgetItem* item);
 
-    void panelAreasMarkingVisibilityChanged(bool visible);
+    void panelAreasPropertiesVisibilityChanged(bool visible);
     void setAreaNumber();
     void setAreaName();
     void setAreaDescription();
     void setAreaInscription();
     void updateAreaInscription();
 
-    void panelWayVisibilityChanged(bool visible);
+    void panelSearchVisibilityChanged(bool visible);
+    void ldtInputTextEdited(const QString &text);
+    void lstwgtSearchCurrentItemChanged(QListWidgetItem *current,
+                                      QListWidgetItem *previous);
+
+    void panelWaysVisibilityChanged(bool visible);
     void setStart();
     void setFinish();
-    void lstwgtWaysCurrentItemChanged(QListWidgetItem *current, QListWidgetItem *previous);
+    void lstwgtWaysCurrentItemChanged(QListWidgetItem *current,
+                                      QListWidgetItem *previous);
     void way();
 //    void chkAreaNumberVisibleStateChanged(int state);
 //    void chkAreaNameVisibleStateChanged(int state);
@@ -160,6 +169,7 @@ private:
     static const qreal cZoom = 1.1;
     static const int cDockWidth = 150;
     static const bool isExtraShortcutsEnabled = false;
+    static const QString cNewFileName;
     enum State
     {
         stSave = -1,
@@ -168,7 +178,7 @@ private:
     };
 
     ///////////////////////////////Variables////////////////////////////////////
-    MainWindow::Program m_program;
+//    MainWindow::Program m_program;
     QString openFileName;
     MapFloor::Mode mode;
     int curFloor;
@@ -203,7 +213,7 @@ private:
     QAction *actHandDrag;
     QAction *actAddBase;
     QAction *actLayerBase;
-    QAction *actLayerCrossBase;
+    QAction *actLayerGrid;
     QAction *actLayerGraph;
     QAction *actMagnetToExtensions;
 //    QAction *actAddWall;
@@ -212,7 +222,7 @@ private:
     QAction *actAddNode;
     QAction *actAbout;
 
-    QAction *actPanelFloorsManagement;
+    QAction *actPanelFloors;
     QAction *actFloorAdd;
     QAction *actFloorDelete;
     QAction *actFloorMoveDown;
@@ -224,11 +234,12 @@ private:
     QAction *actVerticalDelete;
     QAction *actVerticalMoveDown;
     QAction *actVerticalMoveUp;
-//    QAction *actVerticalSetPassage;
 
-    QAction *actPanelAreasMarking;
+    QAction *actPanelAreasProperties;
 
-    QAction *actPanelWay;
+    QAction *actPanelSearch;
+
+    QAction *actPanelWays;
     QAction *actSetStart;
     QAction *actSetFinish;
 //    QAction *actAllowStairs;
@@ -243,9 +254,10 @@ private:
     QMenu *menuFile;
     QMenu *menuEdit;
     QMenu *menuView;
+    QMenu *menuLayers;
+    QMenu *menuZoom;
     QMenu *menuGo;
-//    QMenu *menuLayers;
-//    QMenu *menuAdd;
+    QMenu *menuAdd;
 //    QMenu *menuPanels;
     QMenu *menuHelp;
 
@@ -258,19 +270,16 @@ private:
 //    QToolBar *tbrLayers;
     QToolBar *tbrAdd;
     QToolBar *tbrPanels;
-    /*QToolBar *tbrFloorNameChange;
-    QLabel *lblFloorNameChange;
-    QLineEdit *ldtFloorNameChange;*/
 
     // Central
     QWidget *wgtCentral;
     QVBoxLayout *vblwgtCentral;
 
     // Dock FloorsManagement
-    QDockWidget *dckwgtFloorsManagement;
-    QWidget *wgtFloorsManagement;
-    QVBoxLayout *vblFloorsManagement;
-    QHBoxLayout *hblFloorsManagementButtons;
+    QDockWidget *dckwgtFloors;
+    QWidget *wgtFloors;
+    QVBoxLayout *vblFloors;
+    QHBoxLayout *hblFloorsButtons;
     QToolButton *btnFloorAdd;
     QToolButton *btnFloorDelete;
     QToolButton *btnFloorMoveDown;
@@ -297,9 +306,9 @@ private:
 
 
     // Dock AreasMarking
-    QDockWidget *dckwgtAreasMarking;
-    QWidget *wgtAreasMarking;
-    QVBoxLayout *vblAreasMarking;
+    QDockWidget *dckwgtAreasProperties;
+    QWidget *wgtAreasProperties;
+    QVBoxLayout *vblAreasProperties;
     QLabel *lblAreaNumber;
     QLineEdit *ldtAreaNumber;
     QLabel *lblAreaName;
@@ -314,6 +323,14 @@ private:
 //    QCheckBox *chkAreaNumberVisible;
 //    QCheckBox *chkAreaNameVisible;
 
+    // Dock Search
+    QDockWidget *dckwgtSearch;
+    QWidget *wgtSearch;
+    QVBoxLayout *vblSearch;
+    QLabel *lblAreasNumber;
+    QLineEdit *ldtInput;
+    QListWidget *lstwgtAreas;
+
     // Dock Way
     QDockWidget *dckwgtWay;
     QWidget *wgtWay;
@@ -321,10 +338,10 @@ private:
     QHBoxLayout *hblWayButtons;
     QToolButton *btnSetStart;
     QToolButton *btnSetFinish;
+    QGroupBox *grpbxWay;
+    QVBoxLayout *vblgrpbxWay;
+    QLabel *lblWaysChoice;
     QListWidget *lstwgtWays;
-//    QToolButton *btnAllowStairs;
-//    QToolButton *btnAllowLifts;
-//    QToolButton *btnWay;
     QLabel *lblWayInfo;
 
     // Graphics
@@ -336,11 +353,13 @@ private:
     void createActions();
     void createMenus();
     void createToolBars();
-    void createPanelFloorsManagement();
+    void createPanelFloors();
     void createPanelVerticals();
-    void createPanelAreasMarking();
-    void createPanelWay();
-    void blockAndFreePanelAreasMarking();
+    void createPanelAreasProperties();
+    void createPanelSearch();
+    void createPanelWays();
+    void blockAndFreePanelAreasProperties();
+    void freePanelWays();
     void createGraphics();
     void setState(Elements elem, State visible, State enable);
     qreal displayPixPerM(qreal pix, qreal mm) const;
