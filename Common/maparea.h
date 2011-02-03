@@ -30,6 +30,10 @@ public:
         ceIntersection,
         ceAreaExist
     };
+    static const QPen cPenNormal;
+    static const QPen cPenSelected;
+    static const QBrush cBrushNormal;
+    static const QBrush cBrushSelected;
     QString number();
     void setNumber(const QString &number);
 //    bool isNumberVisible();
@@ -42,6 +46,7 @@ public:
     void setDescription(const QString &description);
     QString inscription();
     void setInscription(const QString &inscription);
+    QString info(const QString pattern) const;
     MapArea* parent();
 //    void setParent(MapArea *parent);
     void addArea(MapArea *area);

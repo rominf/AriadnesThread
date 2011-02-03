@@ -2,13 +2,14 @@
 
 quint32 GraphArc::m_count = 0;
 const QPen GraphArc::cPenNormal = QPen(Qt::blue);
-const QPen GraphArc::cPenSelected = QPen(QBrush(Qt::black), 2);
-const QPen GraphArc::cPenWay = QPen(QBrush(Qt::darkGreen), 2);
+//const QPen GraphArc::cPenSelected = QPen(QBrush(Qt::black), 2);
+const QPen GraphArc::cPenWay = QPen(/*QBrush(*/Qt::darkGreen/*), 2*/);
 
-GraphArc::GraphArc(GraphNode *node1, GraphNode *node2,
-                   const VerticalType type, const bool oneWay):
+GraphArc::GraphArc(GraphNode *node1, GraphNode *node2, const VerticalType type,
+                   const VerticalDirection direction):
         QGraphicsLineItem(QLineF(node1->pos(), node2->pos())),
-        m_node1(node1), m_node2(node2), m_verticalType(type), m_oneWay(oneWay)
+        m_node1(node1), m_node2(node2), m_verticalType(type),
+        m_verticalDirection(direction)
 {
     node1->addArc(this);
 //    if (!oneWay)
@@ -36,7 +37,7 @@ GraphArc::~GraphArc()
 
 QDataStream & operator<<(QDataStream &output, const GraphArc &arc)
 {
-    output << arc.m_oneWay << arc.m_verticalType
+    output/* << arc.m_oneWay */<< arc.m_verticalType << arc.m_verticalDirection
             << arc.m_node1->uin() << arc.m_node2->uin();
     return output;
 }
@@ -61,7 +62,7 @@ GraphNode* GraphArc::node2() const
 
 bool GraphArc::isRight(const GraphNode *node) const
 {
-    return !(m_oneWay & (m_node2 == node));
+    return !((m_verticalType != None) & (m_node2 == node));
 }
 
 bool GraphArc::contain(GraphNode *node) const
@@ -82,6 +83,11 @@ qreal GraphArc::lenght() const
 GraphArc::VerticalType GraphArc::verticalType() const
 {
     return m_verticalType;
+}
+
+GraphArc::VerticalDirection GraphArc::verticalDirection() const
+{
+    return m_verticalDirection;
 }
 
 int GraphArc::type() const

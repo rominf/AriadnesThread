@@ -1,6 +1,7 @@
 #ifndef MAPGRAPH_H
 #define MAPGRAPH_H
 
+#include <qmath.h>
 #include <QMessageBox>
 #include <QStack>
 #include "grapharc.h"

@@ -5,7 +5,6 @@
         <file alias="AddDoor">Icons/AddDoor.png</file>
         <file alias="AddWall">Icons/AddWall.png</file>
         <file alias="AreaCopy">Icons/AreaCopy.png</file>
-        <file alias="AreasMarking">Icons/AreasMarking.png</file>
         <file alias="Add">Icons/Add.png</file>
         <file alias="FloorDefault">Icons/FloorDefault.png</file>
         <file alias="Delete">Icons/Delete.png</file>
@@ -27,12 +26,16 @@
         <file alias="HandDrag">Icons/HandDrag.png</file>
         <file alias="FloorLower">Icons/FloorLower.png</file>
         <file alias="FloorUpper">Icons/FloorUpper.png</file>
-        <file alias="LayerCrossBase">Icons/LayerCrossBase.png</file>
         <file alias="SetFinish">Icons/SetFinish.png</file>
         <file alias="SetStart">Icons/SetStart.png</file>
-        <file alias="Way">Icons/Way.png</file>
         <file alias="Verticals">Icons/Verticals.png</file>
         <file alias="AddNode">Icons/AddNode.png</file>
         <file alias="Ariadne">Icons/Ariadne.svg</file>
+        <file alias="Floors">Icons/Floors.png</file>
+        <file alias="AreasProperties">Icons/AreasProperties.png</file>
+        <file alias="Ways">Icons/Ways.png</file>
+        <file alias="Zoom">Icons/Zoom.png</file>
+        <file alias="LayerGrid">Icons/LayerGrid.png</file>
+        <file alias="Search">Icons/Search.png</file>
     </qresource>
 </RCC>

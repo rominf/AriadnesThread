@@ -13,7 +13,7 @@ class MapSelection: public QObject
 {
     Q_OBJECT
 public:
-    MapSelection(bool multiselection = false);
+    MapSelection(QColor color, bool multiselection = false);
     void addItem(QGraphicsItem *item);
     void removeItem(QGraphicsItem *item);
     QGraphicsItem* item();
@@ -22,21 +22,21 @@ public:
 signals:
     void areaActivated(MapArea *area, bool activated);
 private:
-    bool m_multiselection;
     QVector<MapArea*> m_areas;
     QVector<MapDoor*> m_doors;
     QVector<GraphNode*> m_nodes;
     QVector<GraphArc*> m_arcs;
-    QBrush *brushNormalArea;
-    QBrush *brushNormalDoor;
-    QBrush *brushSelectedArea;
-    QBrush *brushSelectedDoor;
-    QPen *penNormal;
-    QPen *penSelectedArea;
-    QPen *penSelectedDoor;
-
-    QBrush brush;
-    QPen pen;
+//    QBrush *brushNormalArea;
+//    QBrush *brushNormalDoor;
+//    QBrush *brushSelectedArea;
+//    QBrush *brushSelectedDoor;
+//    QPen *penNormal;
+//    QPen *penSelectedArea;
+//    QPen *penSelectedDoor;
+    QColor m_color;
+    QBrush m_brush;
+    QPen m_pen;
+    bool m_multiselection;
 };
 
 #endif // MAPSELECTION_H

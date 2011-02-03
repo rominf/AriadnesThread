@@ -8,9 +8,9 @@ MapFloor::MapFloor(const QRectF &sceneRect, QObject *parent) :
     QGraphicsScene(sceneRect, parent),
     cCursorCircleR(7.0)
 {
-    cModesNames.insert(AreaAdd, tr("добавление области"));
-    cModesNames.insert(DoorAdd, tr("добавление двери"));
-    cModesNames.insert(NodeAdd, tr("добавление вершины графа"));
+    cModesNames.insert(AreaAdd, tr("создание областей"));
+    cModesNames.insert(DoorAdd, tr("создание дверей"));
+    cModesNames.insert(NodeAdd, tr("создание графа"));
     m_mode = Idle;
     m_magnetToExtensions = false;
     m_border = new QGraphicsRectItem(sceneRect, 0, this);
@@ -46,7 +46,7 @@ MapFloor::MapFloor(const QRectF &sceneRect, QObject *parent) :
 //    m_startPoint->setPen(QPen(Qt::red));
     m_startPoint->setBrush(QBrush(Qt::red));
     m_startPoint->hide();
-    m_selection = new MapSelection(false);
+    m_selection = new MapSelection(Global::colorSelected, false);
     m_uin = ++m_count;
 }
 
@@ -400,6 +400,7 @@ void MapFloor::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 
 void MapFloor::keyPressEvent(QKeyEvent *event)
 {
+#ifdef EDITOR
     event->accept();
     switch (event->key())
     {
@@ -474,8 +475,10 @@ void MapFloor::keyPressEvent(QKeyEvent *event)
 //            finalizeWall();
 //            break;
         case NodeAdd:
-            setMode(Idle);
-//            emit graphStartedAnew();
+            m_cursorCircle->setVisible(false);
+            emit addedNode(m_cursorCircle->pos(), m_uin);
+            m_cursorCircle->setVisible(true);
+//            setMode(Idle);
             break;
         default:
             break; // Ignore other :)
@@ -487,6 +490,7 @@ void MapFloor::keyPressEvent(QKeyEvent *event)
     default:
         break; // Ignore other :)
     }
+#endif
 }
 
 void MapFloor::addItem (QGraphicsItem *item)
@@ -513,6 +517,26 @@ void MapFloor::magnetToExtensions(bool b)
 void MapFloor::setLastNode(GraphNode *node)
 {
     m_lastNode = node;
+}
+
+QList<MapArea*> MapFloor::findAreas(const QRegExp &str) const
+{
+    MapArea *a;
+    QStack<MapArea*> stk;
+    QList<MapArea*> result;
+    for (int i = 0; i != m_outlines.size(); i++)
+        stk.push(m_outlines.at(i));
+    while (!stk.isEmpty())
+    {
+        a = stk.pop();
+        if ((bool)a->number().contains(str) | (bool)a->name().contains(str) |
+            (bool)a->description().contains(str))
+            result << a;
+        int size = a->areasNumber();
+        for (int i = 0; i !=size; i++)
+            stk.push(a->area(i));
+    }
+    return result;
 }
 
 bool MapFloor::isBaseExist()
@@ -550,7 +574,7 @@ void MapFloor::baseSetVisible(bool visible)
     m_base->setVisible(visible);
 }
 
-void MapFloor::crossBaseSetVisible(bool visible)
+void MapFloor::gridSetVisible(bool visible)
 {
     if (visible)
         m_crossBase->setBrush(QBrush(Qt::CrossPattern));
@@ -739,17 +763,21 @@ QPointF MapFloor::getPoint(QPointF m, Geometry::Straight straight,
     {
         int nodeNum = -1;
         qreal d = INFINITY;
-        if ((straight == Geometry::None))
-        {
+//        if ((straight == Geometry::None))
+//        {
             for (int i = 0; i != m_graphNodes.size(); i++)
                 if (Geometry::dest(m_graphNodes.at(i), m) < d)
                 {
                     d = Geometry::dest(m_graphNodes.at(i), m);
                     nodeNum = i;
                 }
-            if (d < Geometry::cMagnetDestToNode)
+            if ((d < Geometry::cMagnetDestToNode) &
+                ((straight == Geometry::None) |
+                 ((straight != Geometry::None) &
+                  ((m_graphNodes.at(nodeNum).x() == m.x()) |
+                   (m_graphNodes.at(nodeNum).y() == m.y())))))
                 return m_graphNodes.at(nodeNum);
-        }
+//        }
         if (b)
         {
             d = INFINITY;

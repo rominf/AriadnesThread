@@ -1,5 +1,9 @@
 #include "maparea.h"
 
+const QPen MapArea::cPenNormal = QPen(Qt::black);
+//const QPen MapArea::cPenSelected = QPen(QBrush(Qt::black), 3);
+const QBrush MapArea::cBrushNormal = QBrush(Qt::NoBrush);
+//const QBrush MapArea::cBrushSelected = QBrush(Global::colorSelected);
 const int MapArea::cFontSize = 16;
 const QString MapArea::cFontFamily = "Arial";
 quint32 MapArea::m_count = 0;
@@ -13,14 +17,14 @@ MapArea::MapArea(const QPolygonF &polygon, const quint32 floorUin):
     m_name = "";
     m_description = "";
 //    updateTitle();
-    setBrush(QBrush(Qt::NoBrush));
+    setBrush(cBrushNormal);
 }
 
 MapArea::MapArea(const MapArea &area, const quint32 floorUin,
                  const QString &floorFromName, const QString &floorToName):
         QGraphicsPolygonItem(area.polygon()), m_floorUin(floorUin)
 {
-    setBrush(QBrush(Qt::NoBrush));
+    setBrush(cBrushNormal);
     m_uin = ++m_count;
     m_inscription = new QGraphicsTextItem(this);
     QString oldAreasNumber = area.m_number;
@@ -78,6 +82,21 @@ QDataStream &operator>>(QDataStream &input, MapArea &area)
     input >> area.m_uin >> area.m_number >> area.m_name >> area.m_description
             >> inscription >> last;
     area.setInscription(inscription);
+//    QString tooltip = area.info("<b>%1</b><br>%2<br><i>%3</i>");
+    QString tooltip = "";
+    if (!area.number().isEmpty())
+        tooltip += "<b>" + area.number() + "</b>";
+
+    if (!area.name().isEmpty() & !tooltip.isEmpty())
+        tooltip += "<br>";
+    tooltip += area.name();
+
+    if (!area.description().isEmpty() & !tooltip.isEmpty())
+        tooltip += "<br>";
+    tooltip += "<i>" + area.description() + "</i>";
+
+    if (!tooltip.isEmpty())
+        area.setToolTip(tooltip);
 //    area.updateTitle();
     area.m_count = qMax(area.m_count, area.m_uin);
     for (int i = 0; i != last; i++)
@@ -165,6 +184,28 @@ void MapArea::setInscription(const QString &inscription)
     m_inscription->setDocument(doc);
     m_inscription->setPos(boundingRect().center().x() - doc->size().width()/2,
                     boundingRect().center().y() - doc->size().height()/2);
+}
+
+QString MapArea::info(const QString pattern) const
+{
+    QString str;
+    str = pattern;
+    str = pattern.arg(m_number).arg(m_name).arg(m_description);
+    if ((bool)str.contains("<br>") |
+        (bool)str.contains("<b>") | (bool)str.contains("<i>"))
+        str.replace("/n", "<br>");
+    str = str.trimmed();
+    str.remove("<b></b>");
+    str.remove("<i></i>");
+    str.replace("<br><br>", "<br>");
+    str.replace("/n/n", "/n");
+    while (str.indexOf("<br>") == 0)
+        str.remove(0, 4);
+    while (str.lastIndexOf("<br>") == str.length() - 4)
+        str.remove(str.length() - 4, 4);
+
+
+    return str;
 }
 
 MapArea* MapArea::parent()

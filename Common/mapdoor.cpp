@@ -1,6 +1,11 @@
 #include "mapdoor.h"
 
 const qreal MapDoor::cCircleR = 7.0;
+const QPen MapDoor::cPenNormal = QPen(Qt::black);
+//const QPen MapDoor::cPenSelected = QPen(QBrush(Qt::black), 2);
+const QBrush MapDoor::cBrushNormal = QBrush(Qt::white);
+const QBrush MapDoor::cBrushIsntConnectedWithNode = QBrush(Qt::red);
+//const QBrush MapDoor::cBrushSelected = QBrush(Global::colorSelected);
 quint32 MapDoor::m_count = 0;
 QSet<quint32> MapDoor::m_finishedDoors;
 
@@ -12,7 +17,11 @@ MapDoor::MapDoor(const MapDoor &door):
     setPos(point.x(), point.y());
     m_node = 0;
     m_uin = ++m_count;
-    setBrush(QBrush(Qt::red));
+#ifdef EDITOR
+    setBrush(cBrushIsntConnectedWithNode);
+#else
+    setBrush(cBrushNormal);
+#endif
 }
 
 MapDoor::MapDoor(const QPointF &point):
@@ -22,7 +31,11 @@ MapDoor::MapDoor(const QPointF &point):
     setPos(point.x(), point.y());
     m_node = 0;
     m_uin = ++m_count;
-    setBrush(QBrush(Qt::red));
+#ifdef EDITOR
+    setBrush(cBrushIsntConnectedWithNode);
+#else
+    setBrush(cBrushNormal);
+#endif
 }
 
 QDataStream &operator<<(QDataStream &output, const MapDoor &door)
@@ -77,15 +90,14 @@ void MapDoor::setNode(GraphNode *node)
 {
     m_node = node;
     if (node)
-    {
         if (node->door() != this)
-        {
-            setBrush(QBrush(Qt::white));
             node->setDoor(this);
-        }
-    }
+#ifdef EDITOR
+    if (node)
+        setBrush(cBrushNormal);
     else
-        setBrush(QBrush(Qt::red));
+        setBrush(cBrushIsntConnectedWithNode);
+#endif
 }
 
 quint32 MapDoor::floorUin()
