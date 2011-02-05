@@ -1,8 +1,8 @@
 #include "map.h"
 #include <QDataStream>
 
-qreal Map::m_lengthStairsDown = cSpeedMPerMin*cTimeStairsDown;
-qreal Map::m_lengthStairsUp = cSpeedMPerMin*cTimeStairsUp;
+qreal Map::m_lengthStairsDown = Global::cSpeedMPerMin*Global::cTimeStairsDown;
+qreal Map::m_lengthStairsUp = Global::cSpeedMPerMin*Global::cTimeStairsUp;
 
 Map::Map(qreal mapPixPerRealM, qreal mapPixPerDisplayM,
          qreal mapPixSizeX, qreal mapPixSizeY, QObject *parent): QObject(parent),
@@ -428,17 +428,17 @@ void Map::updateVertical(const int vertNum)
                         }
                         if (!symbol.isEmpty())
                             area->setInscription(symbol);
-                        for (int i = 0; i != area->doorsNumber() - 1; i++)
-                        {
-                            GraphNode *node1 = area->door(i)->node();
-                            GraphNode *node2 = area->door(i+1)->node();
-                            if ((node1 != 0) & (node2 != 0))
-                            {
-                                GraphArc *arc =
-                                        new GraphArc(node1, node2, type);
-                                arc->setLenght(0);
-                            }
-                        }
+//                        for (int i = 0; i != area->doorsNumber() - 1; i++)
+//                        {
+//                            GraphNode *node1 = area->door(i)->node();
+//                            GraphNode *node2 = area->door(i+1)->node();
+//                            if ((node1 != 0) & (node2 != 0))
+//                            {
+//                                GraphArc *arc =
+//                                        new GraphArc(node1, node2, type);
+//                                arc->setLenght(0);
+//                            }
+//                        }
                         doors.append(area->door(0));
                         if (area->doorsNumber() > 1)
                             area->setBrush(Qt::red);
@@ -446,9 +446,9 @@ void Map::updateVertical(const int vertNum)
                 }
             }
             symbol = "" ;
-            switch (vertical->type())
-            {
-            case GraphArc::Stairs:
+            switch (vertical->type())   // Требуется проставлять не только для
+            {                           // последней, может быть разрыв
+            case GraphArc::Stairs:      // посередине
                 if (!doors.isEmpty())
                     symbol = tr("￪");
                 break;
@@ -494,7 +494,8 @@ void Map::updateVertical(const int vertNum)
             {
                 qreal lengthStairsDown = convertRealMToPix(m_lengthStairsDown);
                 qreal lengthStairsUp = convertRealMToPix(m_lengthStairsUp);
-                qreal lengthLift = convertRealMToPix(cSpeedMPerMin * cTimeLift);
+                qreal lengthLift = convertRealMToPix(
+                        Global::cSpeedMPerMin*Global::cTimeLift);
                 for (int i = 0; i != doors.size() - 1; i++)
                     if ((doors.at(i)->node() != 0) & (doors.at(i+1)->node() != 0))
                     {
@@ -647,20 +648,10 @@ void Map::setStart(QGraphicsItem *item)
         (item->type() == GraphNode::Type)) & (m_start->item() != item))
     {
         m_start->addItem(item);
-//        QAbstractGraphicsShapeItem *shapeItem =
-//                qgraphicsitem_cast<QAbstractGraphicsShapeItem*>(item);
-//        shapeItem->setPen(Global::penStart);
-//        shapeItem->setBrush(Global::brushStart);
         QVector<GraphNode*> nodes = getNodesFromItem(item);
         if (!nodes.isEmpty())
             m_graph->setStartNodes(nodes);
     }
-//        m_startNodes = nodes;
-//    if (item->type() == GraphNode::Type)
-//    {
-//        m_startNodes.clear();
-//        m_startNodes.append(qgraphicsitem_cast<GraphNode*>(item));
-//    }
 }
 
 void Map::setFinish(QGraphicsItem *item)
@@ -668,24 +659,11 @@ void Map::setFinish(QGraphicsItem *item)
     if (((item->type() == MapArea::Type) | (item->type() == MapDoor::Type) |
         (item->type() == GraphNode::Type)) & (m_finish->item() != item))
     {
-//        QAbstractGraphicsShapeItem *shapeItem =
-//                qgraphicsitem_cast<QAbstractGraphicsShapeItem*>(item);
-//        shapeItem->setPen(Global::penFinish);
-//        shapeItem->setBrush(Global::brushFinish);
         m_finish->addItem(item);
         QVector<GraphNode*> nodes = getNodesFromItem(item);
         if (!nodes.isEmpty())
             m_graph->setFinishNodes(nodes);
     }
-//    QVector<GraphNode*> nodes = getNodesFromItem(item);
-//    if (!nodes.isEmpty())
-//        m_graph->setFinishNodes(nodes);
-//        m_finishNodes = nodes;
-//    if (item->type() == GraphNode::Type)
-//    {
-//        m_finishNodes.clear();
-//        m_finishNodes.append(qgraphicsitem_cast<GraphNode*>(item));
-//    }
 }
 
 bool Map::isStartAndFinishNodesValid() const

@@ -84,10 +84,6 @@ private slots:
 //    void graphNodesChanged(QVector<QPointF*> &nodes, int floor);
 
 private:
-    static const qreal cSpeedMPerMin = 85;
-    static const qreal cTimeStairsDown = 0.5;
-    static const qreal cTimeStairsUp = 1;
-    static const qreal cTimeLift = 0.5;
     static qreal m_lengthStairsDown;
     static qreal m_lengthStairsUp;
 

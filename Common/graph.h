@@ -49,6 +49,7 @@ signals:
     void lastNodeChanged(GraphNode *node);
 //    void graphNodesChanged(QVector<QPointF*> &nodes, int floor);
 private:
+    static qreal m_lengthLiftWaiting;
     QVector<GraphNode*> m_nodes;
     QVector<GraphNode*> m_startNodes;
     QVector<GraphNode*> m_finishNodes;

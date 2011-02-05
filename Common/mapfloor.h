@@ -66,7 +66,7 @@ public:
 //    QGraphicsItem* selectedItem();
     MapSelection* selection();
     virtual void addItem (QGraphicsItem *item);
-    MapArea::CreateError addArea(MapArea *area);
+    MapArea::CreationError addArea(MapArea *area);
     bool addDoor(MapDoor *door);
     void addPointNodesMagnetTo(QPointF point);
     void addArc(GraphArc *arc);
@@ -144,6 +144,7 @@ private:
     void deleteArea(MapArea *area);
     void finalizeDoor();
     void deleteDoor(MapDoor *door);
+    void finalizeNode();
 //    void finalizeNode();
 };
 

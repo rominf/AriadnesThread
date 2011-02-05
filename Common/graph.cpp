@@ -1,5 +1,8 @@
 #include "graph.h"
 
+qreal Graph::m_lengthLiftWaiting =
+        Global::cSpeedMPerMin*Global::cTimeLiftWaiting;
+
 Graph::Graph()
 {
     m_lastNode = 0;
@@ -42,7 +45,7 @@ QDataStream & operator<<(QDataStream &output, const Graph &graph)
                 output << *arc;
             }
         }
-    output << GraphArc::None << GraphArc::Undefined << 0 << 0; // End of arcs
+    output << GraphArc::None << GraphArc::Undefined << 0 << 0 << 0.0; // End of arcs
     return output;
 }
 
@@ -67,15 +70,17 @@ QDataStream & operator>>(QDataStream &input, Graph &graph)
     int type;
     int direction = 0;
     bool b = false;
-    input >> type >> direction >> node1uin >> node2uin;
+    qreal length;
+    input >> type >> direction >> node1uin >> node2uin >> length;
 //    input >> b >> type >> node1uin >> node2uin;
     while (node1uin != 0)
     {
         arc = new GraphArc(nodes.value(node1uin), nodes.value(node2uin),
                            GraphArc::VerticalType(type),
                            GraphArc::VerticalDirection(direction)/*, b*/);
+        arc->setLenght(length);
         emit graph.graphItemAdded(arc);
-        input >> type >> direction >> node1uin >> node2uin;
+        input >> type >> direction >> node1uin >> node2uin >> length;
 //        input >> b >> type >> node1uin >> node2uin;
     }
     return input;
@@ -373,7 +378,7 @@ qreal Graph::djkstra(GraphNode *start, const QVector<GraphNode *> *finish,
     GraphNode *min = start;
     while (min)
     {
-        // Finding non visited node, which have minimum dest
+        // Finding non visited node, which have minimum dist
         min = 0;
         QMap<pGraphNode, qreal>::iterator it = dist.begin();
         for (; it != dist.end(); ++it)
@@ -399,6 +404,12 @@ qreal Graph::djkstra(GraphNode *start, const QVector<GraphNode *> *finish,
                 {
                     GraphNode *adjacent = min->adjacentNode(min->arc(i));
                     qreal distPerMin = dist.value(min) + min->arc(i)->lenght();
+                    if (vertType == GraphArc::Lift)
+                        if (prev.contains(min))
+                            if (prev.value(min)->arc(min)->type() !=
+                                GraphArc::Lift)
+                                distPerMin += m_lengthLiftWaiting;
+
                     bool update = false;
                     if (dist.contains(adjacent))
 //                    {

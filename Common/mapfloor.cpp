@@ -254,9 +254,7 @@ void MapFloor::mousePressEvent(QGraphicsSceneMouseEvent *event)
             finalizeDoor();
             break;
         case NodeAdd:
-            m_cursorCircle->setVisible(false);
-            emit addedNode(m_cursorCircle->pos(), m_uin);
-            m_cursorCircle->setVisible(true);
+            finalizeNode();
             break;
         default:
         {
@@ -475,10 +473,7 @@ void MapFloor::keyPressEvent(QKeyEvent *event)
 //            finalizeWall();
 //            break;
         case NodeAdd:
-            m_cursorCircle->setVisible(false);
-            emit addedNode(m_cursorCircle->pos(), m_uin);
-            m_cursorCircle->setVisible(true);
-//            setMode(Idle);
+            finalizeNode();
             break;
         default:
             break; // Ignore other :)
@@ -854,7 +849,7 @@ void MapFloor::takeAwayGraphicsLineItem(QGraphicsLineItem *item)
         item->setLine(-INFINITY, -INFINITY, -INFINITY, -INFINITY);
 }
 
-MapArea::CreateError MapFloor::addArea(MapArea *area)
+MapArea::CreationError MapFloor::addArea(MapArea *area)
 {
     MapArea *parentArea = 0;
 
@@ -1005,6 +1000,15 @@ void MapFloor::deleteDoor(MapDoor *door)
     if (i > -1)
         m_graphNodes.remove(i);
     delete door;
+}
+
+void MapFloor::finalizeNode()
+{
+    m_cursorCircle->setVisible(false);
+    m_tempLine->setVisible(false);
+    emit addedNode(m_cursorCircle->pos(), m_uin);
+    m_tempLine->setVisible(true);
+    m_cursorCircle->setVisible(true);
 }
 
 QPolygonF MapFloor::convertLineVecToPolygon(const

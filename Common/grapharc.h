@@ -55,7 +55,7 @@ private:
     VerticalType m_verticalType;
     VerticalDirection m_verticalDirection;
 //    bool m_oneWay;
-    int m_lenght;
+    qreal m_lenght;
     quint32 m_uin;
 
     static quint32 m_count; // Counter for making uins
