@@ -22,7 +22,6 @@ public:
 private:
     QMap<quint32, quint32> m_areas;
     QString m_name;
-//    bool m_passage;
     GraphArc::VerticalType m_type;
 };
 

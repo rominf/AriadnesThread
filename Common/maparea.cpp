@@ -82,21 +82,9 @@ QDataStream &operator>>(QDataStream &input, MapArea &area)
     input >> area.m_uin >> area.m_number >> area.m_name >> area.m_description
             >> inscription >> last;
     area.setInscription(inscription);
+    area.updateToolTip();
 //    QString tooltip = area.info("<b>%1</b><br>%2<br><i>%3</i>");
-    QString tooltip = "";
-    if (!area.number().isEmpty())
-        tooltip += "<b>" + area.number() + "</b>";
 
-    if (!area.name().isEmpty() & !tooltip.isEmpty())
-        tooltip += "<br>";
-    tooltip += area.name();
-
-    if (!area.description().isEmpty() & !tooltip.isEmpty())
-        tooltip += "<br>";
-    tooltip += "<i>" + area.description() + "</i>";
-
-    if (!tooltip.isEmpty())
-        area.setToolTip(tooltip);
 //    area.updateTitle();
     area.m_count = qMax(area.m_count, area.m_uin);
     for (int i = 0; i != last; i++)
@@ -109,6 +97,51 @@ QDataStream &operator>>(QDataStream &input, MapArea &area)
     return input;
 }
 
+//bool MapArea::operator<(const MapArea *b) const
+//bool operator<(const MapArea *a, const MapArea *b) const
+//{
+//    QString numA = a->m_number;
+//    QString numB = b->m_number;
+//    QString nameA = a->m_name;
+//    QString nameB = b->m_name;
+//    if (!numA.isEmpty())
+//    {
+//        if (!numB.isEmpty())
+//        {
+//            if (numA < numB)
+//                return true;
+//            else
+//                if (numA > numB)
+//                    return false;
+//        }
+//        else
+//            return true;
+
+//    }
+//    else
+//        if (!numB.isEmpty())
+//            return false;
+//    return true;
+//    if (!nameA.isEmpty())
+//    {
+//        if (!nameB.isEmpty())
+//        {
+//            if (nameA < nameB)
+//                return true;
+//            else
+//                if (nameA > nameB)
+//                    return false;
+//        }
+//        else
+//            return true;
+
+//    }
+//    else
+//        if (!nameB.isEmpty())
+//            return false;
+//    return false;
+//}
+
 QString MapArea::number()
 {
     return m_number;
@@ -117,6 +150,7 @@ QString MapArea::number()
 void MapArea::setNumber(const QString &number)
 {
     m_number = number;
+    updateToolTip();
 }
 
 //bool MapArea::isNumberVisible()
@@ -137,6 +171,7 @@ QString MapArea::name()
 void MapArea::setName(const QString &name)
 {
     m_name = name;
+    updateToolTip();
 }
 
 //bool MapArea::isNameVisible()
@@ -157,6 +192,7 @@ QString MapArea::description()
 void MapArea::setDescription(const QString &description)
 {
     m_description = description;
+    updateToolTip();
 }
 
 QString MapArea::inscription()
@@ -186,27 +222,48 @@ void MapArea::setInscription(const QString &inscription)
                     boundingRect().center().y() - doc->size().height()/2);
 }
 
-QString MapArea::info(const QString pattern) const
+void MapArea::updateToolTip()
 {
-    QString str;
-    str = pattern;
-    str = pattern.arg(m_number).arg(m_name).arg(m_description);
-    if ((bool)str.contains("<br>") |
-        (bool)str.contains("<b>") | (bool)str.contains("<i>"))
-        str.replace("/n", "<br>");
-    str = str.trimmed();
-    str.remove("<b></b>");
-    str.remove("<i></i>");
-    str.replace("<br><br>", "<br>");
-    str.replace("/n/n", "/n");
-    while (str.indexOf("<br>") == 0)
-        str.remove(0, 4);
-    while (str.lastIndexOf("<br>") == str.length() - 4)
-        str.remove(str.length() - 4, 4);
+    QString tooltip = "";
+    if (!number().isEmpty())
+        tooltip += "<b>" + number() + "</b>";
 
+    if (!name().isEmpty() & !tooltip.isEmpty())
+        tooltip += "<br>";
+    tooltip += name();
 
-    return str;
+    if (!description().isEmpty() & !tooltip.isEmpty())
+        tooltip += "<br>";
+    tooltip += "<i>" + description() + "</i>";
+
+    tooltip.remove("<i></i>");
+    tooltip.replace("\n", "<br>");
+
+    if (!tooltip.isEmpty())
+        setToolTip(tooltip);
 }
+
+//QString MapArea::info(const QString pattern) const
+//{
+//    QString str;
+//    str = pattern;
+//    str = pattern.arg(m_number).arg(m_name).arg(m_description);
+//    if ((bool)str.contains("<br>") |
+//        (bool)str.contains("<b>") | (bool)str.contains("<i>"))
+//        str.replace("/n", "<br>");
+//    str = str.trimmed();
+//    str.remove("<b></b>");
+//    str.remove("<i></i>");
+//    str.replace("<br><br>", "<br>");
+//    str.replace("/n/n", "/n");
+//    while (str.indexOf("<br>") == 0)
+//        str.remove(0, 4);
+//    while (str.lastIndexOf("<br>") == str.length() - 4)
+//        str.remove(str.length() - 4, 4);
+
+
+//    return str;
+//}
 
 MapArea* MapArea::parent()
 {

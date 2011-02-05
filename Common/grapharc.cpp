@@ -37,8 +37,8 @@ GraphArc::~GraphArc()
 
 QDataStream & operator<<(QDataStream &output, const GraphArc &arc)
 {
-    output/* << arc.m_oneWay */<< arc.m_verticalType << arc.m_verticalDirection
-            << arc.m_node1->uin() << arc.m_node2->uin();
+    output << arc.m_verticalType << arc.m_verticalDirection
+            << arc.m_node1->uin() << arc.m_node2->uin() << arc.m_lenght;
     return output;
 }
 
