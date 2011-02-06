@@ -582,7 +582,7 @@ MapArea* MapFloor::area(int i)
     return m_outlines[i];
 }
 
-MapArea* MapFloor::areaByUin(quint32 uin)
+MapArea* MapFloor::area(quint32 uin)
 {
     MapArea *a;
     QStack<MapArea*> stk;

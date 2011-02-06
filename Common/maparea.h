@@ -50,7 +50,7 @@ public:
     void setInscription(const QString &inscription);
     void updateToolTip();
 //    QString info(const QString pattern) const;
-    MapArea* parent();
+    MapArea* parent() const;
 //    void setParent(MapArea *parent);
     void addArea(MapArea *area);
     MapArea* area(int i) const;
@@ -59,10 +59,10 @@ public:
     void addDoor(MapDoor *door);
     MapDoor* door(int i) const;
     void deleteDoor(MapDoor* door);
-    int doorsNumber();
+    int doorsNumber() const;
     int type() const;
-    quint32 uin();
-    quint32 floorUin();
+    quint32 uin() const;
+    quint32 floorUin() const;
 private:
     static const int cFontSize;
     static const QString cFontFamily;

@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     QTranslator* translator = new QTranslator;
     translator->load(QString("qt_") + locale);
     a.installTranslator(translator);
-    a.setWindowIcon(QIcon(":/Ariadne"));
+    a.setWindowIcon(QIcon(":/Ariadne.svg"));
 
     MainWindow w;
     w.show();

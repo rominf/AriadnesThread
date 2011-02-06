@@ -135,7 +135,7 @@ private slots:
     void verticalDelete();
     void verticalMoveDown();
     void verticalMoveUp();
-    void verticalSetType(int type);
+    void verticalSetTypeCurrentIndexChanged(int index);
     void lstwgtVerticalsCurrentItemChanged(QListWidgetItem *current, QListWidgetItem *previous);
 //    void wgtVerticalsListCurrentRowChanged(int row);
     void lstwgtVerticalsItemChanged(QListWidgetItem* item);
@@ -176,6 +176,13 @@ private:
         stFalse = false,
         stTrue = true
     };
+//    enum VerticalType   // # !Соответствие между типом вертикали и индексом списка
+//    {
+//        None = 0,
+//        Stairs = 1,
+//        Lift = 2,
+//        Room = 4
+//    };
 
     ///////////////////////////////Variables////////////////////////////////////
 //    MainWindow::Program m_program;
@@ -191,9 +198,9 @@ private:
     ///////////////////////////////Objects//////////////////////////////////////
     // OUR ALL!!! Please, do not touch!
     Map *map;
+    // our all ended. :)
     QStringListModel *modelFloorsList;
     QItemSelectionModel *selectionFloorsList;
-    // our all ended. :)
 
     // Actions
     QAction *actMapNew;

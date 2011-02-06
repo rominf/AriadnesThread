@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent)
     resize(782, 498);
 //    showMaximized();
 
-    openFileName = "map.bld";
+    openFileName = tr("УЛК МГТУ им. Н.Э. Баумана.bld");
 }
 
 MainWindow::~MainWindow()
@@ -208,7 +208,7 @@ void MainWindow::createActions()
 #endif
 
 
-    actAbout = new QAction(QIcon(":/Ariadne"), tr("&О программе"), this);
+    actAbout = new QAction(QIcon(":/Ariadne.svg"), tr("&О программе"), this);
     connect(actAbout, SIGNAL(triggered()), SLOT(about()));
     /*actAboutQT = new QAction(tr("О QT"), this);
     actAboutQT->setStatusTip(tr("Об инструментарий Qt, при помощи которого "
@@ -576,14 +576,14 @@ void MainWindow::createPanelVerticals()
     hblVerticalsButtons->addWidget(btnVerticalMoveUp);
 
     cbxVerticalType = new QComboBox();
-    cbxVerticalType->insertItem(0, tr("Аудитория"));
-    cbxVerticalType->insertItem(1, tr("Лестница"));
-    cbxVerticalType->insertItem(2, tr("Лифт"));
+    cbxVerticalType->insertItem(0, tr("Аудитория"), (int)GraphArc::Room);
+    cbxVerticalType->insertItem(1, tr("Лестница"), (int)GraphArc::Stairs);
+    cbxVerticalType->insertItem(2, tr("Лифт"), (int)GraphArc::Lift);
 //    new QListWidgetItem(tr("Аудитория"), cbxVerticalType);
 //    new QListWidgetItem(tr("Лестница"), cbxVerticalType);
 //    new QListWidgetItem(tr("Лифт"), cbxVerticalType);
     connect(cbxVerticalType, SIGNAL(currentIndexChanged(int)),
-            SLOT(verticalSetType(int)));
+            SLOT(verticalSetTypeCurrentIndexChanged(int)));
     hblVerticalsButtons->addWidget(cbxVerticalType);
 //    btnVerticalSetPassage = new QToolButton();
 //    btnVerticalSetPassage->setDefaultAction(actVerticalSetPassage);
@@ -1842,7 +1842,8 @@ void MainWindow::panelFloorsVisibilityChanged(bool visible)
     actPanelFloors->setChecked(visible);
 }
 
-void MainWindow::viewFloorsListCurrentItemChanged(const QModelIndex &current, const QModelIndex &previous)
+void MainWindow::viewFloorsListCurrentItemChanged(const QModelIndex &current,
+                                                  const QModelIndex &previous)
 {
     int floor = current.row();
     if (curFloor != floor)
@@ -1864,12 +1865,14 @@ void MainWindow::panelVerticalsVisibilityChanged(bool visible)
 
 void MainWindow::verticalAdd()
 {
-    QListWidgetItem *item = new QListWidgetItem(tr("Новая вертикаль"), lstwgtVerticals);
-    item->setFlags(item->flags () | Qt::ItemIsEditable);
     map->addVertical();
-    map->setNameVertical(lstwgtVerticals->row(item), item->text());
+    QListWidgetItem *item =
+            new QListWidgetItem(tr("Новая вертикаль"), lstwgtVerticals);
+    item->setFlags(item->flags () | Qt::ItemIsEditable);
+//    map->vertical(lstwgtVerticals->row(item))->setName(item->text());
 //    lstwgtVerticals->insertItem(->count(), item);
     lstwgtVerticals->setCurrentItem(item);
+    cbxVerticalType->setCurrentIndex(-1);
     cbxVerticalType->setCurrentIndex(0);
 }
 
@@ -1898,13 +1901,18 @@ void MainWindow::verticalMoveUp()
     lstwgtVerticals->setCurrentRow(i - 1);
 }
 
-void MainWindow::verticalSetType(int type)
+void MainWindow::verticalSetTypeCurrentIndexChanged(int index)
 {
-    map->setTypeVertical(lstwgtVerticals->currentRow(),
-                         GraphArc::VerticalType(type));
+    int i = lstwgtVerticals->currentRow();
+    if ((i > -1) & (index > -1))
+    {
+        int type = cbxVerticalType->itemData(index).toInt();
+        map->vertical(i)->setType((GraphArc::VerticalType)type);
+    }
 }
 
-void MainWindow::lstwgtVerticalsCurrentItemChanged(QListWidgetItem *current, QListWidgetItem *previous)
+void MainWindow::lstwgtVerticalsCurrentItemChanged(QListWidgetItem *current,
+                                                   QListWidgetItem *previous)
 {
     int i = lstwgtVerticals->row(current);
 //    actVerticalSetPassage->setChecked(map->typeVertical(i));
@@ -1920,12 +1928,15 @@ void MainWindow::lstwgtVerticalsCurrentItemChanged(QListWidgetItem *current, QLi
             actVerticalMoveDown->setEnabled(true);
         cbxVerticalType->setCurrentIndex(map->vertical(i)->type());
         map->selectVertical(i);
+//        map->updateVertical(i);
     }
 }
 
 void MainWindow::lstwgtVerticalsItemChanged(QListWidgetItem *item)
 {
-    map->setNameVertical(lstwgtVerticals->currentRow(), item->text());
+    int i = lstwgtVerticals->currentRow();
+    if (i > -1)
+        map->vertical(i)->setName(item->text());
 }
 
 //void MainWindow::view
@@ -2127,16 +2138,18 @@ void MainWindow::setFinish()
     }
 }
 
-void MainWindow::lstwgtWaysCurrentItemChanged(QListWidgetItem *current, QListWidgetItem *previous)
+void MainWindow::lstwgtWaysCurrentItemChanged(QListWidgetItem *current,
+                                              QListWidgetItem *previous)
 {
-//    if (item->data(Qt::UserRole).canConvert<Graph::WayPermissions>())
-//    {
     if (current)
     {
         GraphArc::WayPermissions permissions =
                 (GraphArc::WayPermissions)current->data(Qt::UserRole).toInt();
         map->way(permissions);
         map->paintWay();
+        QGraphicsItem *item = map->start();
+        if (item->type() != MapDoor::Type)
+            zoomOn(item);
         Map::WayInfo *info = map->wayInfo();
         QString floorsInfo, stairsInfo, liftsInfo;
         floorsInfo  =
@@ -2189,11 +2202,6 @@ void MainWindow::way()
 {
     if (map->isStartAndFinishNodesValid())
     {
-//        qreal length;
-//        int stairsDownNumer;
-//        int stairsUpNumer;
-//        int liftsNumber;
-//        qreal time/*, timeStairs, timeLift*/;
         GraphArc::WayPermissions permissions;
         Map::WayInfo *info;
 
@@ -2204,15 +2212,10 @@ void MainWindow::way()
         permissions = GraphArc::None;
         map->way(permissions);
         info = map->wayInfo();
-        if (info->length != 0)
-        {
-            QListWidgetItem *item = new QListWidgetItem(
-                    QString::number(lstwgtWays->count() + 1) +
-                    tr(". По этажу"), lstwgtWays);
-            item->setData(Qt::UserRole, (int)permissions);
-//            item->setFlags(Qt::ItemIsUserCheckable);
-//            item->setCheckState(Qt::Checked);
-        }
+        QListWidgetItem *item = new QListWidgetItem(
+                QString::number(lstwgtWays->count() + 1) +
+                tr(". По этажу"), lstwgtWays);
+        item->setData(Qt::UserRole, (int)permissions);
 
         permissions = GraphArc::Stairs;
         map->way(permissions);
@@ -2224,8 +2227,6 @@ void MainWindow::way()
                     tr(". C лестницами"), lstwgtWays);
             item->setData(Qt::UserRole, (int)permissions);
         }
-//        timeStairs = time;
-    //    lstwgtWays->insertItem(lstwgtWays->count(), tr("Без катания на лифтах (" + time + ")");
 
         permissions = GraphArc::Lift;
         map->way(permissions);
@@ -2237,34 +2238,26 @@ void MainWindow::way()
                     tr(". С лифтами"), lstwgtWays);
             item->setData(Qt::UserRole, (int)permissions);
         }
-//        timeLift = time;
 
         permissions = GraphArc::Stairs | GraphArc::Lift;
         map->way(permissions);
         info = map->wayInfo();
         if ((info->stairsNumber != 0) & (info->liftsNumber != 0))
         {
-//            if (!(((liftsNumber == 0) & (timeStairs == time)) |
-//                ((stairsDownNumer + stairsUpNumer == 0) & (timeLift == time))))
-//            if ((stairsDownNumer + stairsUpNumer > 0) & (liftsNumber > 0))
-//            {
-                QListWidgetItem *item = new QListWidgetItem(
-                        QString::number(lstwgtWays->count() + 1) +
-                        tr(". С лестницами и лифтами"), lstwgtWays);
-                item->setData(Qt::UserRole, (int)permissions);
-//            }
+            QListWidgetItem *item = new QListWidgetItem(
+                    QString::number(lstwgtWays->count() + 1) +
+                    tr(". С лестницами и лифтами"), lstwgtWays);
+            item->setData(Qt::UserRole, (int)permissions);
         }
 
         if (lstwgtWays->count())
         {
             lstwgtWays->setVisible(true);
             lstwgtWays->setCurrentItem(lstwgtWays->item(0));
-//            lstwgtWaysItemActivated(, );
         }
         else
-        {
-            lblWayInfo->setText(tr("Нет!!! Только не \"Облом\"!"));
-        }
+            lblWayInfo->setText(
+                    tr("Не удалось найти путь между заданными объектами."));
     }
 }
 

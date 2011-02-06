@@ -30,7 +30,7 @@
         <file alias="SetStart">Icons/SetStart.png</file>
         <file alias="Verticals">Icons/Verticals.png</file>
         <file alias="AddNode">Icons/AddNode.png</file>
-        <file alias="Ariadne">Icons/Ariadne.svg</file>
+        <file alias="Ariadne.svg">Icons/Ariadne.svg</file>
         <file alias="Floors">Icons/Floors.png</file>
         <file alias="AreasProperties">Icons/AreasProperties.png</file>
         <file alias="Ways">Icons/Ways.png</file>

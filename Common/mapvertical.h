@@ -5,8 +5,9 @@
 #include "maparea.h"
 #include "grapharc.h"
 
-class MapVertical
+class MapVertical: public QObject
 {
+    Q_OBJECT
     friend QDataStream &operator<<(QDataStream &output,
                                    const MapVertical &vertical);
     friend QDataStream &operator>>(QDataStream &input, MapVertical &vertical);
@@ -15,10 +16,13 @@ public:
     void addArea(quint32 floorUin, quint32 areaUin);
     void deleteArea(quint32 floorUin);
     quint32 area(const quint32 floorUin) const;
+    bool contains(const quint32 areaUin) const;
     void setName(const QString &name);
     QString name() const;
     void setType(const GraphArc::VerticalType type);
     GraphArc::VerticalType type() const;
+signals:
+    void updated(MapVertical *vertical);
 private:
     QMap<quint32, quint32> m_areas;
     QString m_name;

@@ -2,6 +2,7 @@
 
 MapVertical::MapVertical()
 {
+    m_type = GraphArc::None;
 }
 
 QDataStream &operator<<(QDataStream &output, const MapVertical &vertical)
@@ -33,11 +34,13 @@ QDataStream &operator>>(QDataStream &input, MapVertical &vertical)
 void MapVertical::addArea(quint32 floorUin, quint32 areaUin)
 {
     m_areas[floorUin] = areaUin;
+    emit updated(this);
 }
 
 void MapVertical::deleteArea(quint32 floorUin)
 {
     m_areas.remove(floorUin);
+    emit updated(this);
 }
 
 quint32 MapVertical::area(const quint32 floorUin) const
@@ -48,6 +51,11 @@ quint32 MapVertical::area(const quint32 floorUin) const
         return 0;
 }
 
+bool MapVertical::contains(const quint32 areaUin) const
+{
+    return m_areas.key(areaUin) != 0;
+}
+
 void MapVertical::setName(const QString &name)
 {
     m_name = name;
@@ -56,6 +64,7 @@ void MapVertical::setName(const QString &name)
 void MapVertical::setType(const GraphArc::VerticalType type)
 {
     m_type = type;
+    emit updated(this);
 }
 
 GraphArc::VerticalType MapVertical::type() const
