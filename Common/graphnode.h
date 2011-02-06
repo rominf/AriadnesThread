@@ -15,10 +15,6 @@ class GraphNode : public QGraphicsEllipseItem
     friend QDataStream& operator<<(QDataStream &output, const GraphNode &node);
     friend QDataStream& operator>>(QDataStream &input, GraphNode &node);
 public:
-    GraphNode();
-    GraphNode(const QPointF &point, quint32 floor);
-    ~GraphNode();
-
     enum {Type = QGraphicsItem::UserType + 4};
     static const QPen cPenNormal;
     static const QPen cPenSelected;
@@ -27,9 +23,12 @@ public:
     static const QBrush cBrushSelected;
     static const QBrush cBrushWay;
 
+    GraphNode();
+    GraphNode(const QPointF &point, quint32 floor);
+    ~GraphNode();
+
     GraphArc* arc(const int i) const;
     GraphArc* arc(const GraphNode *adjacent, const bool oneWay = false) const;
-//    const QVector<GraphArc*> arcs() const;
     void addArc(GraphArc *arc);
     void deleteArc(GraphArc *arc);
     int arcsNumber() const;

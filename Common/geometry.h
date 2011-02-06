@@ -26,7 +26,7 @@ public:
 private:
     static const qreal cMagnetDestToLine = 25.0;
     static const qreal cMagnetDestToTop = 10.0;
-    static const qreal cError = 0.1;
+    static const qreal cError = 0.001;
 
 };
 

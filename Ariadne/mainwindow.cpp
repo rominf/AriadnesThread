@@ -1,10 +1,14 @@
 #include "mainwindow.h"
 
 const QString MainWindow::cNewFileName = QDir::currentPath() + tr("/New.bld");
+QMap<int, GraphArc::VerticalType> MainWindow::verticalType;
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent)
 {
-//    qApp->setWindowIcon(QIcon(":/Ariadne"));
+    verticalType.insert(0, GraphArc::Room);
+    verticalType.insert(1, GraphArc::Stairs);
+    verticalType.insert(2, GraphArc::Lift);
+
 #ifdef EDITOR
     qApp->setApplicationName(tr("Ариадна"));
 #else
@@ -138,18 +142,15 @@ void MainWindow::createActions()
 #endif
     actZoomOut= new QAction(QIcon(":/ZoomOut"), tr("У&меньшить"), this);
     connect(actZoomOut, SIGNAL(triggered()), SLOT(zoomOut()));
-    actZoomOut->setShortcuts(shortcuts(QKeySequence::ZoomOut/*tr("Ctrl+-")*/, tr("-")));
-//    actZoomOut->setShortcut(/*Qt::CTRL + */tr("-"));
+    actZoomOut->setShortcuts(shortcuts(QKeySequence::ZoomOut, tr("-")));
 
     actZoomIn = new QAction(QIcon(":/ZoomIn"), tr("&Увеличить"), this);
     connect(actZoomIn, SIGNAL(triggered()), SLOT(zoomIn()));
-    actZoomIn->setShortcuts(shortcuts(QKeySequence::ZoomIn/*tr("Ctrl++")*/, tr("+")));
-//    actZoomIn->setShortcut(/*Qt::CTRL + */tr("+"));
+    actZoomIn->setShortcuts(shortcuts(QKeySequence::ZoomIn, tr("+")));
 
     actZoomFit = new QAction(QIcon(":/ZoomFit"), tr("&Вместить"), this);
     connect(actZoomFit, SIGNAL(triggered()), SLOT(zoomFit()));
     actZoomFit->setShortcuts(shortcuts(tr("Ctrl+*"), tr("*")));
-//    actZoomFit->setShortcut(/*Qt::CTRL + */tr("*"));
 
     actHandDrag = new QAction(QIcon(":/HandDrag"),
                               tr("&Панорамирование"), this);
@@ -169,16 +170,13 @@ void MainWindow::createActions()
 
     actFloorLower = new QAction(QIcon(":/FloorLower"), tr("Cамый низ"), this);
     connect(actFloorLower, SIGNAL(triggered()), SLOT(floorLower()));
-//    actFloorLower->setShortcuts(shortcuts(tr("Ctrl+Shift+Down"), Qt::Key_End));
     actFloorLower->setShortcut(Qt::Key_End);
 
     actFloorDown = new QAction(QIcon(":/Down"), tr("Этаж &ниже"), this);
     connect(actFloorDown, SIGNAL(triggered()), SLOT(floorDown()));
-//    actFloorDown->setShortcuts(shortcuts(tr("Ctrl+Down"), Qt::Key_PageDown));
     actFloorDown->setShortcut(Qt::Key_PageDown);
 
-    actFloorUp = new QAction(QIcon(":/Up"), tr("Этаж &выше"),
-                                   this);
+    actFloorUp = new QAction(QIcon(":/Up"), tr("Этаж &выше"), this);
     connect(actFloorUp, SIGNAL(triggered()), SLOT(floorUp()));
     actFloorUp->setShortcut(Qt::Key_PageUp);
 
@@ -266,18 +264,11 @@ void MainWindow::createActions()
     actVerticalMoveUp = new QAction(QIcon(":/Up"),
                                     tr("Переместить &вверх"), this);
     connect(actVerticalMoveUp, SIGNAL(triggered()), SLOT(verticalMoveUp()));
-
-//    actVerticalSetPassage = new QAction(QIcon(":/SetPassage"),
-//                                        tr("Лифт или лестница"), this);
-//    connect(actVerticalSetPassage, SIGNAL(triggered(bool)),
-//            SLOT(verticalSetPassage(bool)));
-//    actVerticalSetPassage->setShortcuts(shortcuts(tr("Ctrl+L"), tr("L")));
-//    actVerticalSetPassage->setCheckable(true);
 #endif
 
 
-    actPanelAreasProperties = new QAction(QIcon(":/AreasProperties"),
-                                         tr("&Свойства области"), this);
+    actPanelAreasProperties = new QAction(
+            QIcon(":/AreasProperties"), tr("&Свойства области"), this);
     actPanelAreasProperties->setData(eAreasProperties);
 #ifdef EDITOR
     actPanelAreasProperties->setShortcuts(shortcuts(tr("Ctrl+3"), tr("3")));
@@ -311,19 +302,6 @@ void MainWindow::createActions()
 
     actSetFinish = new QAction(QIcon(":/SetFinish"), tr("Финиш"), this);
     connect(actSetFinish, SIGNAL(triggered()), SLOT(setFinish()));
-
-//    actAllowStairs = new QAction(QIcon(":/AllowStairs"),
-//                                 tr("Разрешить лестницы"), this);
-//    actAllowStairs->setCheckable(true);
-//    actAllowStairs->setChecked(true);
-
-//    actAllowLifts = new QAction(QIcon(":/AllowLifts"),
-//                                tr("Разрешить лифты"), this);
-//    actAllowLifts->setCheckable(true);
-//    actAllowLifts->setChecked(true);
-
-//    actWay = new QAction(QIcon(":/Way"), tr("Путь"), this);
-//    connect(actWay, SIGNAL(triggered()), SLOT(way()));
 
 
     actgrpPanels = new QActionGroup(this);
@@ -361,7 +339,6 @@ void MainWindow::createMenus()
     menuView = menuBar()->addMenu(tr("&Вид"));
 #ifdef EDITOR
     menuView->addAction(actAddBase);
-//    menuView->addSeparator();
     menuLayers = menuView->addMenu(tr("&Слои"));
     menuLayers->addAction(actLayerBase);
     menuLayers->addAction(actLayerGrid);
@@ -372,7 +349,6 @@ void MainWindow::createMenus()
     menuZoom->addAction(actZoomOut);
     menuZoom->addAction(actZoomIn);
     menuZoom->addAction(actZoomFit);
-//    menuView->addSeparator();
     menuView->addAction(actHandDrag);
 #ifdef EDITOR
     menuView->addSeparator();
@@ -429,13 +405,7 @@ void MainWindow::createToolBars()
     tbrView->addAction(actZoomOut);
     tbrView->addAction(actZoomIn);
     tbrView->addAction(actZoomFit);
-//    tbrView->addAction(actAddBase);
     tbrView->addAction(actHandDrag);
-//    actHandDrag->setVisible(false);
-//#ifdef EDITOR
-//    tbrView->addAction(actMagnetToExtensions);
-//#endif
-//    actMagnetToExtensions->setVisible(false);
 
     tbrGo = addToolBar(tr("Переключение этажей"));
 //    addToolBar(Qt::BottomToolBarArea, tbrFloorsSwitching);
@@ -463,16 +433,6 @@ void MainWindow::createToolBars()
 //    tbrLayers->addAction(actLayerBase);
 //    tbrLayers->addAction(actLayerCrossBase);
 //    tbrLayers->addAction(actLayerGraph);
-
-    /*tbrALT = new QToolBar(tr("Изменить название этажа"));
-    addToolBar(Qt::BottomToolBarArea, tbrFloorNameChange);
-    tbrFloorNameChange->setFloatable(false);
-    lblFloorNameChange = new QLabel(tr("Название этажа: "), this);
-    tbrFloorNameChange->addWidget(lblFloorNameChange);
-    ldtFloorNameChange = new QLineEdit(this);
-    connect(ldtFloorNameChange,
-            SIGNAL(textChanged(QString)), SLOT(FloorNameChange(QString)));
-    tbrFloorNameChange->addWidget(ldtFloorNameChange);*/
 #ifdef EDITOR
     tbrAdd = addToolBar(tr("Добавить"));
     tbrAdd->setFloatable(false);
@@ -534,8 +494,6 @@ void MainWindow::createPanelFloors()
     vblFloors->addLayout(hblFloorsButtons);
 
     viewFloorsList = new QListView();
-//    connect(viewFloorsList, SIGNAL(activated(QModelIndex)),
-//            SLOT(viewFloorsListItemActivated(QModelIndex)));
     connect(modelFloorsList, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
             SLOT(viewFloorsListItemChanged(QModelIndex)));
     viewFloorsList->setModel(modelFloorsList);
@@ -579,33 +537,21 @@ void MainWindow::createPanelVerticals()
     cbxVerticalType->insertItem(0, tr("Аудитория"), (int)GraphArc::Room);
     cbxVerticalType->insertItem(1, tr("Лестница"), (int)GraphArc::Stairs);
     cbxVerticalType->insertItem(2, tr("Лифт"), (int)GraphArc::Lift);
-//    new QListWidgetItem(tr("Аудитория"), cbxVerticalType);
-//    new QListWidgetItem(tr("Лестница"), cbxVerticalType);
-//    new QListWidgetItem(tr("Лифт"), cbxVerticalType);
     connect(cbxVerticalType, SIGNAL(currentIndexChanged(int)),
             SLOT(verticalSetTypeCurrentIndexChanged(int)));
     hblVerticalsButtons->addWidget(cbxVerticalType);
-//    btnVerticalSetPassage = new QToolButton();
-//    btnVerticalSetPassage->setDefaultAction(actVerticalSetPassage);
-//    hblVerticalsButtons->addWidget(btnVerticalSetPassage);
 
     hblVerticalsButtons->addStretch();
     vblVerticals->addLayout(hblVerticalsButtons);
 
     lstwgtVerticals = new QListWidget();
-    connect(lstwgtVerticals, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
-            SLOT(lstwgtVerticalsCurrentItemChanged(QListWidgetItem*,QListWidgetItem*)));
+    connect(lstwgtVerticals,
+            SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
+            SLOT(lstwgtVerticalsCurrentItemChanged(QListWidgetItem*,
+                                                   QListWidgetItem*)));
     connect(lstwgtVerticals, SIGNAL(itemChanged(QListWidgetItem*)),
             SLOT(lstwgtVerticalsItemChanged(QListWidgetItem*)));
     vblVerticals->addWidget(lstwgtVerticals);
-//    viewVerticalsList = new QListView();
-//    connect(viewVerticalsList, SIGNAL(activated(QModelIndex)),
-//            SLOT(viewVerticalsListItemActivated(QModelIndex)));
-//    connect(modelVerticalsList, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
-//            SLOT(viewVerticalsListItemChanged(QModelIndex)));
-//    viewVerticalsList->setModel(modelVerticalsList);
-//    viewVerticalsList->setSelectionModel(selectionVerticalsList);
-//    vblVerticals->addWidget(viewVerticalsList);
 }
 
 void MainWindow::createPanelAreasProperties()
@@ -640,12 +586,6 @@ void MainWindow::createPanelAreasProperties()
 #ifndef EDITOR
     ldtAreaName->setReadOnly(true);
 #endif
-//    ldtAreaName->setMaximumHeight(
-//            (ptdtAreaName->fontMetrics().lineSpacing() +
-//             ptdtAreaName->font().pointSize())*2);
-//    // ### Must be rewrited
-//    ptdtAreaName->setMinimumWidth(cDockWidth);
-//    ptdtAreaName->setMinimumWidth(0);
     vblAreasProperties->addWidget(ldtAreaName);
 
     lblAreaDescription = new QLabel(tr("Описание: "));
@@ -673,23 +613,6 @@ void MainWindow::createPanelAreasProperties()
             SLOT(setAreaInscription()));
     vblAreasProperties->addWidget(ptdtAreaInscription);
 #endif
-
-//    grpbxFieldVisible = new QGroupBox(tr("Показывать на плане: "));
-//    vblAreasMarking->addWidget(grpbxFieldVisible);
-
-//    vblFieldVisible = new QVBoxLayout(grpbxFieldVisible);
-
-//    chkAreaNumberVisible = new QCheckBox(tr("Номер"));
-//    connect(chkAreaNumberVisible, SIGNAL(stateChanged(int)),
-//            SLOT(chkAreaNumberVisibleStateChanged(int)));
-//    vblFieldVisible->addWidget(chkAreaNumberVisible);
-
-//    chkAreaNameVisible = new QCheckBox(tr("Название"));
-//    connect(chkAreaNameVisible, SIGNAL(stateChanged(int)),
-//            SLOT(chkAreaNameVisibleStateChanged(int)));
-//    vblFieldVisible->addWidget(chkAreaNameVisible);
-
-//    grpbxFieldVisible->setLayout(vblFieldVisible);
 }
 
 void MainWindow::createPanelSearch()
@@ -751,19 +674,6 @@ void MainWindow::createPanelWays()
     btnSetFinish->setDefaultAction(actSetFinish);
     hblWayButtons->addWidget(btnSetFinish);
 
-//    btnAllowStairs = new QToolButton();
-//    btnAllowStairs->setDefaultAction(actAllowStairs);
-//    hblWayButtons->addWidget(btnAllowStairs);
-
-//    btnAllowLifts = new QToolButton();
-//    btnAllowLifts->setDefaultAction(actAllowLifts);
-//    hblWayButtons->addWidget(btnAllowLifts);
-
-//    btnWay = new QToolButton();
-//    btnWay->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-//    btnWay->setDefaultAction(actWay);
-//    hblWayButtons->addWidget(btnWay);
-
     vblWay->addLayout(hblWayButtons);
 //    vblWay->addSpacing(5);
 
@@ -775,7 +685,6 @@ void MainWindow::createPanelWays()
     lblWaysChoice = new QLabel();
     lblWaysChoice->setWordWrap(true);
     vblgrpbxWay->addWidget(lblWaysChoice);
-//    vblWay->addWidget(lblWaysChoice);
 
     lstwgtWays = new QListWidget();
     connect(lstwgtWays, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
@@ -794,10 +703,6 @@ void MainWindow::createPanelWays()
 
     lblWayInfo = new QLabel();
     lblWayInfo->setWordWrap(true);
-//            tr("Для того, чтобы найти путь\nвыберите стартовое помещение или\n"
-//               "дверь и нажмите кнопку \"Старт\".\nАналогично обозначьте финиш.\n"
-//               "Программа выведет список\nкратчайших маршрутов (с учётом средств"
-//               "передвижения)."));
     vblgrpbxWay->addWidget(lblWayInfo);
 
     vblWay->addStretch();
@@ -814,8 +719,6 @@ void MainWindow::blockAndFreePanelAreasProperties()
 #ifdef EDITOR
     ptdtAreaInscription->setPlainText("");
 #endif
-//    chkAreaNumberVisible->setChecked(false);
-//    chkAreaNameVisible->setChecked(false);
 }
 
 void MainWindow::freePanelWays()
@@ -865,27 +768,23 @@ void MainWindow::createGraphics()
     }
     else
     {
+        modelFloorsList->setStringList(QStringList());
+        curFloor = -1;
 #ifdef EDITOR
         lstwgtVerticals->clear();
 #endif
-        modelFloorsList->setStringList(QStringList());
         lstwgtAreas->clear();
-        curFloor = -1;
-//        cbxFloorSelect->clear();
     }
 #ifndef EDITOR
     layerBaseSetVisible(false);
     layerGraphSetVisible(false);
 #endif
-//    blockAndFreePanelAreasProperties();
     freePanelWays();
     switchMode(MapFloor::Idle);
 }
 
 void MainWindow::setState(Elements elem, State visible, State enable)
 {
-//    bool enable = (st == stEnable_Visible);
-//    bool visible = (st != stDisable_Unvisible);
     if (visible != stSave)
     {
         if (elem & eFile)
@@ -894,11 +793,6 @@ void MainWindow::setState(Elements elem, State visible, State enable)
             actMapNew->setVisible(visible);
             actMapSave->setVisible(visible);
 #endif
-//            else
-//            {
-//                actMapNew->setVisible(false);
-//                actMapSave->setVisible(false);
-//            }
             actMapOpen->setVisible(visible);
             actMapSaveAs->setVisible(visible);
             actQuit->setVisible(visible);
@@ -946,11 +840,6 @@ void MainWindow::setState(Elements elem, State visible, State enable)
             menuGo->menuAction()->setVisible(visible);
             tbrGo->setVisible(visible);
         }
-//        if (elem & eLayers)
-//        {
-
-////            tbrLayers->setVisible(visible);
-//        }
 #ifdef EDITOR
         if ((elem & eAdd) > 0)
         {
@@ -1005,12 +894,6 @@ void MainWindow::setState(Elements elem, State visible, State enable)
             if (!visible)
                 if (view)
                     setFocus();
-//            if (m_program != pFull)
-//            {
-//                btnUpdateAreaInscription->setVisible(false);
-//                lblAreaInscription->setVisible(false);
-//                ptdtAreaInscription->setVisible(false);
-//            }
         }
         if (elem & eSearch)
         {
@@ -1101,12 +984,6 @@ void MainWindow::setState(Elements elem, State visible, State enable)
             menuGo->setEnabled(enable);
             tbrGo->setEnabled(enable);
         }
-
-//        if (elem & eLayers)
-//        {
-
-////            tbrLayers->setEnabled(enable);
-//        }
 #ifdef EDITOR
         if ((elem & eAdd) > 0)
         {
@@ -1143,49 +1020,20 @@ void MainWindow::setState(Elements elem, State visible, State enable)
         }
 #ifdef EDITOR
         if (elem & eFloors)
-        {
             wgtFloors->setEnabled(enable);
-
-//            actPanelFloorsManagement->setEnabled(enable);
-            //        dckwgtFloorsManagement->setEnabled(en);
-        }
         if (elem & eVerticals)
-        {
             wgtVerticals->setEnabled(enable);
-
-//            actPanelVerticals->setEnabled(enable);
-            //        dckwgtFloorsManagement->setEnabled(en);
-        }
 #endif
-
         if (elem & eAreasProperties)
         {
             if (!enable)
                 dckwgtAreasProperties->setVisible(false);
             wgtAreasProperties->setEnabled(enable);
-//            if (m_program != pFull)
-//            {
-//                ldtAreaNumber->setReadOnly(true);
-//                ldtAreaName->setReadOnly(true);
-//                ptdtAreaDescription->setReadOnly(true);
-//                btnUpdateAreaInscription->setEnabled(false);
-//                lblAreaInscription->setEnabled(false);
-//                ptdtAreaInscription->setEnabled(false);
-//            }
-
-//            actPanelAreasMarking->setEnabled(enable);
-            //        dckwgtAreasMarking->setEnabled(en);
-            //        ptdtRoomName->setEnabled(en);
-            //        ptdtRoomDescription->setEnabled(en);
         }
         if (elem & eSearch)
-        {
             wgtWay->setEnabled(enable);
-        }
         if (elem & eWays)
-        {
             wgtWay->setEnabled(enable);
-        }
     }
 
 }
@@ -1231,7 +1079,8 @@ void MainWindow::mapSave(QString &fileName)
                     << map->areasAutoRenaming();
         }
         // Copy
-        QString copyFile = QTime::currentTime().toString("hh.mm.ss") + ".bld";
+        QString copyFile = QDateTime::currentDateTime().toString(
+                "yy.MM.dd.hh.mm.ss") + ".bld";
         QFile copy(copyFile);
         if (copy.open(QIODevice::WriteOnly))
         {
@@ -1905,10 +1754,7 @@ void MainWindow::verticalSetTypeCurrentIndexChanged(int index)
 {
     int i = lstwgtVerticals->currentRow();
     if ((i > -1) & (index > -1))
-    {
-        int type = cbxVerticalType->itemData(index).toInt();
-        map->vertical(i)->setType((GraphArc::VerticalType)type);
-    }
+        map->vertical(i)->setType(verticalType.value(index));
 }
 
 void MainWindow::lstwgtVerticalsCurrentItemChanged(QListWidgetItem *current,
@@ -1926,7 +1772,8 @@ void MainWindow::lstwgtVerticalsCurrentItemChanged(QListWidgetItem *current,
             actVerticalMoveDown->setEnabled(false);
         else
             actVerticalMoveDown->setEnabled(true);
-        cbxVerticalType->setCurrentIndex(map->vertical(i)->type());
+        cbxVerticalType->setCurrentIndex(
+                verticalType.key(map->vertical(i)->type()));
         map->selectVertical(i);
 //        map->updateVertical(i);
     }
@@ -2088,6 +1935,9 @@ void MainWindow::ldtInputTextEdited(const QString &text)
                 str += ", ";
             str += area->name();
 
+            if (str.isEmpty())
+                str = tr("Без названия");
+
             if (!str.isEmpty() & !floor->name().isEmpty())
                 str += " (";
             str += floor->name() + tr(" этаж)");
@@ -2148,7 +1998,7 @@ void MainWindow::lstwgtWaysCurrentItemChanged(QListWidgetItem *current,
         map->way(permissions);
         map->paintWay();
         QGraphicsItem *item = map->start();
-        if (item->type() != MapDoor::Type)
+        if ((item->type() != MapDoor::Type) & (item->type() != GraphNode::Type))
             zoomOn(item);
         Map::WayInfo *info = map->wayInfo();
         QString floorsInfo, stairsInfo, liftsInfo;
@@ -2212,10 +2062,13 @@ void MainWindow::way()
         permissions = GraphArc::None;
         map->way(permissions);
         info = map->wayInfo();
-        QListWidgetItem *item = new QListWidgetItem(
-                QString::number(lstwgtWays->count() + 1) +
-                tr(". По этажу"), lstwgtWays);
-        item->setData(Qt::UserRole, (int)permissions);
+        if (map->isWayExist())
+        {
+            QListWidgetItem *item = new QListWidgetItem(
+                    QString::number(lstwgtWays->count() + 1) +
+                    tr(". По этажу"), lstwgtWays);
+            item->setData(Qt::UserRole, (int)permissions);
+        }
 
         permissions = GraphArc::Stairs;
         map->way(permissions);

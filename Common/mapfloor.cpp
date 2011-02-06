@@ -638,7 +638,7 @@ QSet<MapArea*> MapFloor::parentAreas(MapArea *area, const QPointF *pos)
     return set;
 }
 
-void MapFloor::areasToLineVec(/*MapArea *area*/)
+void MapFloor::areasToLineVec()
 {
     if (!m_lines.isEmpty())
     {
@@ -758,21 +758,18 @@ QPointF MapFloor::getPoint(QPointF m, Geometry::Straight straight,
     {
         int nodeNum = -1;
         qreal d = INFINITY;
-//        if ((straight == Geometry::None))
-//        {
-            for (int i = 0; i != m_graphNodes.size(); i++)
-                if (Geometry::dest(m_graphNodes.at(i), m) < d)
-                {
-                    d = Geometry::dest(m_graphNodes.at(i), m);
-                    nodeNum = i;
-                }
-            if ((d < Geometry::cMagnetDestToNode) &
-                ((straight == Geometry::None) |
-                 ((straight != Geometry::None) &
-                  ((m_graphNodes.at(nodeNum).x() == m.x()) |
-                   (m_graphNodes.at(nodeNum).y() == m.y())))))
-                return m_graphNodes.at(nodeNum);
-//        }
+        for (int i = 0; i != m_graphNodes.size(); i++)
+            if (Geometry::dest(m_graphNodes.at(i), m) < d)
+            {
+                d = Geometry::dest(m_graphNodes.at(i), m);
+                nodeNum = i;
+            }
+        if ((d < Geometry::cMagnetDestToNode) &
+            ((straight == Geometry::None) |
+             ((straight != Geometry::None) &
+              ((m_graphNodes.at(nodeNum).x() == m.x()) |
+               (m_graphNodes.at(nodeNum).y() == m.y())))))
+            return m_graphNodes.at(nodeNum);
         if (b)
         {
             d = INFINITY;

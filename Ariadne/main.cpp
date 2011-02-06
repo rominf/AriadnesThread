@@ -9,11 +9,13 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
+    // Support of translation
     QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
     QString locale = QLocale::system().name();
     QTranslator* translator = new QTranslator;
     translator->load(QString("qt_") + locale);
     a.installTranslator(translator);
+
     a.setWindowIcon(QIcon(":/Ariadne.svg"));
 
     MainWindow w;

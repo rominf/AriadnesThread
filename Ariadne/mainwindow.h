@@ -57,7 +57,6 @@
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-//friend QDataStream & operator<<(QDataStream & output, const Map &map);
 public:
     enum Program
     {
@@ -71,7 +70,6 @@ public:
         eEdit = 2,
         eView = 4,
         eGo = 8,
-//        eLayers = 8,
         eAdd  = 16,
         eHelp = 32,
         ePanels = 64,
@@ -82,8 +80,6 @@ public:
         eWays = 2048
     };
     Q_DECLARE_FLAGS(Elements, Element)
-
-//    const QStringListModel* modelFloorsList() const;
 
 protected:
     virtual void closeEvent(QCloseEvent *event);
@@ -110,8 +106,6 @@ private slots:
     void layerGridSetVisible(bool visible);
     void layerGraphSetVisible(bool visible);
     void magnetToExtensions(bool b);
-//    void floorNameChange(const QString &); // Set current floor name
-//    void addWall();                     // Adding wall
     void addArea();                     // Adding area
     void addDoor();                     // Adding door
     void addNode();                     // Adding graph node
@@ -125,7 +119,8 @@ private slots:
     void floorMoveDown();
     void floorMoveUp();
     void floorSetDefault();
-    void viewFloorsListCurrentItemChanged(const QModelIndex &current, const QModelIndex &previous);
+    void viewFloorsListCurrentItemChanged(const QModelIndex &current,
+                                          const QModelIndex &previous);
     void viewFloorsListItemChanged(QModelIndex index);
     void mouseDoubleClicked();
     void mouseMiddleButtonClicked(QGraphicsItem *item);
@@ -136,8 +131,8 @@ private slots:
     void verticalMoveDown();
     void verticalMoveUp();
     void verticalSetTypeCurrentIndexChanged(int index);
-    void lstwgtVerticalsCurrentItemChanged(QListWidgetItem *current, QListWidgetItem *previous);
-//    void wgtVerticalsListCurrentRowChanged(int row);
+    void lstwgtVerticalsCurrentItemChanged(QListWidgetItem *current,
+                                           QListWidgetItem *previous);
     void lstwgtVerticalsItemChanged(QListWidgetItem* item);
 
     void panelAreasPropertiesVisibilityChanged(bool visible);
@@ -158,8 +153,6 @@ private slots:
     void lstwgtWaysCurrentItemChanged(QListWidgetItem *current,
                                       QListWidgetItem *previous);
     void way();
-//    void chkAreaNumberVisibleStateChanged(int state);
-//    void chkAreaNameVisibleStateChanged(int state);
     void about();                       // Show info about my fantastic program
 
 private:
@@ -176,26 +169,13 @@ private:
         stFalse = false,
         stTrue = true
     };
-//    enum VerticalType   // # !Соответствие между типом вертикали и индексом списка
-//    {
-//        None = 0,
-//        Stairs = 1,
-//        Lift = 2,
-//        Room = 4
-//    };
+    static QMap<int, GraphArc::VerticalType> verticalType;
 
-    ///////////////////////////////Variables////////////////////////////////////
-//    MainWindow::Program m_program;
     QString openFileName;
     MapFloor::Mode mode;
     int curFloor;
     quint32 defaultFloor;
-//    bool isFirstAreasMarking;
 
-    ///////////////////////////////Enums////////////////////////////////////////
-
-
-    ///////////////////////////////Objects//////////////////////////////////////
     // OUR ALL!!! Please, do not touch!
     Map *map;
     // our all ended. :)
@@ -223,7 +203,6 @@ private:
     QAction *actLayerGrid;
     QAction *actLayerGraph;
     QAction *actMagnetToExtensions;
-//    QAction *actAddWall;
     QAction *actAddArea;
     QAction *actAddDoor;
     QAction *actAddNode;
@@ -249,9 +228,6 @@ private:
     QAction *actPanelWays;
     QAction *actSetStart;
     QAction *actSetFinish;
-//    QAction *actAllowStairs;
-//    QAction *actAllowLifts;
-//    QAction *actWay;
 
     QActionGroup *actgrpPanels;
     // QAction *actAboutQT;
@@ -265,7 +241,6 @@ private:
     QMenu *menuZoom;
     QMenu *menuGo;
     QMenu *menuAdd;
-//    QMenu *menuPanels;
     QMenu *menuHelp;
 
     // Toolbars
@@ -303,14 +278,8 @@ private:
     QToolButton *btnVerticalDelete;
     QToolButton *btnVerticalMoveDown;
     QToolButton *btnVerticalMoveUp;
-//    QToolButton *btnVerticalSetPassage;
     QComboBox *cbxVerticalType;
     QListWidget *lstwgtVerticals;
-//    QListView *viewFloorsList;
-//    QToolButton *btnFloorMoveDown;
-//    QToolButton *btnFloorMoveUp;
-//    QToolButton *btnFloorSetDefault;
-
 
     // Dock AreasMarking
     QDockWidget *dckwgtAreasProperties;
@@ -325,10 +294,6 @@ private:
     QPushButton *btnUpdateAreaInscription;
     QLabel *lblAreaInscription;
     QPlainTextEdit *ptdtAreaInscription;
-//    QGroupBox *grpbxFieldVisible;
-//    QVBoxLayout *vblFieldVisible;
-//    QCheckBox *chkAreaNumberVisible;
-//    QCheckBox *chkAreaNameVisible;
 
     // Dock Search
     QDockWidget *dckwgtSearch;
@@ -355,7 +320,6 @@ private:
     QGraphicsView *view;
     QGraphicsPixmapItem *pImage;
 
-    ///////////////////////////////Functions////////////////////////////////////
     QList<QKeySequence> shortcuts(QKeySequence main, QKeySequence extra);
     void createActions();
     void createMenus();

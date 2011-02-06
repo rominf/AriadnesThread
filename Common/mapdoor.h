@@ -15,15 +15,15 @@ class MapDoor : public QGraphicsEllipseItem
     friend QDataStream &operator>>(QDataStream &input, MapDoor &door);
 
 public:
-    MapDoor(const MapDoor &door);
-    MapDoor(const QPointF &point);
-
     enum {Type = QGraphicsItem::UserType + 2};
     static const QPen cPenNormal;
     static const QPen cPenSelected;
     static const QBrush cBrushNormal;
     static const QBrush cBrushIsntConnectedWithNode;
     static const QBrush cBrushSelected;
+
+    MapDoor(const MapDoor &door);
+    MapDoor(const QPointF &point);
 
     MapArea* parentArea(int i);
     void addParentArea(MapArea *area);
@@ -40,16 +40,10 @@ private:
 
     static QSet<quint32> m_finishedDoors;
     static quint32 m_count;
-
     QVector<MapArea*> m_parentAreas;
     QSet<quint32> m_parentAreasUins;
     GraphNode *m_node;
     quint32 m_uin;
-
-
-//    static QSet<MapDoor*> m_finishedDoors;
-
-//    static quint32 releaseDoor(const MapDoor *door, int i);
 };
 
 #endif // MAPDOOR_H
