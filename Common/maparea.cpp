@@ -265,7 +265,7 @@ void MapArea::updateToolTip()
 //    return str;
 //}
 
-MapArea* MapArea::parent()
+MapArea* MapArea::parent() const
 {
     return m_parent;
 }
@@ -335,7 +335,7 @@ void MapArea::deleteDoor(MapDoor* door)
         m_doors.remove(i);
 }
 
-int MapArea::doorsNumber()
+int MapArea::doorsNumber() const
 {
     return m_doors.size();
 }
@@ -345,12 +345,12 @@ int MapArea::type() const
     return Type;
 }
 
-quint32 MapArea::uin()
+quint32 MapArea::uin() const
 {
     return m_uin;
 }
 
-quint32 MapArea::floorUin()
+quint32 MapArea::floorUin() const
 {
     return m_floorUin;
 }

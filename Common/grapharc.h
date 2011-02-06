@@ -27,8 +27,7 @@ public:
     };
     Q_DECLARE_FLAGS(WayPermissions, VerticalType)
     GraphArc(GraphNode *node1, GraphNode *node2, const VerticalType type = None,
-             const VerticalDirection direction = Undefined/*,
-             const bool oneWay = false*/);
+             const VerticalDirection direction = Undefined);
     ~GraphArc();
 
     enum {Type = QGraphicsItem::UserType + 3};

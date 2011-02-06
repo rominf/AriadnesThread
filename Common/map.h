@@ -43,10 +43,7 @@ public:
     void swapVerticals(int x, int y);
     int verticalsNumber();
     MapVertical* vertical(const int vertNum) const;
-    void setNameVertical(const int vertNum, const QString &name);
-    void setTypeVertical(const int vertNum, GraphArc::VerticalType);
-    void updateVertical(const int vertNum);
-    GraphArc::VerticalType typeVertical(const int vertNum) const;
+    MapVertical* vertical(const MapArea *area) const;
     void selectVertical(const int vertNum);
     void deselectVertical();
     bool areaCopy(MapArea *area, int floorFromIndex, int floorToIndex);
@@ -54,7 +51,9 @@ public:
     void setAreasAutoRenaming(bool enabled);
     QList<MapArea*> findAreas(const QRegExp str) const;
     Graph* graph() const;
+    QGraphicsItem* start() const;
     void setStart(QGraphicsItem *item);
+    QGraphicsItem* finish() const;
     void setFinish(QGraphicsItem *item);
     bool isStartAndFinishNodesValid() const;
     void way(const GraphArc::WayPermissions permissions);
@@ -71,6 +70,7 @@ public:
 
 public slots:
     void graphStartAnew();
+    void updateVertical(MapVertical *vertical = 0);
 
 private slots:
     void areaActivated(MapArea *area, bool activated);

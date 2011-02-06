@@ -37,3 +37,5 @@ SOURCES += \
 
 RESOURCES += \
     MapIcons.qrc
+
+RC_FILE = AppIcon.rc

@@ -5,8 +5,8 @@ const QPen GraphArc::cPenNormal = QPen(Qt::blue);
 //const QPen GraphArc::cPenSelected = QPen(QBrush(Qt::black), 2);
 const QPen GraphArc::cPenWay = QPen(/*QBrush(*/Qt::darkGreen/*), 2*/);
 
-GraphArc::GraphArc(GraphNode *node1, GraphNode *node2, const VerticalType type,
-                   const VerticalDirection direction):
+GraphArc::GraphArc(GraphNode *node1, GraphNode *node2,
+                   const VerticalType type, const VerticalDirection direction):
         QGraphicsLineItem(QLineF(node1->pos(), node2->pos())),
         m_node1(node1), m_node2(node2), m_verticalType(type),
         m_verticalDirection(direction)

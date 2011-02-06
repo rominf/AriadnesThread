@@ -77,7 +77,7 @@ QDataStream & operator>>(QDataStream &input, Graph &graph)
     {
         arc = new GraphArc(nodes.value(node1uin), nodes.value(node2uin),
                            GraphArc::VerticalType(type),
-                           GraphArc::VerticalDirection(direction)/*, b*/);
+                           GraphArc::VerticalDirection(direction));
         arc->setLenght(length);
         emit graph.graphItemAdded(arc);
         input >> type >> direction >> node1uin >> node2uin >> length;
@@ -383,15 +383,8 @@ qreal Graph::djkstra(GraphNode *start, const QVector<GraphNode *> *finish,
         QMap<pGraphNode, qreal>::iterator it = dist.begin();
         for (; it != dist.end(); ++it)
             if (!visit.contains(it.key()))
-//            {
-//                if (min)
-//                {
-                    if (it.value() < dist.value(min))
-                        min = it.key();
-//                }
-//                else
-//                    min = it.key();
-//            }
+                if (it.value() < dist.value(min))
+                    min = it.key();
 
         if (min)
         {
@@ -518,7 +511,10 @@ void Graph::paintWay(bool isActive)
         if (node)
         {
             node->setPen(penNode);
-            node->setBrush(QBrush(Qt::red));
+            if (isActive)
+                node->setBrush(QBrush(Qt::red));
+            else
+                node->setBrush(brushNode);
             node->setVisible(visible);
         }
     }

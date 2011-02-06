@@ -60,7 +60,7 @@ public:
     void baseSetVisible(bool visible);
     void gridSetVisible(bool visible);
     MapArea* area(int i);
-    MapArea* areaByUin(quint32 uin);
+    MapArea* area(quint32 uin);
 //    void selectArea(MapArea *area);
 //    void resetSelection();
 //    QGraphicsItem* selectedItem();
