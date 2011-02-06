@@ -26,12 +26,11 @@ public:
         Up = 2
     };
     Q_DECLARE_FLAGS(WayPermissions, VerticalType)
+    enum {Type = QGraphicsItem::UserType + 3};
+
     GraphArc(GraphNode *node1, GraphNode *node2, const VerticalType type = None,
              const VerticalDirection direction = Undefined);
     ~GraphArc();
-
-    enum {Type = QGraphicsItem::UserType + 3};
-
 
     static const QPen cPenNormal;
     static const QPen cPenSelected;
@@ -53,7 +52,6 @@ private:
     GraphNode *m_node2;
     VerticalType m_verticalType;
     VerticalDirection m_verticalDirection;
-//    bool m_oneWay;
     qreal m_lenght;
     quint32 m_uin;
 

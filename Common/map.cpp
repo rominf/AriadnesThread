@@ -365,8 +365,8 @@ void Map::updateVertical(MapVertical *vertical)
                 if (area->doorsNumber() > 0)
                 {
                     doors.append(area->door(0));
-                    if (area->doorsNumber() > 1)
-                        area->setBrush(Qt::red);
+//                    if (area->doorsNumber() > 1)
+//                        area->setBrush(Qt::red);
                 }
             }
         }
@@ -388,6 +388,7 @@ void Map::updateVertical(MapVertical *vertical)
         if ((type == GraphArc::Stairs) | (type == GraphArc::Lift))
         {
             QString symbol = "";
+            bool isFirst = true;
             for (int i = 0; i != m_floors.size(); i++)
             {
                 area = m_floors.at(i)->area(
@@ -402,14 +403,20 @@ void Map::updateVertical(MapVertical *vertical)
                         switch (vertical->type())
                         {
                         case GraphArc::Stairs:
-                            if (doors.isEmpty())
+                            if (isFirst)
+                            {
                                 symbol = tr("￬");
+                                isFirst = false;
+                            }
                             else
                                 symbol = tr("⇅");
                             break;
                         case GraphArc::Lift:
-                            if (doors.isEmpty())
+                            if (isFirst)
+                            {
                                 symbol = tr("⇓");
+                                isFirst = false;
+                            }
                             else
                                 symbol = tr("⇕");
                             break;
@@ -446,7 +453,8 @@ void Map::updateVertical(MapVertical *vertical)
                 qreal lengthLift = convertRealMToPix(
                         Global::cSpeedMPerMin*Global::cTimeLift);
                 for (int i = 0; i != doors.size() - 1; i++)
-                    if ((doors.at(i)->node() != 0) & (doors.at(i+1)->node() != 0))
+                    if ((doors.at(i)->node() != 0) &
+                        (doors.at(i+1)->node() != 0))
                     {
                         GraphNode *node1 = doors.at(i)->node();
                         GraphNode *node2 = doors.at(i+1)->node();
@@ -643,7 +651,7 @@ bool Map::isWayExist() const
 
 Map::WayInfo* Map::wayInfo() const
 {
-    WayInfo *info = new WayInfo;/* = {0, 0, 0, 0, 0, 0, 0, 0}*/;
+    WayInfo *info = new WayInfo;
     info->length = 0;
     info->floorsNumber = 0;
     info->stairsNumber = 0;

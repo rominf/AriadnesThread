@@ -93,11 +93,6 @@ GraphArc* GraphNode::arc(const GraphNode *adjacent, const bool oneWay) const
     return 0;
 }
 
-//const QVector<GraphArc*> GraphNode::arcs() const
-//{
-//    return m_arcs;
-//}
-
 void GraphNode::deleteArc(GraphArc *arc)
 {
     int i = m_arcs.indexOf(arc);

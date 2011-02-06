@@ -61,16 +61,10 @@ public:
     void clearWay();
     bool isWayExist() const;
     WayInfo* wayInfo() const;
-//    QVector<QPointF*> graphNodesCoordinates();
-
-//    void graphStartAnew();
-//    const Graph* graph() const;
-
-//signals:
 
 public slots:
     void graphStartAnew();
-    void updateVertical(MapVertical *vertical = 0);
+    void updateVertical(MapVertical *vertical);
 
 private slots:
     void areaActivated(MapArea *area, bool activated);
@@ -79,9 +73,6 @@ private slots:
     void deleteArc(GraphArc *arc);
     void setLastNode(GraphNode *node);
     void addGraphItem(QGraphicsItem *item);
-//    void deleteGraphItem(QGraphicsItem *item);
-//    void graphDeleteNode(GraphNode *node);
-//    void graphNodesChanged(QVector<QPointF*> &nodes, int floor);
 
 private:
     static qreal m_lengthStairsDown;
@@ -94,13 +85,9 @@ private:
     MapSelection *m_finish;
     bool m_areasAutoRenaming;
     int m_selectedVertical;
-//    MapSelection *m_copy;
-//    QVector<GraphNode*> m_startNodes;
-//    QVector<GraphNode*> m_finishNodes;
 
     qreal m_pixPerRealM;
     qreal m_pixPerDisplayM;
-//    qreal m_realMPerDisplayM;
     qreal m_pixSizeX;
     qreal m_pixSizeY;
 

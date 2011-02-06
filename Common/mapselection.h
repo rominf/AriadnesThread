@@ -26,13 +26,6 @@ private:
     QVector<MapDoor*> m_doors;
     QVector<GraphNode*> m_nodes;
     QVector<GraphArc*> m_arcs;
-//    QBrush *brushNormalArea;
-//    QBrush *brushNormalDoor;
-//    QBrush *brushSelectedArea;
-//    QBrush *brushSelectedDoor;
-//    QPen *penNormal;
-//    QPen *penSelectedArea;
-//    QPen *penSelectedDoor;
     QColor m_color;
     QBrush m_brush;
     QPen m_pen;

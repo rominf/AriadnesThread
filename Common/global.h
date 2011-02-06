@@ -21,10 +21,6 @@ public:
     static const QColor colorStart;
     static const QColor colorFinish;
     static const QPen pen;
-//    static const QPen penStart;
-//    static const QBrush brushStart;
-//    static const QPen penFinish;
-//    static const QBrush brushFinish;
 signals:
 
 public slots:

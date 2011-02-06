@@ -8,8 +8,8 @@
 class MapVertical: public QObject
 {
     Q_OBJECT
-    friend QDataStream &operator<<(QDataStream &output,
-                                   const MapVertical &vertical);
+    friend QDataStream &operator<<(
+            QDataStream &output, const MapVertical &vertical);
     friend QDataStream &operator>>(QDataStream &input, MapVertical &vertical);
 public:
     MapVertical();
