@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QDataStream>
+#include <QTextStream>
 #include "global.h"
 #include "graph.h"
 #include "grapharc.h"
@@ -29,8 +30,17 @@ public:
         int liftsFloorsDownNumber;
         int liftsFloorsUpNumber;
     };
+    struct Properties
+    {
+        QString name;
+        QString description;
+        qreal longitude;
+        qreal latitude;
+    };
 
     void setPixPerDisplayM(qreal r);
+    Properties* properties();
+    void setProperties(Properties *properties);
     int floorsNumber();
     void insertFloor(int i);
     void swapFloors(int x, int y);
@@ -78,6 +88,7 @@ private:
     static qreal m_lengthStairsDown;
     static qreal m_lengthStairsUp;
 
+    Properties *m_properties;
     Graph *m_graph;
     QVector<MapFloor*> m_floors;
     QVector<MapVertical*> m_verticals;

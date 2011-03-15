@@ -1,4 +1,5 @@
 QT += svg
+QT += webkit
 
 HEADERS += \
     Common/map.h \
@@ -15,7 +16,8 @@ HEADERS += \
     Common/graphnode.h \
     Ariadne/dialogfloorchoice.h \
     Common/mapvertical.h \
-    Common/global.h
+    Common/global.h \
+    Ariadne/dialogmapproperties.h
 
 SOURCES += \
     Common/map.cpp \
@@ -33,7 +35,8 @@ SOURCES += \
     Common/graphnode.cpp \
     Ariadne/dialogfloorchoice.cpp \
     Common/mapvertical.cpp \
-    Common/global.cpp
+    Common/global.cpp \
+    Ariadne/dialogmapproperties.cpp
 
 RESOURCES += \
     MapIcons.qrc

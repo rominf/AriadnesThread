@@ -38,8 +38,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent)
     createPanelFloors();
     createPanelVerticals();
 #endif
-    createPanelSearch();
     createPanelAreasProperties();
+    createPanelSearch();
     createPanelWays();
 
     setState(eFile | eHelp, stTrue, stTrue);
@@ -49,9 +49,10 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent)
     actMapSave->setEnabled(false);
 #endif
     actMapSaveAs->setEnabled(false);
+    actMapProperties->setEnabled(false);
 //    resize(792, 573);
-    resize(782, 498);
-//    showMaximized();
+//    resize(782, 498);
+    showMaximized();
 
     openFileName = tr("УЛК МГТУ им. Н.Э. Баумана.bld");
 }
@@ -91,6 +92,10 @@ void MainWindow::createActions()
                                tr("Сохранить &как…"), this);
     connect(actMapSaveAs, SIGNAL(triggered()), SLOT(mapSaveAs()));
     actMapSaveAs->setShortcuts(shortcuts(QKeySequence::SaveAs, tr("Shift+S")));
+
+    actMapProperties = new QAction(QIcon(":/Properties"), tr("Свойства"), this);
+    connect(actMapProperties, SIGNAL(triggered()), SLOT(mapProperties()));
+//    actProperties->setShortcuts(shortcuts(QKeySequence::Quit, tr("Q")));
 
     actQuit = new QAction(QIcon(":/Quit"), tr("В&ыход"), this);
     connect(actQuit, SIGNAL(triggered()), SLOT(exit()));
@@ -205,6 +210,10 @@ void MainWindow::createActions()
     actAddNode->setShortcuts(shortcuts(tr("Ctrl+G"), tr("G")));
 #endif
 
+
+    actHelp = new QAction(QIcon(":/Help"), tr("&Помощь"), this);
+    connect(actHelp, SIGNAL(triggered()), SLOT(help()));
+    actHelp->setShortcut(QKeySequence::HelpContents);
 
     actAbout = new QAction(QIcon(":/Ariadne.svg"), tr("&О программе"), this);
     connect(actAbout, SIGNAL(triggered()), SLOT(about()));
@@ -328,6 +337,7 @@ void MainWindow::createMenus()
     menuFile->addAction(actMapSave);
 #endif
     menuFile->addAction(actMapSaveAs);
+    menuFile->addAction(actMapProperties);
     menuFile->addAction(actQuit);
 
 #ifdef EDITOR
@@ -376,6 +386,7 @@ void MainWindow::createMenus()
 #endif
 
     menuHelp = menuBar()->addMenu(tr("&Справка"));
+    menuHelp->addAction(actHelp);
     menuHelp->addAction(actAbout);
     //menuHelp->addAction(actAboutQT);
 }
@@ -567,6 +578,17 @@ void MainWindow::createPanelAreasProperties()
     dckwgtAreasProperties->setWidget(wgtAreasProperties);
 
     vblAreasProperties = new QVBoxLayout(wgtAreasProperties);
+
+    lblAreaType = new QLabel(tr("Тип: "));
+    vblAreasProperties->addWidget(lblAreaType);
+
+    cbxAreaType = new QComboBox();
+    cbxAreaType->insertItem(0, tr("Помещение"), (int)MapArea::Normal);
+    cbxAreaType->insertItem(1, tr("Отверстие"), (int)MapArea::Hole);
+    cbxAreaType->insertItem(2, tr("Полный"), (int)MapArea::Full);
+    connect(cbxAreaType, SIGNAL(currentIndexChanged(int)),
+            SLOT(cbxAreaTypeCurrentIndexChanged(int)));
+    vblAreasProperties->addWidget(cbxAreaType);
 
     lblAreaNumber = new QLabel(tr("Номер: "));
     vblAreasProperties->addWidget(lblAreaNumber);
@@ -795,6 +817,7 @@ void MainWindow::setState(Elements elem, State visible, State enable)
 #endif
             actMapOpen->setVisible(visible);
             actMapSaveAs->setVisible(visible);
+            actMapProperties->setVisible(visible);
             actQuit->setVisible(visible);
 
             menuFile->menuAction()->setVisible(visible);
@@ -854,6 +877,7 @@ void MainWindow::setState(Elements elem, State visible, State enable)
 #endif
         if (elem & eHelp)
         {
+            actHelp->setVisible(visible);
             actAbout->setVisible(visible);
 
             menuHelp->menuAction()->setVisible(visible);
@@ -920,6 +944,7 @@ void MainWindow::setState(Elements elem, State visible, State enable)
 #endif
             actMapOpen->setEnabled(enable);
             actMapSaveAs->setEnabled(enable);
+            actMapProperties->setEnabled(enable);
             actQuit->setEnabled(enable);
 
             menuFile->menuAction()->setEnabled(enable);
@@ -999,6 +1024,7 @@ void MainWindow::setState(Elements elem, State visible, State enable)
 
         if (elem & eHelp)
         {
+            actHelp->setEnabled(enable);
             actAbout->setEnabled(enable);
 
             menuHelp->menuAction()->setEnabled(enable);
@@ -1092,6 +1118,26 @@ void MainWindow::mapSave(QString &fileName)
     }
 }
 
+MapArea* MainWindow::selectedArea()
+{
+    if ((map->floorsNumber() > 0) & (curFloor > -1))
+    {
+        MapSelection *selection = map->floor(curFloor)->selection();
+        if (selection)
+        {
+            QGraphicsItem *item = selection->item();
+            if (item)
+                if (item->type() == MapArea::Type)
+                {
+                    MapArea *area = qgraphicsitem_cast<MapArea*>(item);
+                    if (area)
+                        return area;
+                }
+        }
+    }
+    return 0;
+}
+
 void MainWindow::closeEvent(QCloseEvent *event)
 {
 #ifdef EDITOR
@@ -1127,15 +1173,15 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::mapNew()
 {
-    DialogMapSize* pDialog = new DialogMapSize(this);
-    if (pDialog->exec() == QDialog::Accepted)
+    DialogMapSize* dialog = new DialogMapSize(this);
+    if (dialog->exec() == QDialog::Accepted)
     {
         openFileName = cNewFileName;
         if (map)
             delete map;
         map = new Map(cPixPerRealM, displayPixPerM(width(), widthMM()),
-                      pDialog->MSizeX()*cPixPerRealM,
-                      pDialog->MSizeY()*cPixPerRealM, this);
+                      dialog->MSizeX()*cPixPerRealM,
+                      dialog->MSizeY()*cPixPerRealM, this);
         createGraphics();
         floorAdd();
         floorSetDefault();
@@ -1229,6 +1275,14 @@ void MainWindow::mapSaveAs()
     mapSave(fileName);
 }
 
+void MainWindow::mapProperties()
+{
+    DialogMapProperties* dialog = new DialogMapProperties(
+            this, map->properties());
+    if (dialog->exec() == QDialog::Accepted)
+        map->setProperties(dialog->properties());
+}
+
 void MainWindow::exit()
 {
     close();
@@ -1236,36 +1290,34 @@ void MainWindow::exit()
 
 void MainWindow::areaCopy()
 {
-    if (map->floor(curFloor)->selection()->item() != 0)
-        if (map->floor(curFloor)->selection()->item()->type() == MapArea::Type)
-        {
-            MapArea *oldArea = qgraphicsitem_cast<MapArea*>(
-                    map->floor(curFloor)->selection()->item());
-            int i;
-            if (curFloor > 0)
-                i = curFloor - 1;
+    MapArea *oldArea = selectedArea();
+    if (oldArea)
+    {
+        int i;
+        if (curFloor > 0)
+            i = curFloor - 1;
+        else
+            if (curFloor < map->floorsNumber() - 1)
+                i = curFloor + 1;
             else
-                if (curFloor < map->floorsNumber() - 1)
-                    i = curFloor + 1;
-                else
-                {
-                    QMessageBox::warning(
-                            0, tr("Ошибка при копировании области"),
-                            tr("В здании только 1 этаж. Копирование области на "
-                               "этаж, на котором она находится невозможно."));
-                    return;
-                }
-            DialogFloorChoice* dialog = new DialogFloorChoice(
-                    this, modelFloorsList, i, tr("Выберите этаж, на который "
-                                                 "будет\nскопирована "
-                                                 "выделенная область:"));
-            if (dialog->exec() == QDialog::Accepted)
             {
-                int floorTo = dialog->floor();
-                if (map->areaCopy(oldArea, curFloor, floorTo))
-                    setActiveFloor(floorTo);
+                QMessageBox::warning(
+                        0, tr("Ошибка при копировании области"),
+                        tr("В здании только 1 этаж. Копирование области на "
+                           "этаж, на котором она находится невозможно."));
+                return;
             }
+        DialogFloorChoice* dialog = new DialogFloorChoice(
+                this, modelFloorsList, i, tr("Выберите этаж, на который "
+                                             "будет\nскопирована "
+                                             "выделенная область:"));
+        if (dialog->exec() == QDialog::Accepted)
+        {
+            int floorTo = dialog->floor();
+            if (map->areaCopy(oldArea, curFloor, floorTo))
+                setActiveFloor(floorTo);
         }
+    }
 }
 
 void MainWindow::graphCopy()
@@ -1562,33 +1614,31 @@ void MainWindow::switchMode(MapFloor::Mode m)
     case MapFloor::Selection:
         {
             bool selectionIsValid = false;
-            if (map->floor(curFloor)->selection()->item() != 0)
-                if (map->floor(curFloor)->selection()->item()->type() ==
-                                                                MapArea::Type)
-                {
-                    selectionIsValid = true;
-                    setState(eAreasProperties/* | eWays*/, stSave, stTrue);
-                    MapArea *area = qgraphicsitem_cast<MapArea*>(
-                            map->floor(curFloor)->selection()->item());
-                    bool isModified = false;
-                    isModified = (!area->number().isEmpty() |
-                                  !area->name().isEmpty() |
-                                  !area->description().isEmpty() |
-                                  !area->inscription().isEmpty());
+            MapArea *area = selectedArea();
+            if (area)
+            {
+                selectionIsValid = true;
+                setState(eAreasProperties/* | eWays*/, stSave, stTrue);
+                bool isModified = false;
+                isModified = (!area->number().isEmpty() |
+                              !area->name().isEmpty() |
+                              !area->description().isEmpty() |
+                              !area->inscription().isEmpty());
 #ifdef EDITOR
-                    ptdtAreaInscription->document()->setModified(isModified);
+                ptdtAreaInscription->document()->setModified(isModified);
 #endif
-                    ldtAreaNumber->setText(area->number());
-                    ldtAreaName->setText(area->name());
-                    ptdtAreaDescription->setPlainText(area->description());
+                cbxAreaType->setCurrentIndex((int)area->areaType());
+                ldtAreaNumber->setText(area->number());
+                ldtAreaName->setText(area->name());
+                ptdtAreaDescription->setPlainText(area->description());
 #ifdef EDITOR
-                    ptdtAreaInscription->setPlainText(area->inscription());
-                    ptdtAreaInscription->document()->setModified(isModified);
+                ptdtAreaInscription->setPlainText(area->inscription());
+                ptdtAreaInscription->document()->setModified(isModified);
 #endif
-                    ldtAreaNumber->selectAll();
-                    if (dckwgtAreasProperties->isVisible())
-                        ldtAreaNumber->setFocus();;
-                }
+                ldtAreaNumber->selectAll();
+                if (dckwgtAreasProperties->isVisible())
+                    ldtAreaNumber->setFocus();;
+            }
             if (!selectionIsValid)
             {
                 blockAndFreePanelAreasProperties();
@@ -1818,66 +1868,59 @@ void MainWindow::panelAreasPropertiesVisibilityChanged(bool visible)
         ldtAreaNumber->setFocus();
 }
 
+void MainWindow::cbxAreaTypeCurrentIndexChanged(int index)
+{
+    MapArea *area = selectedArea();
+    MapArea::AreaType type = MapArea::AreaType(index);
+    if (area)
+        if (type != area->areaType())
+            area->setAreaType(type, false);
+}
+
 void MainWindow::setAreaNumber()
 {
-    if ((map->floorsNumber() > 0) & (curFloor > -1))
-        if (map->floor(curFloor)->selection()->item() != 0)
-            if (map->floor(curFloor)->selection()->item()->type() == MapArea::Type)
-            {
-                MapArea *area = qgraphicsitem_cast<MapArea*>(
-                        map->floor(curFloor)->selection()->item());
-                area->setNumber(ldtAreaNumber->text());
+    MapArea *area = selectedArea();
+    if (area)
+    {
+        area->setNumber(ldtAreaNumber->text());
 #ifdef EDITOR
-                if (!ptdtAreaInscription->document()->isModified())
-                    updateAreaInscription();
+        if (!ptdtAreaInscription->document()->isModified())
+            updateAreaInscription();
 #endif
-            }
+    }
 }
 
 void MainWindow::setAreaName()
 {
-    if ((map->floorsNumber() > 0) & (curFloor > -1))
-        if (map->floor(curFloor)->selection()->item() != 0)
-            if (map->floor(curFloor)->selection()->item()->type() == MapArea::Type)
-            {
-                MapArea *area = qgraphicsitem_cast<MapArea*>(
-                        map->floor(curFloor)->selection()->item());
-                area->setName(ldtAreaName->text());
+    MapArea *area = selectedArea();
+    if (area)
+    {
+        area->setName(ldtAreaName->text());
 #ifdef EDITOR
-                if (!ptdtAreaInscription->document()->isModified())
-                    updateAreaInscription();
+        if (!ptdtAreaInscription->document()->isModified())
+            updateAreaInscription();
 #endif
-            }
+    }
 }
 
 void MainWindow::setAreaDescription()
 {
-    if ((map->floorsNumber() > 0) & (curFloor > -1))
-        if (map->floor(curFloor)->selection()->item() != 0)
-            if (map->floor(curFloor)->selection()->item()->type() == MapArea::Type)
-            {
-                MapArea *area = qgraphicsitem_cast<MapArea*>(
-                        map->floor(curFloor)->selection()->item());
-                area->setDescription(
-                        ptdtAreaDescription->document()->toPlainText());
+    MapArea *area = selectedArea();
+    if (area)
+    {
+        area->setDescription(ptdtAreaDescription->document()->toPlainText());
 #ifdef EDITOR
-                if (!ptdtAreaInscription->document()->isModified())
-                    updateAreaInscription();
+        if (!ptdtAreaInscription->document()->isModified())
+            updateAreaInscription();
 #endif
-            }
+    }
 }
 
 void MainWindow::setAreaInscription()
 {
-    if ((map->floorsNumber() > 0) & (curFloor > -1))
-        if (map->floor(curFloor)->selection()->item() != 0)
-            if (map->floor(curFloor)->selection()->item()->type() == MapArea::Type)
-            {
-                MapArea *area = qgraphicsitem_cast<MapArea*>(
-                        map->floor(curFloor)->selection()->item());
-                area->setInscription(
-                        ptdtAreaInscription->document()->toPlainText());
-            }
+    MapArea *area = selectedArea();
+    if (area)
+        area->setInscription(ptdtAreaInscription->document()->toPlainText());
 }
 
 //void MainWindow::chkAreaNumberVisibleStateChanged(int state)
@@ -1945,6 +1988,7 @@ void MainWindow::ldtInputTextEdited(const QString &text)
             QListWidgetItem *item = new QListWidgetItem(str, lstwgtAreas);
             item->setData(Qt::UserRole, (uint)area);
         }
+        lstwgtAreas->setCurrentRow(0);
     }
     else
         lblAreasNumber->hide();
@@ -2114,6 +2158,11 @@ void MainWindow::way()
     }
 }
 
+void MainWindow::help()
+{
+    QDesktopServices::openUrl(QUrl("./Help.pdf"));
+}
+
 void MainWindow::about()
 {
     QString s;
@@ -2128,6 +2177,5 @@ void MainWindow::about()
            "кратчайшего пути.");
 #endif
     QMessageBox::about(this, tr("О программе"), "<b>" + qApp->applicationName()
-                       + " " + qApp->applicationVersion() + "</b>"
-                       + "<br>" + s);
+                       + " " + qApp->applicationVersion() + "</b><br>" + s);
 }

@@ -37,5 +37,7 @@
         <file alias="Zoom">Icons/Zoom.png</file>
         <file alias="LayerGrid">Icons/LayerGrid.png</file>
         <file alias="Search">Icons/Search.png</file>
+        <file alias="Properties">Icons/Properties.png</file>
+        <file alias="Help">Icons/Help.png</file>
     </qresource>
 </RCC>

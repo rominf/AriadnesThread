@@ -82,8 +82,9 @@ void MapSelection::removeItem(QGraphicsItem *item)
     {
         MapArea *area = qgraphicsitem_cast<MapArea*>(item);
         emit areaActivated(m_areas.at(0), false);
-        area->setBrush(m_brush/**brushNormalArea*/);
-        area->setPen(m_pen/**penNormal*/);
+        area->repaint();
+//        area->setBrush(m_brush/**brushNormalArea*/);
+//        area->setPen(m_pen/**penNormal*/);
         int i = m_areas.indexOf(area);
         if (i > -1)
             m_areas.remove(i);

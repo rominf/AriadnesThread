@@ -8,7 +8,7 @@
 #include <QComboBox>
 #include <QCheckBox>
 #include <QCursor>
-#include <QDockWidget>
+#include <QDesktopServices>
 #include <QDockWidget>
 #include <QFile>
 #include <QFileDialog>
@@ -50,6 +50,7 @@
 #include "../Common/global.h"
 #include "../Common/map.h"
 #include "../Common/mapfloor.h"
+#include "dialogmapproperties.h"
 #include "dialogmapsize.h"
 #include "dialogfloorchoice.h"
 
@@ -89,6 +90,7 @@ private slots:
     void mapOpen();                     // Opening map
     void mapSave();                     // Saving map to open file
     void mapSaveAs();                   // Saving map to another file
+    void mapProperties();               // Map properties
     void exit();                        // Exit program
     void areaCopy();                    // Copy area to another floor
     void graphCopy();                   // Copy graph to another floor
@@ -136,6 +138,7 @@ private slots:
     void lstwgtVerticalsItemChanged(QListWidgetItem* item);
 
     void panelAreasPropertiesVisibilityChanged(bool visible);
+    void cbxAreaTypeCurrentIndexChanged(int index);
     void setAreaNumber();
     void setAreaName();
     void setAreaDescription();
@@ -153,6 +156,7 @@ private slots:
     void lstwgtWaysCurrentItemChanged(QListWidgetItem *current,
                                       QListWidgetItem *previous);
     void way();
+    void help();
     void about();                       // Show info about my fantastic program
 
 private:
@@ -178,6 +182,7 @@ private:
 
     // OUR ALL!!! Please, do not touch!
     Map *map;
+
     // our all ended. :)
     QStringListModel *modelFloorsList;
     QItemSelectionModel *selectionFloorsList;
@@ -187,6 +192,7 @@ private:
     QAction *actMapOpen;
     QAction *actMapSave;
     QAction *actMapSaveAs;
+    QAction *actMapProperties;
     QAction *actQuit;
     QAction *actAreaCopy;
     QAction *actGraphCopy;
@@ -206,6 +212,7 @@ private:
     QAction *actAddArea;
     QAction *actAddDoor;
     QAction *actAddNode;
+    QAction *actHelp;
     QAction *actAbout;
 
     QAction *actPanelFloors;
@@ -281,10 +288,12 @@ private:
     QComboBox *cbxVerticalType;
     QListWidget *lstwgtVerticals;
 
-    // Dock AreasMarking
+    // Dock AreasProperties
     QDockWidget *dckwgtAreasProperties;
     QWidget *wgtAreasProperties;
     QVBoxLayout *vblAreasProperties;
+    QLabel *lblAreaType;
+    QComboBox *cbxAreaType;
     QLabel *lblAreaNumber;
     QLineEdit *ldtAreaNumber;
     QLabel *lblAreaName;
@@ -338,6 +347,7 @@ private:
     void swapVerticals(int x, int y);
     MapFloor::Mode getMode();
     void mapSave(QString &fileName);
+    MapArea* selectedArea();
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(MainWindow::Elements)

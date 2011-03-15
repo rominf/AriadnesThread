@@ -12,6 +12,11 @@ m_pixSizeX(mapPixSizeX), m_pixSizeY(mapPixSizeY)
     // Count map geometry
 //    m_realMPerDisplayM = m_pixPerDisplayM / m_pixPerRealM;
     // ### Make autoAreasRenaming editable by user
+    m_properties = new Properties;
+    m_properties->name = "";
+    m_properties->description = "";
+    m_properties->longitude = 0;
+    m_properties->latitude = 0;
     m_areasAutoRenaming = true;
     m_selectedVertical = -1;
     m_graph = new Graph();
@@ -26,7 +31,9 @@ m_pixSizeX(mapPixSizeX), m_pixSizeY(mapPixSizeY)
 QDataStream & operator<<(QDataStream &output, const Map &map)
 {
     int last = map.m_floors.size();
-    output << map.m_pixSizeX << map.m_pixSizeY << map.m_pixPerRealM << last;
+    output << map.m_properties->name << map.m_properties->description
+            << map.m_properties->longitude << map.m_properties->latitude
+            << map.m_pixSizeX << map.m_pixSizeY << map.m_pixPerRealM << last;
     for (int i = 0; i != last; i++)
         output << *map.m_floors.at(i);
     last = map.m_verticals.size();
@@ -40,7 +47,9 @@ QDataStream & operator<<(QDataStream &output, const Map &map)
 QDataStream & operator>>(QDataStream &input, Map &map)
 {
     int last;
-    input >> map.m_pixSizeX >> map.m_pixSizeY >> map.m_pixPerRealM >> last;
+    input >> map.m_properties->name >> map.m_properties->description
+            >> map.m_properties->longitude >> map.m_properties->latitude
+            >> map.m_pixSizeX >> map.m_pixSizeY >> map.m_pixPerRealM >> last;
     for (int i = 0; i != last; i++)
     {
         map.insertFloor(i);
@@ -182,6 +191,16 @@ void Map::graphStartAnew()
 void Map::setPixPerDisplayM(qreal r)
 {
     m_pixPerDisplayM = r;
+}
+
+Map::Properties* Map::properties()
+{
+    return m_properties;
+}
+
+void Map::setProperties(Properties *properties)
+{
+    m_properties = properties;
 }
 
 qreal Map::convertPixToDisplayM(qreal r) const
@@ -461,6 +480,8 @@ void Map::updateVertical(MapVertical *vertical)
                         if ((type == GraphArc::Stairs) |
                             (type == GraphArc::Lift))
                         {
+//                            int n = floorNumber(floorByUin(node1->floorUin())) -
+//                                    floorNumber(floorByUin(node2->floorUin()));
                             GraphArc *arcDown = new GraphArc(
                                     node1, node2, type, GraphArc::Down);
                             GraphArc *arcUp = new GraphArc(
@@ -703,13 +724,3 @@ Map::WayInfo* Map::wayInfo() const
     }
     return info;
 }
-
-//QVector<QPointF*> Map::graphNodesCoordinates()
-//{
-//    return m_graph->nodesCoordinates();
-//}
-
-//const Graph* Map::graph() const
-//{
-//    return m_graph;
-//}

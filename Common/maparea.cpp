@@ -3,6 +3,8 @@
 const QPen MapArea::cPenNormal = QPen(Qt::black);
 //const QPen MapArea::cPenSelected = QPen(QBrush(Qt::black), 3);
 const QBrush MapArea::cBrushNormal = QBrush(Qt::NoBrush);
+const QBrush MapArea::cBrushHole = QBrush(QColor(220, 220, 220, 255));
+const QBrush MapArea::cBrushFull = QBrush(Qt::darkGray);
 //const QBrush MapArea::cBrushSelected = QBrush(Global::colorSelected);
 const int MapArea::cFontSize = 16;
 const QString MapArea::cFontFamily = "Arial";
@@ -12,10 +14,11 @@ MapArea::MapArea(const QPolygonF &polygon, const quint32 floorUin):
         QGraphicsPolygonItem(polygon), m_floorUin(floorUin)
 {
     m_uin = ++m_count;
-    m_inscription = new QGraphicsTextItem(this);
+    m_areaType = Normal;
     m_number = "";
     m_name = "";
     m_description = "";
+    m_inscription = new QGraphicsTextItem(this);
 //    updateTitle();
     setBrush(cBrushNormal);
 }
@@ -26,7 +29,6 @@ MapArea::MapArea(const MapArea &area, const quint32 floorUin,
 {
     setBrush(cBrushNormal);
     m_uin = ++m_count;
-    m_inscription = new QGraphicsTextItem(this);
     QString oldAreasNumber = area.m_number;
     QString newAreasNumber = oldAreasNumber;
     if (oldAreasNumber.indexOf(floorFromName) == 0)
@@ -34,6 +36,7 @@ MapArea::MapArea(const MapArea &area, const quint32 floorUin,
     m_number = newAreasNumber;
     m_name = area.m_name;
     m_description = area.m_description;
+    m_inscription = new QGraphicsTextItem(this);
     setInscription(area.m_inscription->toPlainText().replace(
             oldAreasNumber, newAreasNumber));
 //    updateTitle();
@@ -55,8 +58,8 @@ QDataStream &operator<<(QDataStream &output, const MapArea &area)
     last = 0;
     for (int i = 0; i != area.m_doors.size(); i++)
         last += !area.m_doors.at(i)->isFinished();
-    output << area.m_uin << area.m_number << area.m_name << area.m_description
-            << area.m_inscription->toPlainText() << last;
+    output << area.m_uin << area.m_areaType << area.m_number << area.m_name
+            << area.m_description << area.m_inscription->toPlainText() << last;
     for (int i = 0; i != area.m_doors.size(); i++)
         if (!area.m_doors.at(i)->isFinished())
             output << *area.m_doors.at(i);
@@ -78,9 +81,11 @@ QDataStream &operator>>(QDataStream &input, MapArea &area)
     input >> list;
     QPolygonF polygon(list.toVector());
     area.setPolygon(polygon);
+    int type;
     QString inscription;
-    input >> area.m_uin >> area.m_number >> area.m_name >> area.m_description
-            >> inscription >> last;
+    input >> area.m_uin >> type >> area.m_number >> area.m_name >>
+            area.m_description >> inscription >> last;
+    area.setAreaType(MapArea::AreaType(type));
     area.setInscription(inscription);
     area.updateToolTip();
 //    QString tooltip = area.info("<b>%1</b><br>%2<br><i>%3</i>");
@@ -141,6 +146,18 @@ QDataStream &operator>>(QDataStream &input, MapArea &area)
 //            return false;
 //    return false;
 //}
+
+MapArea::AreaType MapArea::areaType()
+{
+    return m_areaType;
+}
+
+void MapArea::setAreaType(MapArea::AreaType type, bool update)
+{
+    m_areaType = type;
+    if (update)
+        repaint();
+}
 
 QString MapArea::number()
 {
@@ -241,6 +258,23 @@ void MapArea::updateToolTip()
 
     if (!tooltip.isEmpty())
         setToolTip(tooltip);
+}
+
+void MapArea::repaint()
+{
+    setPen(cPenNormal);
+    switch (m_areaType)
+    {
+    case Normal:
+        setBrush(cBrushNormal);
+        break;
+    case Hole:
+        setBrush(cBrushHole);
+        break;
+    case Full:
+        setBrush(cBrushFull);
+        break;
+    }
 }
 
 //QString MapArea::info(const QString pattern) const
