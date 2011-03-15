@@ -30,10 +30,20 @@ public:
         ceIntersection,
         ceAreaExist
     };
+    enum AreaType
+    {
+        Normal,
+        Hole,
+        Full
+    };
     static const QPen cPenNormal;
     static const QPen cPenSelected;
     static const QBrush cBrushNormal;
+    static const QBrush cBrushHole;
+    static const QBrush cBrushFull;
     static const QBrush cBrushSelected;
+    MapArea::AreaType areaType();
+    void setAreaType(MapArea::AreaType type, bool update = true);
     QString number();
     void setNumber(const QString &number);
     QString name();
@@ -43,6 +53,7 @@ public:
     QString inscription();
     void setInscription(const QString &inscription);
     void updateToolTip();
+    void repaint();
     MapArea* parent() const;
     void addArea(MapArea *area);
     MapArea* area(int i) const;
@@ -59,10 +70,11 @@ private:
     static const int cFontSize;
     static const QString cFontFamily;
 
-    QGraphicsTextItem *m_inscription;
+    MapArea::AreaType m_areaType;
     QString m_number;
     QString m_name;
     QString m_description;
+    QGraphicsTextItem *m_inscription;
     MapArea *m_parent;
     QVector<MapArea*> m_areas;
     QVector<MapDoor*> m_doors;
