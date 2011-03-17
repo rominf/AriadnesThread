@@ -17,7 +17,7 @@ public:
         None = 0,
         Stairs = 1,
         Lift = 2,
-        Room = 4
+        Auditorium = 4
     };
     enum VerticalDirection
     {

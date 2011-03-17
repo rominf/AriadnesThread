@@ -35,14 +35,14 @@ public:
     {
         Idle, /*WallAdd, */AreaAdd, DoorAdd, NodeAdd, Selection
     };
-    enum MagnetItem
+    enum SnapItem
     {
         miNone = 0,
         miLines = 1,
         miTops = 2,
         miNodes = 4
     };
-    Q_DECLARE_FLAGS(MagnetItems, MagnetItem)
+    Q_DECLARE_FLAGS(SnapItems, SnapItem)
 
     static const QString modeName(Mode mode);
     QString name() const;
@@ -59,9 +59,10 @@ public:
     virtual void addItem (QGraphicsItem *item);
     MapArea::CreationError addArea(MapArea *area);
     bool addDoor(MapDoor *door);
-    void addPointNodesMagnetTo(QPointF point);
+    bool addDoor(const QPointF &point);
+    void addPointNodesSnapTo(const QPointF point);
     void addArc(GraphArc *arc);
-    void magnetToExtensions(bool b);
+    void setSnapToExtensions(const bool b);
     void setLastNode(GraphNode *node);
     QList<MapArea*> findAreas(const QRegExp &str) const;
     quint32 uin();
@@ -85,7 +86,7 @@ private:
     static QMap<int, QString> cModesNames;
 
     Mode m_mode;
-    bool m_magnetToExtensions;
+    bool m_snapToExtensions;
     QString m_name;
     QGraphicsRectItem *m_border;
     QVector<QLineF*> m_lines;
@@ -112,10 +113,11 @@ private:
     void areasToLineVec();
     QVector<MapArea*> pointContainers(QPointF pos);
     bool validatePos(QPointF pos, QPointF &rightPos);
-    QPointF getPoint(QPointF m, Geometry::Straight straight, MagnetItems items);
-    QLineF getLine(QLineF line, bool first, MagnetItems items,
+    QPointF getPoint(QPointF m, Geometry::Straight straight,
+                     SnapItems items, bool SnapToExtensions, bool first);
+    QLineF getLine(QLineF line, bool first, SnapItems items,
                    Qt::KeyboardModifiers modifiers);
-    QPointF graphGetPoint(QPointF pos);
+//    QPointF graphGetPoint(QPointF pos);
     void removeLastFromTempPolyline();
     QPolygonF convertLineVecToPolygon(
             const QVector<QGraphicsLineItem*> &vec) const;
@@ -128,6 +130,6 @@ private:
     void finalizeNode();
 };
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(MapFloor::MagnetItems)
+Q_DECLARE_OPERATORS_FOR_FLAGS(MapFloor::SnapItems)
 
 #endif // MAPFLOOR_H

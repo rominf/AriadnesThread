@@ -107,7 +107,7 @@ private slots:
     void layerBaseSetVisible(bool visible);
     void layerGridSetVisible(bool visible);
     void layerGraphSetVisible(bool visible);
-    void magnetToExtensions(bool b);
+    void snapToExtensions(bool b);
     void addArea();                     // Adding area
     void addDoor();                     // Adding door
     void addNode();                     // Adding graph node
@@ -208,7 +208,7 @@ private:
     QAction *actLayerBase;
     QAction *actLayerGrid;
     QAction *actLayerGraph;
-    QAction *actMagnetToExtensions;
+    QAction *actSnapToExtensions;
     QAction *actAddArea;
     QAction *actAddDoor;
     QAction *actAddNode;

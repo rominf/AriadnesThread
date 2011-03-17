@@ -3,6 +3,8 @@
 DialogMapProperties::DialogMapProperties(
         QWidget *parent, Map::Properties *p): QDialog(parent)
 {
+    setWindowTitle(tr("Свойства здания"));
+
     QString mapTemplateName = "./MapTemplate.html";
     QFile mapTemplateFile(mapTemplateName);
     if (mapTemplateFile.open(QIODevice::ReadOnly))

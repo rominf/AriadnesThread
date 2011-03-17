@@ -5,7 +5,7 @@ QMap<int, GraphArc::VerticalType> MainWindow::verticalType;
 
 MainWindow::MainWindow(QWidget *parent): QMainWindow(parent)
 {
-    verticalType.insert(0, GraphArc::Room);
+    verticalType.insert(0, GraphArc::Auditorium);
     verticalType.insert(1, GraphArc::Stairs);
     verticalType.insert(2, GraphArc::Lift);
 
@@ -163,13 +163,13 @@ void MainWindow::createActions()
     actHandDrag->setShortcuts(shortcuts(tr("Ctrl+H"), tr("H")));
     actHandDrag->setCheckable(true);
 #ifdef EDITOR
-    actMagnetToExtensions = new QAction(
-            QIcon(":/MagnetToExtensions"),
+    actSnapToExtensions = new QAction(
+            QIcon(":/SnapToExtensions"),
             tr("&Прилипать к продолжениям отрезков"), this);
-    connect(actMagnetToExtensions, SIGNAL(triggered(bool)),
-            SLOT(magnetToExtensions(bool)));
-    actMagnetToExtensions->setShortcut(tr("F5"));
-    actMagnetToExtensions->setCheckable(true);
+    connect(actSnapToExtensions, SIGNAL(triggered(bool)),
+            SLOT(snapToExtensions(bool)));
+    actSnapToExtensions->setShortcut(tr("F5"));
+    actSnapToExtensions->setCheckable(true);
 #endif
 
 
@@ -362,7 +362,7 @@ void MainWindow::createMenus()
     menuView->addAction(actHandDrag);
 #ifdef EDITOR
     menuView->addSeparator();
-    menuView->addAction(actMagnetToExtensions);
+    menuView->addAction(actSnapToExtensions);
 #endif
 
     menuGo = menuBar()->addMenu(tr("&Перейти"));
@@ -545,7 +545,7 @@ void MainWindow::createPanelVerticals()
     hblVerticalsButtons->addWidget(btnVerticalMoveUp);
 
     cbxVerticalType = new QComboBox();
-    cbxVerticalType->insertItem(0, tr("Аудитория"), (int)GraphArc::Room);
+    cbxVerticalType->insertItem(0, tr("Аудитория"), (int)GraphArc::Auditorium);
     cbxVerticalType->insertItem(1, tr("Лестница"), (int)GraphArc::Stairs);
     cbxVerticalType->insertItem(2, tr("Лифт"), (int)GraphArc::Lift);
     connect(cbxVerticalType, SIGNAL(currentIndexChanged(int)),
@@ -583,9 +583,9 @@ void MainWindow::createPanelAreasProperties()
     vblAreasProperties->addWidget(lblAreaType);
 
     cbxAreaType = new QComboBox();
-    cbxAreaType->insertItem(0, tr("Помещение"), (int)MapArea::Normal);
-    cbxAreaType->insertItem(1, tr("Отверстие"), (int)MapArea::Hole);
-    cbxAreaType->insertItem(2, tr("Полный"), (int)MapArea::Full);
+    cbxAreaType->insertItem(0, tr("Помещение"), (int)MapArea::Room);
+    cbxAreaType->insertItem(1, tr("Проём"), (int)MapArea::Aperture);
+    cbxAreaType->insertItem(2, tr("Колонна"), (int)MapArea::Column);
     connect(cbxAreaType, SIGNAL(currentIndexChanged(int)),
             SLOT(cbxAreaTypeCurrentIndexChanged(int)));
     vblAreasProperties->addWidget(cbxAreaType);
@@ -837,7 +837,7 @@ void MainWindow::setState(Elements elem, State visible, State enable)
         {
 #ifdef EDITOR
             actAddBase->setVisible(visible);
-            actMagnetToExtensions->setVisible(visible);
+            actSnapToExtensions->setVisible(visible);
 #endif
             actHandDrag->setVisible(visible);
 #ifdef EDITOR
@@ -964,7 +964,7 @@ void MainWindow::setState(Elements elem, State visible, State enable)
         {
 #ifdef EDITOR
             actAddBase->setEnabled(enable);
-            actMagnetToExtensions->setEnabled(enable);
+            actSnapToExtensions->setEnabled(enable);
 #endif
             actHandDrag->setEnabled(enable);
 #ifdef EDITOR
@@ -1103,6 +1103,7 @@ void MainWindow::mapSave(QString &fileName)
             s.setVersion(QDataStream::Qt_4_7);
             s << cMagicNumber << *map << defaultFloor
                     << map->areasAutoRenaming();
+            openFileName = fileName;
         }
         // Copy
         QString copyFile = QDateTime::currentDateTime().toString(
@@ -1474,9 +1475,9 @@ void MainWindow::layerGraphSetVisible(bool visible)
     map->graph()->setVisible(visible);
 }
 
-void MainWindow::magnetToExtensions(bool b)
+void MainWindow::snapToExtensions(bool b)
 {
-    map->floor(curFloor)->magnetToExtensions(b);
+    map->floor(curFloor)->setSnapToExtensions(b);
 }
 
 //void MainWindow::floorNameChange(const QString &floorName)

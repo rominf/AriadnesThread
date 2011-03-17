@@ -12,7 +12,7 @@ MapFloor::MapFloor(const QRectF &sceneRect, QObject *parent) :
     cModesNames.insert(DoorAdd, tr("создание дверей"));
     cModesNames.insert(NodeAdd, tr("создание графа"));
     m_mode = Idle;
-    m_magnetToExtensions = false;
+    m_snapToExtensions = false;
     m_border = new QGraphicsRectItem(sceneRect, 0, this);
     m_border->setBrush(QBrush(Qt::white));
     m_border->setZValue(-2.0);
@@ -108,7 +108,7 @@ QDataStream &operator>>(QDataStream &input, MapFloor &floor)
                     stk2.push(a2->area(i));
             }
             floor.addItem(door);
-            floor.addPointNodesMagnetTo(door->pos());
+            floor.addPointNodesSnapTo(door->pos());
         }
 
         int size = a1->areasNumber();
@@ -244,8 +244,10 @@ void MapFloor::mousePressEvent(QGraphicsSceneMouseEvent *event)
                 m_crossLineHorizontal->hide();
                 m_crossLineVertical->hide();
             }
-            m_tempPolyline.push_back(new QGraphicsLineItem(
-                    QLineF(p1, m_cursorCircle->pos())));
+            QGraphicsLineItem *item = new QGraphicsLineItem(QLineF(
+                    p1, m_cursorCircle->pos()));
+            item->setPen(QPen(Qt::red));
+            m_tempPolyline.push_back(item);
             m_tempPolyline.back()->setZValue(100500 - 5);
             addItem(m_tempPolyline.back());
             break;
@@ -349,7 +351,7 @@ void MapFloor::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
                 m_tempPolyline.at(m_tempPolyline.size()-1)->setLine(line);
             break;
         case DoorAdd:
-            line = getLine(QLineF(point, pos), true, miLines,
+            line = getLine(QLineF(point, pos), true, miNodes | miLines,
                            event->modifiers());
             break;
         case NodeAdd:
@@ -504,9 +506,9 @@ void MapFloor::addItem (QGraphicsItem *item)
 //    m_graphNodes = nodes;
 //}
 
-void MapFloor::magnetToExtensions(bool b)
+void MapFloor::setSnapToExtensions(const bool b)
 {
-    m_magnetToExtensions = b;
+    m_snapToExtensions = b;
 }
 
 void MapFloor::setLastNode(GraphNode *node)
@@ -676,12 +678,19 @@ QVector<MapArea*> MapFloor::pointContainers(QPointF pos)
         a = stk.pop();
         size = a->polygon().size();
         for (int i = 0; i != size; i++)
-            if (Geometry::contain(pos, QLineF(a->polygon().at(i),
-                                              a->polygon().at((i+1)%size))))
+        {
+//            QLineF line = QLineF(a->polygon().at(i),
+//                                 a->polygon().at((i+1)%size));
+//            QPointF base = Geometry::getPerpendicularBase(*pos, line);
+//            if (Geometry::dest(base, line) < Geometry::cMagnetDestToLine)
+                if (Geometry::contain(pos, QLineF(a->polygon().at(i),
+                                                  a->polygon().at((i+1)%size))))
             {
+//                *pos = base;
                 result.append(a);
                 break;
             }
+        }
         size = a->areasNumber();
         for (int i = 0; i !=size; i++)
             stk.push(a->area(i));
@@ -690,11 +699,11 @@ QVector<MapArea*> MapFloor::pointContainers(QPointF pos)
 }
 
 QPointF MapFloor::getPoint(QPointF m, Geometry::Straight straight,
-                           MagnetItems items)
+                           SnapItems items, bool SnapToExtensions, bool first)
 {
     qreal min = INFINITY;
     QPointF newPoint;
-    bool b = m_magnetToExtensions;
+//    bool b = m_snapToExtensions;
 
     if ((straight == Geometry::None) & ((items & miTops) != 0))
         for (int i = 0; i != m_lines.size(); i++)
@@ -707,16 +716,17 @@ QPointF MapFloor::getPoint(QPointF m, Geometry::Straight straight,
             for (int i = 0; i != m_tempPolyline.size() - 1; i++)
                 Geometry::getPointFromLine(m, newPoint,
                                            m_tempPolyline.at(i)->line(),
-                                           straight, b, min);
+                                           straight, SnapToExtensions, min);
 
         for (int i = 0; i != m_lines.size(); i++)
             Geometry::getPointFromLine(m, newPoint, *m_lines.at(i),
-                                       straight, b, min);
+                                       straight, SnapToExtensions, min);
 
         if (m_isCrossLinesActive & (!m_tempPolyline.isEmpty()))
         {
             if (Geometry::getPointFromLine(
-                m, newPoint, m_crossLineHorizontal->line(), straight, b, min))
+                    m, newPoint, m_crossLineHorizontal->line(), straight,
+                    SnapToExtensions, min))
             {
                 m_crossLineHorizontal->setLine(
                         QLineF(m_tempPolyline.at(0)->line().p1(), newPoint));
@@ -732,7 +742,8 @@ QPointF MapFloor::getPoint(QPointF m, Geometry::Straight straight,
                     m_crossLineHorizontal->hide();
                 }
             if (Geometry::getPointFromLine(
-                m, newPoint, m_crossLineVertical->line(), straight, b, min))
+                m, newPoint, m_crossLineVertical->line(), straight,
+                SnapToExtensions, min))
             {
                 m_crossLineVertical->setLine(
                         QLineF(m_tempPolyline.at(0)->line().p1(), newPoint));
@@ -759,37 +770,38 @@ QPointF MapFloor::getPoint(QPointF m, Geometry::Straight straight,
         int nodeNum = -1;
         qreal d = INFINITY;
         for (int i = 0; i != m_graphNodes.size(); i++)
-            if (Geometry::dest(m_graphNodes.at(i), m) < d)
+            if (Geometry::dist(m_graphNodes.at(i), m) < d)
             {
-                d = Geometry::dest(m_graphNodes.at(i), m);
+                d = Geometry::dist(m_graphNodes.at(i), m);
                 nodeNum = i;
             }
-        if ((d < Geometry::cMagnetDestToNode) &
-            ((straight == Geometry::None) |
-             ((straight != Geometry::None) &
-              ((m_graphNodes.at(nodeNum).x() == m.x()) |
-               (m_graphNodes.at(nodeNum).y() == m.y())))))
-            return m_graphNodes.at(nodeNum);
-        if (b)
+        if (nodeNum > -1)
+            if ((d < Geometry::SnapingDistToNode) &
+                ((straight == Geometry::None) |
+                 ((straight != Geometry::None) &
+                  ((m_graphNodes.at(nodeNum).x() == m.x()) |
+                   (m_graphNodes.at(nodeNum).y() == m.y())))))
+                return m_graphNodes.at(nodeNum);
+        if (SnapToExtensions)
         {
             d = INFINITY;
             QPointF point;
             for (int i = 0; i != m_graphNodes.size(); i++)
             {
-                if (straight == Geometry::SaveY)
+                if ((straight == Geometry::SaveY) | first)
                     if (qAbs(m_graphNodes.at(i).x() - m.x()) < d)
                     {
                         d = qAbs(m_graphNodes.at(i).x() - m.x());
                         point = QPointF(m_graphNodes.at(i).x(), m.y());
                     }
-                if (straight == Geometry::SaveX)
+                if ((straight == Geometry::SaveX) | first)
                     if (qAbs(m_graphNodes.at(i).y() - m.y()) < d)
                     {
                         d = qAbs(m_graphNodes.at(i).y() - m.y());
                         point = QPointF(m.x(), m_graphNodes.at(i).y());
                     }
             }
-            if (d < Geometry::cMagnetDestToNode)
+            if (d < Geometry::SnapingDistToNode)
                 return point;
         }
     }
@@ -801,7 +813,7 @@ QPointF MapFloor::getPoint(QPointF m, Geometry::Straight straight,
 
 }
 
-QLineF MapFloor::getLine(QLineF line, bool first, MagnetItems items,
+QLineF MapFloor::getLine(QLineF line, bool first, SnapItems items,
                          Qt::KeyboardModifiers modifiers)
 {
     Geometry::Straight straight = Geometry::None;
@@ -810,18 +822,19 @@ QLineF MapFloor::getLine(QLineF line, bool first, MagnetItems items,
     if (modifiers & Qt::ALT)
         items = items & ~miTops;
     if (!(modifiers & Qt::SHIFT))
-        line.setP2(getPoint(line.p2(), straight, items));
+        line.setP2(getPoint(
+                line.p2(), straight, items, m_snapToExtensions, first));
     return line;
 }
 
-QPointF MapFloor::graphGetPoint(QPointF pos)
-{
-    QVector<QPointF> vec;
-//    for (int i = 0; i != vec.size(); i++)
-    /////////////////////!@!!/!/!/!/!/!/!/!/
-    return QPointF();
+//QPointF MapFloor::graphGetPoint(QPointF pos)
+//{
+//    QVector<QPointF> vec;
+////    for (int i = 0; i != vec.size(); i++)
+//    /////////////////////!@!!/!/!/!/!/!/!/!/
+//    return QPointF();
 
-}
+//}
 
 bool MapFloor::validatePos(QPointF pos, QPointF &rightPos)
 {
@@ -919,7 +932,13 @@ bool MapFloor::addDoor(MapDoor *door)
     }
 }
 
-void MapFloor::addPointNodesMagnetTo(QPointF point)
+bool MapFloor::addDoor(const QPointF &point)
+{
+    QPointF base = getPoint(point, Geometry::None, miLines, false, true);
+    return addDoor(new MapDoor(base));
+}
+
+void MapFloor::addPointNodesSnapTo(const QPointF point)
 {
     if (!m_graphNodes.contains(point))
         m_graphNodes.append(point);
@@ -978,8 +997,8 @@ void MapFloor::deleteArea(MapArea *area)
 
 void MapFloor::finalizeDoor()
 {
-    MapDoor *door = new MapDoor(m_cursorCircle->pos());
-    if (addDoor(door))
+//    MapDoor *door = new MapDoor(m_cursorCircle->pos());
+    if (addDoor(m_cursorCircle->pos()))
     {
         setMode(Idle);
         setMode(DoorAdd);

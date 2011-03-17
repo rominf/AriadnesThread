@@ -14,7 +14,7 @@ MapArea::MapArea(const QPolygonF &polygon, const quint32 floorUin):
         QGraphicsPolygonItem(polygon), m_floorUin(floorUin)
 {
     m_uin = ++m_count;
-    m_areaType = Normal;
+    m_areaType = Room;
     m_number = "";
     m_name = "";
     m_description = "";
@@ -265,13 +265,13 @@ void MapArea::repaint()
     setPen(cPenNormal);
     switch (m_areaType)
     {
-    case Normal:
+    case Room:
         setBrush(cBrushNormal);
         break;
-    case Hole:
+    case Aperture:
         setBrush(cBrushHole);
         break;
-    case Full:
+    case Column:
         setBrush(cBrushFull);
         break;
     }

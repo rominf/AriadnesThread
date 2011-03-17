@@ -18,7 +18,7 @@ GraphArc::GraphArc(GraphNode *node1, GraphNode *node2,
     setZValue(100500 - 2);
     if (floorUin() != 0)    // If arc isn't between floors
 //    {
-        m_lenght = Geometry::dest(m_node1->pos(), m_node2->pos());
+        m_lenght = Geometry::dist(m_node1->pos(), m_node2->pos());
 //        m_verticalType = None;
 //    }
     else
