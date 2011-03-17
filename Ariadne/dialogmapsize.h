@@ -2,10 +2,10 @@
 #define DIALOGMAPSIZE_H
 
 #include <QDialog>
+#include <QDialogButtonBox>
 #include <QDoubleSpinBox>
 #include <QGridLayout>
 #include <QLabel>
-#include <QPushButton>
 
 class DialogMapSize : public QDialog
 {
@@ -24,8 +24,9 @@ private:
     QDoubleSpinBox *m_sbxMSizeY;
     QLabel *m_lblMSizeX;
     QLabel *m_lblMSizeY;
-    QPushButton *m_btnOk;
-    QPushButton *m_btnCancel;
+    QDialogButtonBox *m_buttonBox;
+//    QPushButton *m_btnOk;
+//    QPushButton *m_btnCancel;
 
     static const qreal cMSizeX = 500;
     static const qreal cMSizeY = 300;

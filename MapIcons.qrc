@@ -14,7 +14,6 @@
         <file alias="GraphCopy">Icons/GraphCopy.png</file>
         <file alias="LayerBase">Icons/LayerBase.png</file>
         <file alias="LayerGraph">Icons/LayerGraph.png</file>
-        <file alias="MagnetToExtensions">Icons/MagnetToExtensions.png</file>
         <file alias="New">Icons/New.png</file>
         <file alias="Open">Icons/Open.png</file>
         <file alias="Quit">Icons/Quit.png</file>
@@ -39,5 +38,6 @@
         <file alias="Search">Icons/Search.png</file>
         <file alias="Properties">Icons/Properties.png</file>
         <file alias="Help">Icons/Help.png</file>
+        <file alias="SnapToExtensions">Icons/SnapToExtensions.png</file>
     </qresource>
 </RCC>

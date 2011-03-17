@@ -138,7 +138,7 @@ void Map::addGraphItem(QGraphicsItem *item)
                 door->setNode(node);
             }
         floor->addItem(node);
-        floor->addPointNodesMagnetTo(node->pos());
+        floor->addPointNodesSnapTo(node->pos());
 //        for (int i = 0; i != m_floors.size(); i++)
 //            if (m_floors.at(i)->uin() == node->floorUin())
 //            {
@@ -246,7 +246,7 @@ QVector<GraphNode*> Map::getNodesFromItem(QGraphicsItem *item)
     {
         MapVertical *vertical = Map::vertical(areas.at(0));
         if (vertical)
-            if (vertical->type() == GraphArc::Room)
+            if (vertical->type() == GraphArc::Auditorium)
                 for (int i = 0; i != m_floors.size(); i++)
                 {
                     quint32 floorUin = m_floors.at(i)->uin();
@@ -390,6 +390,7 @@ void Map::updateVertical(MapVertical *vertical)
             }
         }
         if (!doors.isEmpty())
+        {
             for (int i = 0; i != doors.size(); i++)
             {
                 GraphNode *n = doors.at(i)->node();
@@ -403,70 +404,68 @@ void Map::updateVertical(MapVertical *vertical)
                             j++;
                 }
             }
-        GraphArc::VerticalType type = vertical->type();
-        if ((type == GraphArc::Stairs) | (type == GraphArc::Lift))
-        {
-            QString symbol = "";
-            bool isFirst = true;
-            for (int i = 0; i != m_floors.size(); i++)
+            GraphArc::VerticalType type = vertical->type();
+            if ((type == GraphArc::Stairs) | (type == GraphArc::Lift))
             {
-                area = m_floors.at(i)->area(
-                        vertical->area(m_floors.at(i)->uin()));
-                if (area != 0)
+                QString symbol = "";
+                bool isFirst = true;
+                for (int i = 0; i != m_floors.size(); i++)
                 {
-                    if (area->doorsNumber() > 0)
+                    area = m_floors.at(i)->area(
+                            vertical->area(m_floors.at(i)->uin()));
+                    if (area != 0)
                     {
-                        if (!vertical->name().isEmpty())
-                            area->setName(vertical->name());
-                        symbol = "" ;
-                        switch (vertical->type())
+                        if (area->doorsNumber() > 0)
                         {
-                        case GraphArc::Stairs:
-                            if (isFirst)
+                            if (!vertical->name().isEmpty())
+                                area->setName(vertical->name());
+                            symbol = "" ;
+                            switch (vertical->type())
                             {
-                                symbol = tr("￬");
-                                isFirst = false;
+                            case GraphArc::Stairs:
+                                if (isFirst)
+                                {
+                                    symbol = tr("￬");
+                                    isFirst = false;
+                                }
+                                else
+                                    symbol = tr("⇅");
+                                break;
+                            case GraphArc::Lift:
+                                if (isFirst)
+                                {
+                                    symbol = tr("⇓");
+                                    isFirst = false;
+                                }
+                                else
+                                    symbol = tr("⇕");
+                                break;
+                            default:
+                                break;
                             }
-                            else
-                                symbol = tr("⇅");
-                            break;
-                        case GraphArc::Lift:
-                            if (isFirst)
-                            {
-                                symbol = tr("⇓");
-                                isFirst = false;
-                            }
-                            else
-                                symbol = tr("⇕");
-                            break;
-                        default:
-                            break;
+                            if (!symbol.isEmpty())
+                                area->setInscription(symbol);
                         }
-                        if (!symbol.isEmpty())
-                            area->setInscription(symbol);
                     }
                 }
-            }
-            symbol = "" ;
-            switch (vertical->type())
-            {
-            case GraphArc::Stairs:
-                if (!doors.isEmpty())
-                    symbol = tr("￪");
-                break;
-            case GraphArc::Lift:
-                if (!doors.isEmpty())
-                    symbol = tr("⇑");
-                break;
-            default:
-                break;
-            }
-            quint32 floorUin = doors.last()->floorUin();
-            floorByUin(floorUin)->area(
-                    vertical->area(floorUin))->setInscription(symbol);
+                symbol = "" ;
+                switch (vertical->type())
+                {
+                case GraphArc::Stairs:
+                    if (!doors.isEmpty())
+                        symbol = tr("￪");
+                    break;
+                case GraphArc::Lift:
+                    if (!doors.isEmpty())
+                        symbol = tr("⇑");
+                    break;
+                default:
+                    break;
+                }
+                quint32 floorUin = doors.last()->floorUin();
+                floorByUin(floorUin)->area(
+                        vertical->area(floorUin))->setInscription(symbol);
 
-            if (!doors.isEmpty())
-            {
                 qreal lengthStairsDown = convertRealMToPix(m_lengthStairsDown);
                 qreal lengthStairsUp = convertRealMToPix(m_lengthStairsUp);
                 qreal lengthLift = convertRealMToPix(
@@ -712,7 +711,7 @@ Map::WayInfo* Map::wayInfo() const
                 if (arc->verticalDirection() == GraphArc::Up)
                     info->liftsFloorsUpNumber++;
                 break;
-            case GraphArc::Room:
+            case GraphArc::Auditorium:
                 break;
             }
             lastArcType = arc->verticalType();

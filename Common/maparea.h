@@ -32,9 +32,9 @@ public:
     };
     enum AreaType
     {
-        Normal,
-        Hole,
-        Full
+        Room,
+        Aperture,
+        Column
     };
     static const QPen cPenNormal;
     static const QPen cPenSelected;

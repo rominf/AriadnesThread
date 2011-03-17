@@ -69,7 +69,7 @@ QDataStream & operator>>(QDataStream &input, Graph &graph)
     quint32 node1uin, node2uin;
     int type;
     int direction = 0;
-    bool b = false;
+//    bool b = false;
     qreal length;
     input >> type >> direction >> node1uin >> node2uin >> length;
 //    input >> b >> type >> node1uin >> node2uin;

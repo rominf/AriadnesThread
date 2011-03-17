@@ -19,11 +19,16 @@ Geometry::Straight Geometry::straighten(QLineF &line)
     }
 }
 
-qreal Geometry::dest(QPointF m, QPointF n)
+qreal Geometry::dist(QPointF m, QPointF n)
 {
-    // Compute destination between 2 points with standard formula
+    // Compute distance between 2 points with standard formula
     return qSqrt(qPow(m.x() - n.x(), 2) + qPow(m.y() - n.y(), 2));
 }
+
+//qreal Geometry::dest(QPointF m, QLineF l)
+//{
+//    return dest(m, getPerpendicularBase(m, l));
+//}
 
 bool Geometry::inBoundingRectOfSegment(const QLineF &l, const QPointF &p)
 {
@@ -42,7 +47,7 @@ bool Geometry::contain(const QPointF &p, const QLineF &l)
     qreal x1 = l.x1(); qreal y1 = l.y1();
     qreal x2 = l.x2(); qreal y2 = l.y2();
     // From determinant condition of three points on the one line
-    return (qAbs(x*(y1 - y2) - y*(x1 - x2) + (x1*y2 - x2*y1)) <= cError) &
+    return (qAbs(x*(y1 - y2) - y*(x1 - x2) + (x1*y2 - x2*y1)) <= Error) &
             (inBoundingRectOfSegment(l, p));
 }
 
@@ -77,7 +82,7 @@ bool Geometry::getPointFromLine(QPointF m, QPointF &newPoint, const QLineF &l,
         {
             p->setX(l.x1());
             p->setY(m.y());
-            d = dest(*p, m);
+            d = dist(*p, m);
         }
         else
             d = INFINITY;
@@ -98,7 +103,7 @@ bool Geometry::getPointFromLine(QPointF m, QPointF &newPoint, const QLineF &l,
         {
         case None:
             *p = getPerpendicularBase(m, l);
-            d = dest(*p, m);
+            d = dist(*p, m);
             break;
         case SaveX:
             p->setX(m.x());
@@ -113,7 +118,7 @@ bool Geometry::getPointFromLine(QPointF m, QPointF &newPoint, const QLineF &l,
         }
     }
 
-    if ((d < cMagnetDestToLine) &
+    if ((d < SnapingDistToLine) &
         (d < min) & ((inBoundingRectOfSegment(l, *p) | (extension))))
     {
         min = d;
@@ -128,14 +133,14 @@ bool Geometry::getPointFromLineTops(QPointF m, QPointF &newPoint,
                                     const QLineF *line)
 {
     qreal d;
-    d = dest(line->p1(), m);
-    if (d < cMagnetDestToTop)
+    d = dist(line->p1(), m);
+    if (d < SnapingDistToTop)
     {
         newPoint = line->p1();
         return true;
     }
-    d = dest(line->p2(), m);
-    if (d < cMagnetDestToTop)
+    d = dist(line->p2(), m);
+    if (d < SnapingDistToTop)
     {
         newPoint = line->p2();
         return true;

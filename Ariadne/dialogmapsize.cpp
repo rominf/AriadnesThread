@@ -21,21 +21,29 @@ DialogMapSize::DialogMapSize(QWidget *parent) :
     m_lblMSizeX->setBuddy(m_sbxMSizeX);
     m_lblMSizeY->setBuddy(m_sbxMSizeY);
 
-    m_btnOk = new QPushButton(tr("&OK"));
-    m_btnCancel = new QPushButton(tr("&Отмена"));
+//    m_btnOk = new QPushButton(tr("&OK"));
+//    m_btnCancel = new QPushButton(tr("&Отмена"));
 
-    connect(m_btnOk, SIGNAL(clicked()), SLOT(accept()));
-    connect(m_btnCancel, SIGNAL(clicked()), SLOT(reject()));
+    m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok |
+                                       QDialogButtonBox::Cancel);
+    connect(m_buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
+    connect(m_buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
-    //Layout setup
-    QGridLayout* ptopLayout = new QGridLayout;
-    ptopLayout->addWidget(m_lblMSizeX, 0, 0);
-    ptopLayout->addWidget(m_lblMSizeY, 1, 0);
-    ptopLayout->addWidget(m_sbxMSizeX, 0, 1);
-    ptopLayout->addWidget(m_sbxMSizeY, 1, 1);
-    ptopLayout->addWidget(m_btnOk, 2,0);
-    ptopLayout->addWidget(m_btnCancel, 2, 1);
-    setLayout(ptopLayout);
+//    connect(m_btnOk, SIGNAL(clicked()), SLOT(accept()));
+//    connect(m_btnCancel, SIGNAL(clicked()), SLOT(reject()));
+
+    //Layouts setup
+    QVBoxLayout* vbl = new QVBoxLayout;
+
+    QGridLayout* grdl = new QGridLayout;
+    grdl->addWidget(m_lblMSizeX, 0, 0);
+    grdl->addWidget(m_lblMSizeY, 1, 0);
+    grdl->addWidget(m_sbxMSizeX, 0, 1);
+    grdl->addWidget(m_sbxMSizeY, 1, 1);
+    vbl->addLayout(grdl);
+
+    vbl->addWidget(m_buttonBox);
+    setLayout(vbl);
 }
 
 qreal DialogMapSize::MSizeX()

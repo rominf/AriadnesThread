@@ -31,7 +31,11 @@
 		      offset: new YMaps.Point(-8,-27)
 		  }
 	    });
-	    map.addOverlay(createObject("Placemark", new YMaps.GeoPoint(%2,%3), "constructor#pmrdmPlacemark", "%1"));
+	    var placemark = new YMaps.Placemark(new YMaps.GeoPoint(%2,  %3));
+	    placemark.setBalloonContent("%1");
+	    map.addOverlay(placemark);
+	    placemark.openBalloon();
+//	    map.addOverlay(createObject("Placemark", new YMaps.GeoPoint(%2,%3), "constructor#pmrdmPlacemark", "%1"));
 
 		function createObject (type, point, style, description) {
 		    var allowObjects = ["Placemark", "Polyline", "Polygon"],

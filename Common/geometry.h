@@ -11,11 +11,15 @@ public:
     Geometry();
 
     enum Straight {None, SaveX, SaveY};
-    static const qreal cMagnetDestToNode = 15.0;
-    static const qreal cMagnetDestToNodeLine = 10.0;
+    static const qreal SnapingDistToLine = 25.0;
+    static const qreal SnapingDistToNode = 15.0;
+    static const qreal SnapingDistToNodeLine = 10.0;
+    static const qreal SnapingDistToTop = 10.0;
+    static const qreal Error = 0.001;
 
     static Straight straighten(QLineF &line);
-    static qreal dest(QPointF m, QPointF n);
+    static qreal dist(QPointF m, QPointF n);
+//    static qreal dest(QPointF m, QLineF l);
     static bool inBoundingRectOfSegment(const QLineF &l, const QPointF &p);
     static bool contain(const QPointF &p, const QLineF &l);
     static QPointF getPerpendicularBase(QPointF m, QLineF l);
@@ -23,11 +27,6 @@ public:
                                  Straight straight, bool extension, qreal &min);
     static bool getPointFromLineTops(QPointF m, QPointF &newPoint,
                                      const QLineF *line);
-private:
-    static const qreal cMagnetDestToLine = 25.0;
-    static const qreal cMagnetDestToTop = 10.0;
-    static const qreal cError = 0.001;
-
 };
 
 #endif // GEOMETRY_H
