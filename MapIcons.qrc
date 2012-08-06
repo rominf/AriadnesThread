@@ -39,5 +39,6 @@
         <file alias="Properties">Icons/Properties.png</file>
         <file alias="Help">Icons/Help.png</file>
         <file alias="SnapToExtensions">Icons/SnapToExtensions.png</file>
+        <file alias="Export">Icons/Export.png</file>
     </qresource>
 </RCC>
