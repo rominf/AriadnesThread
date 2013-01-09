@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="32px"
+   height="32px"
+   id="svg2985"
+   version="1.1"
+   inkscape:version="0.48.0 r9654"
+   sodipodi:docname="Ariadne.svg"
+   inkscape:export-filename="/home/romas/Step/Icons/Собственные/Ariadne16.png"
+   inkscape:export-xdpi="45"
+   inkscape:export-ydpi="45">
+  <defs
+     id="defs2987">
+    <linearGradient
+       id="linearGradient3771">
+      <stop
+         style="stop-color:#ff0000;stop-opacity:0;"
+         offset="0"
+         id="stop3773" />
+      <stop
+         style="stop-color:#7f0000;stop-opacity:1;"
+         offset="1"
+         id="stop3775" />
+    </linearGradient>
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3771"
+       id="radialGradient3777"
+       cx="16"
+       cy="16"
+       fx="16"
+       fy="16"
+       r="16.25"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="11.197802"
+     inkscape:cx="16"
+     inkscape:cy="15.313845"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     inkscape:grid-bbox="true"
+     inkscape:document-units="px"
+     inkscape:window-width="1280"
+     inkscape:window-height="956"
+     inkscape:window-x="-4"
+     inkscape:window-y="-3"
+     inkscape:window-maximized="1">
+    <inkscape:grid
+       type="xygrid"
+       id="grid2993" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata2990">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="layer1"
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer">
+    <path
+       sodipodi:type="arc"
+       style="fill:#ff0000;fill-opacity:1;stroke:#ffffff;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:0;stroke-dasharray:none;stroke-dashoffset:0"
+       id="path2995"
+       sodipodi:cx="16"
+       sodipodi:cy="16"
+       sodipodi:rx="16"
+       sodipodi:ry="16"
+       d="M 32,16 A 16,16 0 1 1 0,16 16,16 0 1 1 32,16 z" />
+    <path
+       sodipodi:type="arc"
+       style="fill:url(#radialGradient3777);fill-opacity:1;stroke:#ffffff;stroke-width:0.5;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:0;stroke-dasharray:none;stroke-dashoffset:0"
+       id="path2995-1"
+       sodipodi:cx="16"
+       sodipodi:cy="16"
+       sodipodi:rx="16"
+       sodipodi:ry="16"
+       d="M 32,16 A 16,16 0 1 1 0,16 16,16 0 1 1 32,16 z" />
+    <path
+       sodipodi:type="spiral"
+       style="fill:none;stroke:#2b0000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       id="path3005"
+       sodipodi:cx="16"
+       sodipodi:cy="16"
+       sodipodi:expansion="1"
+       sodipodi:revolution="3.0115333"
+       sodipodi:radius="14.372866"
+       sodipodi:argument="-17.704044"
+       sodipodi:t0="0"
+       d="m 16,16 c 0.29618,0.653926 -0.735354,0.721869 -1.086867,0.492271 -0.95258,-0.622196 -0.618351,-2.016564 0.102325,-2.666006 1.289121,-1.161699 3.289812,-0.601331 4.245144,0.696923 1.401988,1.905239 0.590591,4.582784 -1.291519,5.824282 -2.508556,1.654721 -5.883079,0.582932 -7.40342,-1.886116 -1.9131944,-3.107045 -0.5769512,-7.186942 2.480712,-8.9825584 3.70324,-2.1747317 8.492832,-0.5719562 10.561697,3.0753084 2.438086,4.298176 0.567583,9.799986 -3.669906,12.140835 C 15.045818,27.397542 8.8301815,25.258563 6.2181934,20.430437 3.2502865,14.944413 5.6582386,8.0138608 11.077292,5.131326 c 6.079359,-3.2337685 13.725599,-0.556495 16.878249,5.453695 3.500039,6.672451 0.553192,15.034947 -6.048291,18.457388 -0.308062,0.15971 -0.621939,0.308199 -0.940783,0.445121" />
+  </g>
+</svg>

@@ -1,0 +1,26 @@
+/media/documents/Romas/Step/android/bin/classes.dex : \
+/media/documents/Romas/Step/android/bin/classes/org/kde/necessitas/example/Ariadne/BuildConfig.class \
+/media/documents/Romas/Step/android/bin/classes/org/kde/necessitas/example/Ariadne/R$array.class \
+/media/documents/Romas/Step/android/bin/classes/org/kde/necessitas/example/Ariadne/R$attr.class \
+/media/documents/Romas/Step/android/bin/classes/org/kde/necessitas/example/Ariadne/R$drawable.class \
+/media/documents/Romas/Step/android/bin/classes/org/kde/necessitas/example/Ariadne/R$layout.class \
+/media/documents/Romas/Step/android/bin/classes/org/kde/necessitas/example/Ariadne/R$string.class \
+/media/documents/Romas/Step/android/bin/classes/org/kde/necessitas/example/Ariadne/R.class \
+/media/documents/Romas/Step/android/bin/classes/org/kde/necessitas/ministro/IMinistro$Stub$Proxy.class \
+/media/documents/Romas/Step/android/bin/classes/org/kde/necessitas/ministro/IMinistro$Stub.class \
+/media/documents/Romas/Step/android/bin/classes/org/kde/necessitas/ministro/IMinistro.class \
+/media/documents/Romas/Step/android/bin/classes/org/kde/necessitas/ministro/IMinistroCallback$Stub$Proxy.class \
+/media/documents/Romas/Step/android/bin/classes/org/kde/necessitas/ministro/IMinistroCallback$Stub.class \
+/media/documents/Romas/Step/android/bin/classes/org/kde/necessitas/ministro/IMinistroCallback.class \
+/media/documents/Romas/Step/android/bin/classes/org/kde/necessitas/origo/QtActivity$1.class \
+/media/documents/Romas/Step/android/bin/classes/org/kde/necessitas/origo/QtActivity$2.class \
+/media/documents/Romas/Step/android/bin/classes/org/kde/necessitas/origo/QtActivity$3$1$1.class \
+/media/documents/Romas/Step/android/bin/classes/org/kde/necessitas/origo/QtActivity$3$1.class \
+/media/documents/Romas/Step/android/bin/classes/org/kde/necessitas/origo/QtActivity$3.class \
+/media/documents/Romas/Step/android/bin/classes/org/kde/necessitas/origo/QtActivity$4.class \
+/media/documents/Romas/Step/android/bin/classes/org/kde/necessitas/origo/QtActivity$5.class \
+/media/documents/Romas/Step/android/bin/classes/org/kde/necessitas/origo/QtActivity$6.class \
+/media/documents/Romas/Step/android/bin/classes/org/kde/necessitas/origo/QtActivity.class \
+/media/documents/Romas/Step/android/bin/classes/org/kde/necessitas/origo/QtApplication$InvokeResult.class \
+/media/documents/Romas/Step/android/bin/classes/org/kde/necessitas/origo/QtApplication.class \
+/opt/NecessitasQtSDK/android-sdk/tools/support/annotations.jar \
