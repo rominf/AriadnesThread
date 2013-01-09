@@ -1,0 +1,51 @@
+<!DOCTYPE QPH>
+<QPH language="ru">
+<phrase>
+    <source>area</source>
+    <target>область</target>
+</phrase>
+<phrase>
+    <source>door</source>
+    <target>дверь</target>
+</phrase>
+<phrase>
+    <source>create</source>
+    <target>создать</target>
+</phrase>
+<phrase>
+    <source>floor</source>
+    <target>этаж</target>
+</phrase>
+<phrase>
+    <source>graph</source>
+    <target>граф</target>
+</phrase>
+<phrase>
+    <source>error</source>
+    <target>ошибка</target>
+</phrase>
+<phrase>
+    <source>Properties</source>
+    <target>Свойства</target>
+</phrase>
+<phrase>
+    <source>&amp;Quit</source>
+    <target>В&amp;ыход</target>
+</phrase>
+<phrase>
+    <source>&amp;Base</source>
+    <target>&amp;Подложка</target>
+</phrase>
+<phrase>
+    <source>&amp;Grid</source>
+    <target>&amp;Сетка</target>
+</phrase>
+<phrase>
+    <source>&amp;Graph</source>
+    <target>&amp;Граф</target>
+</phrase>
+<phrase>
+    <source>About</source>
+    <target>О программе</target>
+</phrase>
+</QPH>
