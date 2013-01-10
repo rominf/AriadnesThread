@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    <head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+	<title>Карта</title>
+	<script src="http://api-maps.yandex.ru/1.1/?key=AKtNc00BAAAAjF5jPgQAODnS4lq-BonBEsVvi-K2KPQKxFkAAAAAAAAAAABVUBO4VMa6ihJJRWC8OgCDlRBNVg==&modules=pmap&wizard=constructor" type="text/javascript"></script>
+	<script type="text/javascript">
+	    YMaps.jQuery(window).load(function () {
+		var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+		map.setCenter(new YMaps.GeoPoint(%2,%3), 17, YMaps.MapType.MAP);
+		YMaps.Events.observe(map, map.Events.Click, function (map, mEvent) {
+		    var myHtml = "Координаты:<br>" + mEvent.getGeoPoint();
+		    map.openBalloon(mEvent.getGeoPoint(), myHtml);
+		});
+		map.enableScrollZoom();
+		map.addControl(new YMaps.Zoom());
+		map.addControl(new YMaps.ToolBar());
+		YMaps.MapType.PMAP.getName = function () { return "Народная"; };
+		map.addControl(new YMaps.TypeControl([
+		    YMaps.MapType.MAP,
+		    YMaps.MapType.SATELLITE,
+		    YMaps.MapType.HYBRID,
+		    YMaps.MapType.PMAP
+		], [0, 1, 2, 3]));
+		
+
+	    YMaps.Styles.add("constructor#pmrdmPlacemark", {
+		  iconStyle : {
+		      href : "http://api-maps.yandex.ru/i/0.3/placemarks/pmrdm.png",
+		      size : new YMaps.Point(28,29),
+		      offset: new YMaps.Point(-8,-27)
+		  }
+	    });
+	    var placemark = new YMaps.Placemark(new YMaps.GeoPoint(%2,  %3));
+	    placemark.setBalloonContent("%1");
+	    map.addOverlay(placemark);
+	    placemark.openBalloon();
+//	    map.addOverlay(createObject("Placemark", new YMaps.GeoPoint(%2,%3), "constructor#pmrdmPlacemark", "%1"));
+
+		function createObject (type, point, style, description) {
+		    var allowObjects = ["Placemark", "Polyline", "Polygon"],
+			index = YMaps.jQuery.inArray( type, allowObjects),
+			constructor = allowObjects[(index == -1) ? 0 : index];
+			description = description || "";
+		    
+		    var object = new YMaps[constructor](point, {style: style, hasBalloon : !!description});
+		    object.description = description;
+		    
+		    return object;
+		}
+	});
+	</script>
+	<style type="text/css">
+	    html, body, #YMapsID {
+		width: 100%;
+		height: 100%;
+	    }
+	    
+	    body {
+		margin: 0;
+		padding: 0;
+	    }
+	</style>
+    </head>
+    <body>
+      <div id="YMapsID" style="width:;height:"></div>
+    </body>
+</html>
