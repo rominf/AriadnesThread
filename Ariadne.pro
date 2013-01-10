@@ -38,8 +38,12 @@ SOURCES += \
     Common/global.cpp \
     Ariadne/dialogmapproperties.cpp
 
-RESOURCES += \
-    MapIcons.qrc
+TRANSLATIONS += \
+    Translations/ru.ts
+
+CODECFORTR  = utf8
+
+RESOURCES += Resources.qrc
 
 RC_FILE = AppIcon.rc
 
@@ -76,5 +80,6 @@ OTHER_FILES += \
     android/src/org/kde/necessitas/ministro/IMinistro.aidl \
     android/src/org/kde/necessitas/ministro/IMinistroCallback.aidl \
     android/src/org/kde/necessitas/origo/QtApplication.java \
-    android/src/org/kde/necessitas/origo/QtActivity.java
+    android/src/org/kde/necessitas/origo/QtActivity.java \
+    ru_ts.txt
 
