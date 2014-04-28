@@ -790,7 +790,8 @@ void MainWindow::createGraphics()
     if (!view)
     {
         view = new QGraphicsView();
-//        view->setRenderHint(QPainter::Antialiasing);
+        view->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform |
+                             QPainter::HighQualityAntialiasing | QPainter::TextAntialiasing);
         view->setMouseTracking(true);
         view->setBackgroundBrush(QBrush(Qt::gray));
         vblwgtCentral->addWidget(view);
