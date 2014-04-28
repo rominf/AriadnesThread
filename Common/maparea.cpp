@@ -25,15 +25,15 @@ MapArea::MapArea(const QPolygonF &polygon, const quint32 floorUin):
 }
 
 MapArea::MapArea(const MapArea &area, const quint32 floorUin,
-                 const QString &floorFromName, const QString &floorToName):
+				 const QString &floorFromName, const QString &floorToName):
         QGraphicsPolygonItem(area.polygon()), m_floorUin(floorUin)
 {
     setBrush(cBrushNormal);
     m_uin = ++m_count;
     QString oldAreasNumber = area.m_number;
     QString newAreasNumber = oldAreasNumber;
-    if (oldAreasNumber.indexOf(floorFromName) == 0)
-        newAreasNumber.replace(0, floorFromName.length(), floorToName);
+	if (oldAreasNumber.indexOf(floorFromName) == 0)
+		newAreasNumber.replace(0, floorFromName.length(), floorToName);
     m_number = newAreasNumber;
     m_name = area.m_name;
     m_description = area.m_description;
@@ -42,7 +42,7 @@ MapArea::MapArea(const MapArea &area, const quint32 floorUin,
             oldAreasNumber, newAreasNumber));
 //    updateTitle();
     for (int i = 0; i != area.m_areas.size(); i++)
-        addArea(new MapArea(*area.m_areas.at(i), floorUin, floorFromName, floorToName));
+		addArea(new MapArea(*area.m_areas.at(i), floorUin, floorFromName, floorToName));
 }
 
 QDataStream &operator<<(QDataStream &output, const MapArea &area)
@@ -74,7 +74,7 @@ QDataStream &operator>>(QDataStream &input, MapArea &area)
     input >> last;
     for (int i = 0; i != last; i++)
     {
-        MapArea *tempArea = new MapArea(0, area.m_floorUin);
+		MapArea *tempArea = new MapArea(QPolygonF(), area.m_floorUin);
         area.addArea(tempArea);
         input >> *tempArea;
     }
@@ -223,21 +223,27 @@ void MapArea::setInscription(const QString &inscription)
     if (!boundingRect().isValid())    // If area is invalid
         return;
 
-    QTextDocument *doc = new QTextDocument(inscription);
-    doc->setDefaultFont(QFont(cFontFamily, cFontSize));
-    int fontSize = cFontSize;
-    qreal width = polygon().boundingRect().width();
-    qreal height = polygon().boundingRect().height();
-    while (((doc->size().width() > width) |
-            (doc->size().height() > height)) & (fontSize > 1))
-        doc->setDefaultFont(QFont(cFontFamily, --fontSize));
-//    doc->setDefaultFont(QFont(cFontFamily, ++fontSize));
-    doc->setTextWidth(doc->size().width());
-    QTextOption alignment(Qt::AlignHCenter);
-    doc->setDefaultTextOption(alignment);
-    m_inscription->setDocument(doc);
-    m_inscription->setPos(boundingRect().center().x() - doc->size().width()/2,
-                    boundingRect().center().y() - doc->size().height()/2);
+//	m_inscription->setPlainText("inscription");
+
+//	m_inscription->setPos(boundingRect().center().x() - polygon().boundingRect().width()/2,
+//                    boundingRect().center().y() - doc->size().height()/2);
+
+
+	QTextDocument *doc = new QTextDocument(inscription);
+	doc->setDefaultFont(QFont(cFontFamily, cFontSize));
+	int fontSize = cFontSize;
+	qreal width = polygon().boundingRect().width();
+	qreal height = polygon().boundingRect().height();
+	while (((doc->size().width() > width) |
+			(doc->size().height() > height)) & (fontSize > 1))
+		doc->setDefaultFont(QFont(cFontFamily, --fontSize));
+	doc->setDefaultFont(QFont(cFontFamily, ++fontSize));
+	doc->setTextWidth(doc->size().width());
+	QTextOption alignment(Qt::AlignHCenter);
+	doc->setDefaultTextOption(alignment);
+	m_inscription->setDocument(doc);
+	m_inscription->setPos(boundingRect().center().x() - doc->size().width()/2,
+					boundingRect().center().y() - doc->size().height()/2);
 }
 
 void MapArea::updateToolTip()

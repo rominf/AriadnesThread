@@ -1,5 +1,6 @@
 QT += svg
-QT += webkit
+isEqual(QT_MAJOR_VERSION, 4): QT += webkit
+isEqual(QT_MAJOR_VERSION, 5): QT += webkitwidgets
 
 HEADERS += \
     Common/map.h \
@@ -7,7 +8,7 @@ HEADERS += \
     Common/maparea.h \
     Common/mapbase.h \
     Ariadne/mainwindow.h \
-    Ariadne/dialogmapsize.h \
+	Ariadne/dialogmapsize.h \
     Common/geometry.h \
     Common/mapdoor.h \
     Common/mapselection.h \

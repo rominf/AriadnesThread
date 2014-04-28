@@ -53,7 +53,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent)
     actMapProperties->setEnabled(false);
 //    resize(792, 573);
 //    resize(782, 498);
-    showMaximized();
+//    showMaximized();
 }
 
 MainWindow::~MainWindow()
@@ -1805,6 +1805,7 @@ void MainWindow::panelFloorsVisibilityChanged(bool visible)
 void MainWindow::viewFloorsListCurrentItemChanged(const QModelIndex &current,
                                                   const QModelIndex &previous)
 {
+	Q_UNUSED(previous)
     int floor = current.row();
     if (curFloor != floor)
         setActiveFloor(floor);
@@ -1871,6 +1872,7 @@ void MainWindow::verticalSetTypeCurrentIndexChanged(int index)
 void MainWindow::lstwgtVerticalsCurrentItemChanged(QListWidgetItem *current,
                                                    QListWidgetItem *previous)
 {
+	Q_UNUSED(previous)
     int i = lstwgtVerticals->row(current);
 //    actVerticalSetPassage->setChecked(map->typeVertical(i));
     if (i > -1)
@@ -2016,6 +2018,7 @@ void MainWindow::ldtSearchTextChanged(const QString &text)
 void MainWindow::lstwgtSearchCurrentItemChanged(QListWidgetItem *current,
                                                 QListWidgetItem *previous)
 {
+	Q_UNUSED(previous)
     if (current)
     {
 		MapArea *area = (MapArea*)current->data(Qt::UserRole).toULongLong();
@@ -2054,6 +2057,7 @@ void MainWindow::setFinish()
 void MainWindow::lstwgtWaysCurrentItemChanged(QListWidgetItem *current,
                                               QListWidgetItem *previous)
 {
+	Q_UNUSED(previous)
     if (current)
     {
         GraphArc::WayPermissions permissions =

@@ -75,6 +75,7 @@ Map::Properties* DialogMapProperties::properties() const
 
 void DialogMapProperties::focusChanged(QWidget *old, QWidget *now)
 {
+	Q_UNUSED(now)
     if (qobject_cast<QPlainTextEdit*>(old) == m_ptdtDescription)
         mapUpdating();
 }

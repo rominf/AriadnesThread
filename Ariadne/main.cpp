@@ -1,4 +1,4 @@
-#include <QtGui/QApplication>
+#include <QApplication>
 #include <QtSvg>
 #include <QIcon>
 #include <QTextCodec>
@@ -9,7 +9,9 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
+	QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
+#endif
     QString locale = "en";//QLocale::system().name();
 
 	// Support of Qt dialogs translation
@@ -21,10 +23,11 @@ int main(int argc, char *argv[])
 	translator->load(":/tr/" + locale);
     a.installTranslator(translator);
 
-    a.setWindowIcon(QIcon(":/Ariadne.svg"));
+//    a.setWindowIcon(QIcon(":/Ariadne.svg"));
 
     MainWindow w;
-    w.show();
+	w.show();
+//	w.showMaximized();
 
     return a.exec();
 }

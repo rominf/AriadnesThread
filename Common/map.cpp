@@ -130,7 +130,7 @@ void Map::addGraphItem(QGraphicsItem *item)
     {
         GraphNode *node = qgraphicsitem_cast<GraphNode*>(item);
         MapFloor *floor = floorByUin(node->floorUin());
-        QGraphicsItem *item = floor->itemAt(node->pos());
+		QGraphicsItem *item = floor->itemAt(node->pos(), QTransform());
         if (item)
             if (item->type() == MapDoor::Type)
             {
