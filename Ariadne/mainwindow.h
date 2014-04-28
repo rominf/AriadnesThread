@@ -32,7 +32,7 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
-#include <QMotifStyle>
+//#include <QMotifStyle>
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QPushButton>

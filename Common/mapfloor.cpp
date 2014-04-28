@@ -13,39 +13,48 @@ MapFloor::MapFloor(const QRectF &sceneRect, QObject *parent) :
     cModesNames.insert(NodeAdd, tr("create graph"));
     m_mode = Idle;
     m_snapToExtensions = false;
-    m_border = new QGraphicsRectItem(sceneRect, 0, this);
+	m_border = new QGraphicsRectItem(sceneRect);
+//	old code:
+//    m_border = new QGraphicsRectItem(sceneRect, 0, this);
     m_border->setBrush(QBrush(Qt::white));
     m_border->setZValue(-2.0);
+	addItem(m_border);
     m_base = 0;
     addBase(MapBase::cFakeFileName);
-    m_crossBase = new QGraphicsRectItem(sceneRect, 0, this);
+	m_crossBase = new QGraphicsRectItem(sceneRect);
+//    m_crossBase = new QGraphicsRectItem(sceneRect, 0, this);
     m_crossBase->setBrush(QBrush(Qt::NoBrush));
     m_crossBase->setOpacity(0.5);
     m_crossBase->setZValue(-1.0);
+	addItem(m_crossBase);
 
     m_tempLine = 0;
     m_cursorCircle = new QGraphicsEllipseItem(
             -cCursorCircleR, -cCursorCircleR,
-            2*cCursorCircleR, 2*cCursorCircleR, 0, this);
+			2*cCursorCircleR, 2*cCursorCircleR);
     m_cursorCircle->setZValue(100500);  // ### increase 100500
     m_cursorCircle->setPen(QPen(Qt::red));
     m_cursorCircle->setBrush(QBrush(Qt::NoBrush));
     m_cursorCircle->hide();
-    m_crossLineHorizontal = new QGraphicsLineItem(0, this);
+	addItem(m_cursorCircle);
+	m_crossLineHorizontal = new QGraphicsLineItem();
     m_crossLineHorizontal->setZValue(100500 - 4);
     m_crossLineHorizontal->setPen(QPen(Qt::DotLine));
     m_crossLineHorizontal->hide();
-    m_crossLineVertical = new QGraphicsLineItem(0, this);
+	addItem(m_crossLineHorizontal);
+	m_crossLineVertical = new QGraphicsLineItem();
     m_crossLineVertical->setZValue(100500 - 4);
     m_crossLineVertical->setPen(QPen(Qt::DotLine));
     m_crossLineVertical->hide();
+	addItem(m_crossLineVertical);
     m_startPoint = new QGraphicsEllipseItem(
             -cCursorCircleR, -cCursorCircleR,
-            2*cCursorCircleR, 2*cCursorCircleR, 0, this);
+			2*cCursorCircleR, 2*cCursorCircleR);
     m_startPoint->setZValue(100500 - 3);
 //    m_startPoint->setPen(QPen(Qt::red));
     m_startPoint->setBrush(QBrush(Qt::red));
     m_startPoint->hide();
+	addItem(m_startPoint);
     m_selection = new MapSelection(Global::colorSelected, false);
     m_uin = ++m_count;
 }
@@ -77,7 +86,7 @@ QDataStream &operator>>(QDataStream &input, MapFloor &floor)
     floor.addBase(baseFileName);
     for (int i = 0; i != last; i++)
     {
-        floor.m_outlines.append(new MapArea(0, floor.uin()));
+		floor.m_outlines.append(new MapArea(QPolygonF(), floor.uin()));
         input >> *floor.m_outlines[i];
         floor.m_outlines[i]->setZValue(MapFloor::OutlineZValue);
         floor.addItem(floor.m_outlines[i]);
@@ -307,7 +316,7 @@ void MapFloor::mousePressEvent(QGraphicsSceneMouseEvent *event)
         break;
     case Qt::MiddleButton:
     {
-        QGraphicsItem *item = itemAt(event->scenePos());
+		QGraphicsItem *item = itemAt(event->scenePos(), QTransform());
         if (item)
         {
             if (item->type() == QGraphicsTextItem::Type)

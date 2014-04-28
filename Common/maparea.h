@@ -22,7 +22,7 @@ class MapArea : public QGraphicsPolygonItem
 public:
     explicit MapArea(const QPolygonF &polygon, const quint32 floorUin);
     explicit MapArea(const MapArea &area, const quint32 floorUin,
-                     const QString &before, const QString &after);
+					 const QString &floorFromName, const QString &floorToName);
 
     enum {Type = QGraphicsItem::UserType + 1};
     enum CreationError
