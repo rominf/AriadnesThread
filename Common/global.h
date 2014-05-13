@@ -5,7 +5,7 @@
 #include <QBrush>
 #include <QObject>
 
-#define EDITOR
+//#define EDITOR
 
 class Global : public QObject
 {

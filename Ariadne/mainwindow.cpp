@@ -1659,12 +1659,12 @@ void MainWindow::switchMode(MapFloor::Mode m)
             {
                 selectionIsValid = true;
                 setState(eAreasProperties/* | eWays*/, stSave, stTrue);
+#ifdef EDITOR
                 bool isModified = false;
                 isModified = (!area->number().isEmpty() |
                               !area->name().isEmpty() |
                               !area->description().isEmpty() |
                               !area->inscription().isEmpty());
-#ifdef EDITOR
                 ptdtAreaInscription->document()->setModified(isModified);
 #endif
                 cbxAreaType->setCurrentIndex((int)area->areaType());
@@ -2163,7 +2163,7 @@ void MainWindow::way()
         {
             QListWidgetItem *item = new QListWidgetItem(
 			            QString::number(lstwgtWays->count() + 1) + ". " +
-                    tr("With stairs and "), lstwgtWays);
+                    tr("With stairs and lifts"), lstwgtWays);
             item->setData(Qt::UserRole, (int)permissions);
         }
 
