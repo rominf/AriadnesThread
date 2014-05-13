@@ -114,7 +114,7 @@ No surprises today.
 \end_layout
 
 \begin_layout Standard
-“I promise that I’ll find classroom #501u in two months! ”.
+“I promise that I’ll find classroom #501u in two months!”.
  Have you heard this solemn oath? I bet you have.
  Do you remember looking for the classroom where we had our economics class?
  It was really hard to do! 
@@ -183,14 +183,14 @@ To begin with, a few words about my work on this project.
 
 \begin_layout Standard
 My goal was to develop a software application that could display a floor
- plan of a building, find it’s different parts (such as rooms, stairs, lifts,
- and shortcuts between them).
+ plan of a building, find it’s different parts (such as rooms, stairs, and
+ lifts) and shortcuts between them.
  To demonstrate my program I needed floor plans of this building.
 \end_layout
 
 \begin_layout Standard
 \begin_inset Note Comment
-status open
+status collapsed
 
 \begin_layout Plain Layout
 I started from the domain analysis — the essential part of any serious work.
@@ -214,7 +214,7 @@ Then I wrote the program in a half of year.
 
 \begin_layout Standard
 \begin_inset Note Comment
-status open
+status collapsed
 
 \begin_layout Plain Layout
 I've wanted to use my program for navigation in the main building of the
@@ -235,7 +235,7 @@ Slide 3
 Naturally, I couldn’t create floor plans without any programs.
  That’s why my Guide consists of two programs: Ariadne and Theseus.
  I draw the floor plan with the help of my first program called Ariadne.
- For the final users I created the second program called Theseus.
+ For the end users I created the second program called Theseus.
 \end_layout
 
 \begin_layout Paragraph
@@ -266,6 +266,8 @@ Slide 6
 
 \begin_layout Standard
 And here’s another structure of that building — a graph.
+ I defined this mathematical structure to make it possible to solve routing
+ problem.
  I’ve already explained what it is like.
  This graph connects all major elements of the building.
  I will call them areas.
@@ -375,7 +377,7 @@ Here is the program.
  Now I will type “blinnaya” to find it.
  Here it is.
  I’m pressing the button to find the route and...
- Ariadne shows finds it on the floor plan.
+ Theseus finds it on the floor plan.
  We can see other routes (and their parameters) on a special pane as well.
  We can see the timetable of the canteen.
 \end_layout
