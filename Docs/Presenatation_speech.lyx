@@ -1,0 +1,499 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass article
+\use_default_options false
+\maintain_unincluded_children false
+\language american
+\language_package default
+\inputencoding auto
+\fontencoding default
+\font_roman CMU Serif
+\font_sans CMU Sans Serif
+\font_typewriter CMU Typewriter Text
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts true
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format pdf4
+\output_sync 1
+\output_sync_macro "\synctex=1"
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_title "Final presentation speech"
+\pdf_author "Roman Inflianskas"
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder true
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 0
+\use_package esint 1
+\use_package mathdots 0
+\use_package mathtools 0
+\use_package mhchem 0
+\use_package stackrel 0
+\use_package stmaryrd 0
+\use_package undertilde 0
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\index Предметный указатель
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1.5cm
+\topmargin 2cm
+\rightmargin 1.5cm
+\bottommargin 1.5cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Final presentation speech
+\end_layout
+
+\begin_layout Author
+Roman Inflianskas
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Paragraph
+Slide 1
+\end_layout
+
+\begin_layout Standard
+Good afternoon.
+ What a nice day! I feel joy of examinations on your faces.
+\end_layout
+
+\begin_layout Standard
+I would not surprise anybody.
+ My name is still Roman Inflianskas.
+ And, as you might guess, I'm your class-mate from the 
+\begin_inset Quotes eld
+\end_inset
+
+Computer Software and Information Technology
+\begin_inset Quotes erd
+\end_inset
+
+ chair of the 
+\begin_inset Quotes eld
+\end_inset
+
+Informatics and control systems
+\begin_inset Quotes erd
+\end_inset
+
+ faculty of the Bauman Moscow State Technical University.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Quotes eld
+\end_inset
+
+I promise that I'll find classroom #501u in two months!
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Have you heard this Baumanec oath? I bet you have.
+ Do you remember searching next classroom (we had economics in it)? It was
+ really hard to do!
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Comment
+status collapsed
+
+\begin_layout Plain Layout
+And because we have already studied economics in the next classroom #502u
+ you should remember that finding it was really hard to do.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Comment
+status collapsed
+
+\begin_layout Plain Layout
+Navigation is a very developed direction of a science: it has come a long
+ way starting from the rock paintings, through compasses and maps, finishing
+ GPS navigators.
+ But I didn't find any well established software that would help me locate
+ rooms and solve routing problem inside the buildings.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+I decided to fix the situation and created a program.
+ I named it 
+\begin_inset Quotes eld
+\end_inset
+
+Ariadne's Thread
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+I'm here to tell you about my indoor navigation program that I've wrote
+ as a 
+\begin_inset Quotes eld
+\end_inset
+
+Step into the future
+\begin_inset Quotes erd
+\end_inset
+
+ project and it's creation.
+ After that I will show my program for you.
+ I'll finish by telling about some lost opportunities and candy-floss.
+\end_layout
+
+\begin_layout Standard
+I need 10 minutes to accomplish this goal.
+ You will have some time to ask your questions after I finish my talk.
+\end_layout
+
+\begin_layout Standard
+Let's get started.
+\end_layout
+
+\begin_layout Section
+Body
+\end_layout
+
+\begin_layout Paragraph
+Slide 2
+\end_layout
+
+\begin_layout Standard
+First of all I want to talk how did I created this project.
+\end_layout
+
+\begin_layout Standard
+I want to clarify the goal.
+ My goal was to develop a software that would be able to display a floor
+ plan of a building, find it's different parts (such as rooms, stairs, lifts
+ and so on) and shortcuts between them (shortcut has a special meaning in
+ the Computer Science, to clear up: in this speech I use original meaning
+ of this word: 
+\begin_inset Quotes eld
+\end_inset
+
+a route shorter than the usual one
+\begin_inset Quotes erd
+\end_inset
+
+).
+ To demonstrate my program I needed floor plans of this building.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+I started from the domain analysis — the essential part of any serious work.
+ I thoroughly studied existing software that was created in this field.
+ I've found that most of them are using simple mathematical structure —
+ graph and Dijkstra's algorithm for routing.
+ I decided to use them too.
+\end_layout
+
+\begin_layout Plain Layout
+Then I wrote the program in a half of year.
+ Aside from writing the program I needed to create floor plans of buildings
+ for program testing and demonstrating it.
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+I've wanted to use my program for navigation in the main building of the
+ Bauman Moscow State Technical University but I cannot get the plan because
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Paragraph
+Slide 3
+\end_layout
+
+\begin_layout Standard
+As you might guess I couldn't create floor plans without any programs.
+ That's why my Guide consists of two programs: Ariadne and Theseus.
+ I draw floor plan with my first program called Ariadne.
+ For the final users I created the second program called Theseus.
+\end_layout
+
+\begin_layout Paragraph
+Slide 4
+\end_layout
+
+\begin_layout Standard
+On the next slide you can see how my program looks.
+ I don't stop on this slide because I'll show my program later in more details.
+\end_layout
+
+\begin_layout Paragraph
+Slide 5
+\end_layout
+
+\begin_layout Standard
+Let's go to the analysis.
+ Here we have sample of 3D model of a building.
+ Normally building consists of several floors.
+ Besides rooms and doors building can have stairs, lifts, apertures, and
+ pillars.
+ That's a physical structure of the building.
+\end_layout
+
+\begin_layout Paragraph
+Slide 6
+\end_layout
+
+\begin_layout Standard
+I introduce one another structure of that building: graph.
+ I've explained what it is in the previous lessons.
+ Here graph connects all major elements of the building.
+ I called them areas.
+\end_layout
+
+\begin_layout Paragraph
+Slide 7
+\end_layout
+
+\begin_layout Standard
+On this slide you can see floor plan of the same building.
+ Because of the easiness of storing and displaying the data I decided to
+ use the floor plan but not the 3D model to represent the building.
+\end_layout
+
+\begin_layout Paragraph
+Slide 8
+\end_layout
+
+\begin_layout Standard
+Let's recap functions of my program.
+ I needed to give users opportunity to draw the floor plan and the graph,
+ connect the floors with the help of the stairs and the lifts.
+ For the final users I needed to implement searching algorithm for different
+ parts of buildings and routing algorithm.
+\end_layout
+
+\begin_layout Paragraph
+Slide 9
+\end_layout
+
+\begin_layout Standard
+What does it mean: 
+\begin_inset Quotes eld
+\end_inset
+
+drawing floor plans
+\begin_inset Quotes erd
+\end_inset
+
+? Firstly we need outline the floors.
+ Then we draw the areas.
+ Program stores them in a tree to ease structuring, copying, and deleting
+ them.
+ After outlining the areas we need to designate them (each area has it's
+ type and text fields).
+\end_layout
+
+\begin_layout Paragraph
+Slide 10
+\end_layout
+
+\begin_layout Standard
+The next step is drawing the graph.
+ The biggest part of the graph is located on the floor level.
+ 
+\begin_inset Note Comment
+status collapsed
+
+\begin_layout Plain Layout
+Snapping helps us to connect nodes of the graph with the doors.
+ 
+\end_layout
+
+\end_inset
+
+But different floors should be interconnected as well.
+ Verticals (such as stairs and lifts) connect areas located on different
+ floors.
+ When we create a vertical the program adds special edge between the doors
+ of those areas.
+\end_layout
+
+\begin_layout Paragraph
+Slide 11
+\end_layout
+
+\begin_layout Standard
+Having set this information we can use it to find shortcuts.
+ I spitted task of finding routes between the areas to subtasks: finding
+ all routes between the all doors of both areas.
+ Because the doors are linked to the nodes we can solve this task by applying
+ Dijkstra’s algorithm to the graph.
+ We are done.
+\end_layout
+
+\begin_layout Section
+Conclusion
+\end_layout
+
+\begin_layout Paragraph
+Slide 12
+\end_layout
+
+\begin_layout Standard
+Let me sum up.
+ Which results did I achieve? I've done analysis work and created a guide
+ to the buildings.
+ Apart from developing plans for the BMSTU educational-laboratory building
+ I draw plans of the main building of The Pushkin Museum of Fine Arts.
+\end_layout
+
+\begin_layout Paragraph
+Program demonstration
+\end_layout
+
+\begin_layout Standard
+Now I want to show you my program.
+ Firstly we open the building.
+ Here it is.
+ Let's find the shortest way between our laboratory classroom #237 and the
+ pancake house (I love this route because it's vital for hungry students
+ of our chair).
+ We type the number and we get classroom displayed on the screen.
+ Now we mark it as a start area.
+ Now I will type 
+\begin_inset Quotes eld
+\end_inset
+
+blinnaya
+\begin_inset Quotes erd
+\end_inset
+
+ to find it.
+ Here it is.
+ I'm pressing button to find the route and...
+ Ariadne shows us it on the floor plan.
+ We can see other routes (and their parameters) on a special pane as well.
+ We can see the timetable of the canteen.
+\end_layout
+
+\begin_layout Standard
+Well, I almost ran out of time.
+ Now I will tell what happened after I finished this program.
+ I presented it on the conference, won first place, and then applied to
+ the university.
+ I pushed my program as much as I could.
+ I wanted to install it on kiosks that now display library's site.
+ But I faced with huge bureaucracy in our university.
+ I presented this program in The Pushkin Museum of Fine Arts with a huge
+ success.
+ But suddenly they ran out of money and refused to install kiosks.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Comment
+status collapsed
+
+\begin_layout Plain Layout
+Years passed and Google released indoor navigation for big malls and airports.
+ You can use your Android smartphone or PC to try it.
+ But you cannot draw buildings in the Google.Maps.
+ You depend on Google and it's will.
+ For example, BMSTU is not detailed on Google.Maps.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+And one more thing.
+ Just for fun I ported my program to Android.
+ It wasn't hard at all.
+ I just spend one day to achieve that.
+ Here it's.
+\end_layout
+
+\begin_layout Section
+Questions
+\end_layout
+
+\begin_layout Standard
+It's time for questions! You can ask me everything related with this program.
+\end_layout
+
+\end_body
+\end_document
