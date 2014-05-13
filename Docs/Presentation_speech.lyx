@@ -102,44 +102,22 @@ Slide 1
 \end_layout
 
 \begin_layout Standard
-Good afternoon.
- What a nice day! I feel joy of examinations on your faces.
+Good afternoon, ladies and gentlemen!
 \end_layout
 
 \begin_layout Standard
-I would not surprise anybody.
- My name is still Roman Inflianskas.
- And, as you might guess, I'm your class-mate from the 
-\begin_inset Quotes eld
-\end_inset
-
-Computer Software and Information Technology
-\begin_inset Quotes erd
-\end_inset
-
- chair of the 
-\begin_inset Quotes eld
-\end_inset
-
-Informatics and control systems
-\begin_inset Quotes erd
-\end_inset
-
+No surprises today.
+ My name is Roman Inflianskas.
+ And, as you might’ve guessed, I’m your class-mate from the “Computer Software
+ and Information Technology” chair of the “Informatics and control systems”
  faculty of the Bauman Moscow State Technical University.
 \end_layout
 
 \begin_layout Standard
-\begin_inset Quotes eld
-\end_inset
-
-I promise that I'll find classroom #501u in two months!
-\begin_inset Quotes erd
-\end_inset
-
-.
- Have you heard this Baumanec oath? I bet you have.
- Do you remember searching next classroom (we had economics in it)? It was
- really hard to do!
+“I promise that I’ll find classroom #501u in two months! ”.
+ Have you heard this solemn oath? I bet you have.
+ Do you remember looking for the classroom where we had our economics class?
+ It was really hard to do! 
 \end_layout
 
 \begin_layout Standard
@@ -175,39 +153,20 @@ Navigation is a very developed direction of a science: it has come a long
 
 \begin_layout Standard
 I decided to fix the situation and created a program.
- I named it 
-\begin_inset Quotes eld
-\end_inset
-
-Ariadne's Thread
-\begin_inset Quotes erd
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-I'm here to tell you about my indoor navigation program that I've wrote
- as a 
-\begin_inset Quotes eld
-\end_inset
-
-Step into the future
-\begin_inset Quotes erd
-\end_inset
-
- project and it's creation.
- After that I will show my program for you.
- I'll finish by telling about some lost opportunities and candy-floss.
+ I named it “Ariadne’s Thread”.
+ I’m here to tell you about my indoor navigation program that I wrote as
+ a “Step into the future” project.
+ After that I will demonstrate my program to you.
+ And finally I’ll tell you about some lost opportunities and candy-floss.
 \end_layout
 
 \begin_layout Standard
 I need 10 minutes to accomplish this goal.
- You will have some time to ask your questions after I finish my talk.
+ You are welcome to ask me questions after I finish my talk.
 \end_layout
 
 \begin_layout Standard
-Let's get started.
+So off we go!
 \end_layout
 
 \begin_layout Section
@@ -219,24 +178,13 @@ Slide 2
 \end_layout
 
 \begin_layout Standard
-First of all I want to talk how did I created this project.
+To begin with, a few words about my work on this project.
 \end_layout
 
 \begin_layout Standard
-I want to clarify the goal.
- My goal was to develop a software that would be able to display a floor
- plan of a building, find it's different parts (such as rooms, stairs, lifts
- and so on) and shortcuts between them (shortcut has a special meaning in
- the Computer Science, to clear up: in this speech I use original meaning
- of this word: 
-\begin_inset Quotes eld
-\end_inset
-
-a route shorter than the usual one
-\begin_inset Quotes erd
-\end_inset
-
-).
+My goal was to develop a software application that could display a floor
+ plan of a building, find it’s different parts (such as rooms, stairs, lifts,
+ and shortcuts between them).
  To demonstrate my program I needed floor plans of this building.
 \end_layout
 
@@ -284,9 +232,9 @@ Slide 3
 \end_layout
 
 \begin_layout Standard
-As you might guess I couldn't create floor plans without any programs.
- That's why my Guide consists of two programs: Ariadne and Theseus.
- I draw floor plan with my first program called Ariadne.
+Naturally, I couldn’t create floor plans without any programs.
+ That’s why my Guide consists of two programs: Ariadne and Theseus.
+ I draw the floor plan with the help of my first program called Ariadne.
  For the final users I created the second program called Theseus.
 \end_layout
 
@@ -295,8 +243,8 @@ Slide 4
 \end_layout
 
 \begin_layout Standard
-On the next slide you can see how my program looks.
- I don't stop on this slide because I'll show my program later in more details.
+On the next slide you can see what my program looks like.
+ I won’t stop on this slide because I’ll show my program later in more details.
 \end_layout
 
 \begin_layout Paragraph
@@ -304,12 +252,12 @@ Slide 5
 \end_layout
 
 \begin_layout Standard
-Let's go to the analysis.
- Here we have sample of 3D model of a building.
- Normally building consists of several floors.
- Besides rooms and doors building can have stairs, lifts, apertures, and
+Over now to the analysis.
+ Here we have a 3D model of a building, which normally consists of several
+ floors.
+ Besides rooms and doors, buildings can have stairs, lifts, openings, and
  pillars.
- That's a physical structure of the building.
+ That’s the physical structure of a building.
 \end_layout
 
 \begin_layout Paragraph
@@ -317,10 +265,10 @@ Slide 6
 \end_layout
 
 \begin_layout Standard
-I introduce one another structure of that building: graph.
- I've explained what it is in the previous lessons.
- Here graph connects all major elements of the building.
- I called them areas.
+And here’s another structure of that building — a graph.
+ I’ve already explained what it is like.
+ This graph connects all major elements of the building.
+ I will call them areas.
 \end_layout
 
 \begin_layout Paragraph
@@ -328,7 +276,7 @@ Slide 7
 \end_layout
 
 \begin_layout Standard
-On this slide you can see floor plan of the same building.
+On this slide you can see the floor plan of the same building.
  Because of the easiness of storing and displaying the data I decided to
  use the floor plan but not the 3D model to represent the building.
 \end_layout
@@ -338,11 +286,11 @@ Slide 8
 \end_layout
 
 \begin_layout Standard
-Let's recap functions of my program.
- I needed to give users opportunity to draw the floor plan and the graph,
- connect the floors with the help of the stairs and the lifts.
- For the final users I needed to implement searching algorithm for different
- parts of buildings and routing algorithm.
+Let’s recap the functions of my program.
+ I needed to give users an opportunity to draw the floor plan and the graph,
+ and connect the floors with the help of the stairs and the lifts.
+ For end users I needed to implement a searching algorithm for different
+ parts of buildings and a routing algorithm.
 \end_layout
 
 \begin_layout Paragraph
@@ -350,19 +298,11 @@ Slide 9
 \end_layout
 
 \begin_layout Standard
-What does it mean: 
-\begin_inset Quotes eld
-\end_inset
-
-drawing floor plans
-\begin_inset Quotes erd
-\end_inset
-
-? Firstly we need outline the floors.
+What does it mean: “drawing floor plans”? Firstly we need to outline the
+ floors.
  Then we draw the areas.
- Program stores them in a tree to ease structuring, copying, and deleting
- them.
- After outlining the areas we need to designate them (each area has it's
+ The program stores them in a tree to ease structuring, copying, and deleting.
+ After outlining the areas we need to designate them (each area has its
  type and text fields).
 \end_layout
 
@@ -373,7 +313,6 @@ Slide 10
 \begin_layout Standard
 The next step is drawing the graph.
  The biggest part of the graph is located on the floor level.
- 
 \begin_inset Note Comment
 status collapsed
 
@@ -384,10 +323,10 @@ Snapping helps us to connect nodes of the graph with the doors.
 
 \end_inset
 
-But different floors should be interconnected as well.
+ But different floors should be interconnected as well.
  Verticals (such as stairs and lifts) connect areas located on different
  floors.
- When we create a vertical the program adds special edge between the doors
+ When we create a vertical the program adds a special edge between the doors
  of those areas.
 \end_layout
 
@@ -397,10 +336,10 @@ Slide 11
 
 \begin_layout Standard
 Having set this information we can use it to find shortcuts.
- I spitted task of finding routes between the areas to subtasks: finding
- all routes between the all doors of both areas.
+ I split the task of finding routes between the areas to subtasks: finding
+ all routes between all the doors of both areas.
  Because the doors are linked to the nodes we can solve this task by applying
- Dijkstra’s algorithm to the graph.
+ Dijkstra's algorithm to the graph.
  We are done.
 \end_layout
 
@@ -414,10 +353,10 @@ Slide 12
 
 \begin_layout Standard
 Let me sum up.
- Which results did I achieve? I've done analysis work and created a guide
+ What results have I achieved? I’ve done analysis work and created a guide
  to the buildings.
  Apart from developing plans for the BMSTU educational-laboratory building
- I draw plans of the main building of The Pushkin Museum of Fine Arts.
+ I’ve drawn plans of the main building of The Pushkin Museum of Fine Arts.
 \end_layout
 
 \begin_layout Paragraph
@@ -425,41 +364,32 @@ Program demonstration
 \end_layout
 
 \begin_layout Standard
-Now I want to show you my program.
- Firstly we open the building.
+Here is the program.
+ First we open the building.
  Here it is.
- Let's find the shortest way between our laboratory classroom #237 and the
- pancake house (I love this route because it's vital for hungry students
- of our chair).
- We type the number and we get classroom displayed on the screen.
- Now we mark it as a start area.
- Now I will type 
-\begin_inset Quotes eld
-\end_inset
-
-blinnaya
-\begin_inset Quotes erd
-\end_inset
-
- to find it.
+ Let’s find the shortest way from our laboratory classroom #237 to the pancake
+ house (I love this route because it’s vital for hungry students of our
+ chair).
+ We type the number and get the classroom displayed on the screen.
+ We mark it as a starting point.
+ Now I will type “blinnaya” to find it.
  Here it is.
- I'm pressing button to find the route and...
- Ariadne shows us it on the floor plan.
+ I’m pressing the button to find the route and...
+ Ariadne shows finds it on the floor plan.
  We can see other routes (and their parameters) on a special pane as well.
  We can see the timetable of the canteen.
 \end_layout
 
 \begin_layout Standard
-Well, I almost ran out of time.
- Now I will tell what happened after I finished this program.
- I presented it on the conference, won first place, and then applied to
- the university.
- I pushed my program as much as I could.
- I wanted to install it on kiosks that now display library's site.
- But I faced with huge bureaucracy in our university.
- I presented this program in The Pushkin Museum of Fine Arts with a huge
- success.
- But suddenly they ran out of money and refused to install kiosks.
+Well, I’m afraid I’m running out of time.
+ Do you know what happened after I finished this program? I presented it
+ at a conference, won first place, and then applied to the university.
+ I promoted my program as hard as I could.
+ I wanted to install it in kiosks that now display the library’s site.
+ But I faced terrible bureaucracy in our university.
+ I presented this program at The Pushkin Museum of Fine Arts, and it was
+ a great success.
+ Unfortunately they ran out of money and refused to install the kiosks.
 \end_layout
 
 \begin_layout Standard
@@ -482,9 +412,9 @@ Years passed and Google released indoor navigation for big malls and airports.
 \begin_layout Standard
 And one more thing.
  Just for fun I ported my program to Android.
- It wasn't hard at all.
- I just spend one day to achieve that.
- Here it's.
+ It wasn’t hard at all.
+ I just spent one day to achieve that.
+ Here it is.
 \end_layout
 
 \begin_layout Section
@@ -492,7 +422,8 @@ Questions
 \end_layout
 
 \begin_layout Standard
-It's time for questions! You can ask me everything related with this program.
+And now it’s time for your questions! You can ask me anything related to
+ this program.
 \end_layout
 
 \end_body
