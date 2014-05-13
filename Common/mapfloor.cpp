@@ -501,6 +501,8 @@ void MapFloor::keyPressEvent(QKeyEvent *event)
     default:
         break; // Ignore other :)
     }
+#else
+    Q_UNUSED(event);
 #endif
 }
 
