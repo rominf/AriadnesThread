@@ -25,8 +25,6 @@ private:
     QLabel *m_lblMSizeX;
     QLabel *m_lblMSizeY;
     QDialogButtonBox *m_buttonBox;
-//    QPushButton *m_btnOk;
-//    QPushButton *m_btnCancel;
 
     static const qreal cMSizeX = 500;
     static const qreal cMSizeY = 300;
