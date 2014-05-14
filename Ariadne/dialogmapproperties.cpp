@@ -14,8 +14,6 @@ DialogMapProperties::DialogMapProperties(
     }
     mapTemplateFile.close();
 
-//    m_tempMapFile = new QTemporaryFile();
-
     QVBoxLayout *vlayout = new QVBoxLayout(this);
 #ifdef EDITOR
     QGridLayout *glayout = new QGridLayout(this);

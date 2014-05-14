@@ -30,7 +30,6 @@ private slots:
 
 private:
     QString m_mapTemplate;
-//    QTemporaryFile *m_tempMapFile;
     QLineEdit *m_ldtName;
     QPlainTextEdit *m_ptdtDescription;
     QLineEdit *m_ldtCoordinates;

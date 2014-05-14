@@ -367,12 +367,6 @@ void MainWindow::createMenus()
     menuGo->addAction(actFloorUpper);
     menuGo->addAction(actFloorLower);
 
-//    menuPanels = menuBar()->addMenu(tr("Пане&ли"));
-//    menuPanels->addAction(actPanelFloorsManagement);
-//    menuPanels->addAction(actPanelVerticals);
-//    menuPanels->addAction(actPanelAreasMarking);
-//    menuPanels->addAction(actPanelWay);
-
 #ifdef EDITOR
     menuAdd = menuBar()->addMenu(tr("&Add"));
     menuAdd->addAction(actAddArea);
@@ -383,7 +377,6 @@ void MainWindow::createMenus()
     menuHelp = menuBar()->addMenu(tr("&Help"));
     menuHelp->addAction(actHelp);
     menuHelp->addAction(actAbout);
-    //menuHelp->addAction(actAboutQT);
 }
 
 void MainWindow::createToolBars()
@@ -399,12 +392,6 @@ void MainWindow::createToolBars()
 #else
     tbrFile->addAction(actMapSaveAs);
 #endif
-//    tbrFile->addAction(actQuit);
-
-//    tbrEdit = addToolBar(tr("Правка"));
-//    tbrEdit->setFloatable(false);
-//    tbrEdit->addAction(actAreaCopy);
-//    tbrEdit->addAction(actGraphCopy);
 
     tbrView = addToolBar(tr("View"));
     tbrView->setFloatable(false);
@@ -442,7 +429,6 @@ void MainWindow::createToolBars()
 #ifdef EDITOR
     tbrAdd = addToolBar(tr("Add"));
     tbrAdd->setFloatable(false);
-//    tbrAdd->addAction(actAddWall);
     tbrAdd->addAction(actAddArea);
     tbrAdd->addAction(actAddDoor);
     tbrAdd->addAction(actAddNode);
@@ -1638,7 +1624,6 @@ void MainWindow::switchMode(MapFloor::Mode m)
 #endif
         setCursor(Qt::ArrowCursor);
         break;
-//    case MapFloor::WallAdd:
     case MapFloor::AreaAdd:
     case MapFloor::DoorAdd:
     case MapFloor::NodeAdd:
