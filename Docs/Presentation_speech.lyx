@@ -234,8 +234,8 @@ Slide 3
 \begin_layout Standard
 Naturally, I couldn’t create floor plans without any programs.
  That’s why my Guide consists of two programs: Ariadne and Theseus.
- I draw the floor plan with the help of my first program called Ariadne.
- For the end users I created the second program called Theseus.
+ I drew the floor plan with the help of my first program called Ariadne.
+ For end users I worked out the second program called Theseus.
 \end_layout
 
 \begin_layout Paragraph
@@ -244,7 +244,7 @@ Slide 4
 
 \begin_layout Standard
 On the next slide you can see what my program looks like.
- I won’t stop on this slide because I’ll show my program later in more details.
+ I won’t stop on this slide because I’ll show my program later in more detail.
 \end_layout
 
 \begin_layout Paragraph
@@ -266,8 +266,8 @@ Slide 6
 
 \begin_layout Standard
 And here’s another structure of that building — a graph.
- I defined this mathematical structure to make it possible to solve routing
- problem.
+ I defined this mathematical structure to make it possible to solve the
+ routing problem.
  I’ve already explained what it is like.
  This graph connects all major elements of the building.
  I will call them areas.
@@ -290,9 +290,9 @@ Slide 8
 \begin_layout Standard
 Let’s recap the functions of my program.
  I needed to give users an opportunity to draw the floor plan and the graph,
- and connect the floors with the help of the stairs and the lifts.
+ and connect the floors with the help of stairs and lifts.
  For end users I needed to implement a searching algorithm for different
- parts of buildings and a routing algorithm.
+ parts of buildings and the routing algorithm.
 \end_layout
 
 \begin_layout Paragraph
@@ -337,7 +337,7 @@ Slide 11
 \end_layout
 
 \begin_layout Standard
-Having set this information we can use it to find shortcuts.
+Having acquired this information we can use it to find shortcuts.
  I split the task of finding routes between the areas to subtasks: finding
  all routes between all the doors of both areas.
  Because the doors are linked to the nodes we can solve this task by applying
@@ -357,8 +357,9 @@ Slide 12
 Let me sum up.
  What results have I achieved? I’ve done analysis work and created a guide
  to the buildings.
- Apart from developing plans for the BMSTU educational-laboratory building
- I’ve drawn plans of the main building of The Pushkin Museum of Fine Arts.
+ Apart from developing plans for the educational-laboratory building of
+ this university I’ve drawn plans of the main building of The Pushkin Museum
+ of Fine Arts.
 \end_layout
 
 \begin_layout Paragraph
@@ -378,14 +379,14 @@ Here is the program.
  Here it is.
  I’m pressing the button to find the route and...
  Theseus finds it on the floor plan.
- We can see other routes (and their parameters) on a special pane as well.
+ We can see other routes (and their parameters) on a special panel as well.
  We can see the timetable of the canteen.
 \end_layout
 
 \begin_layout Standard
 Well, I’m afraid I’m running out of time.
  Do you know what happened after I finished this program? I presented it
- at a conference, won first place, and then applied to the university.
+ at a conference, won first prize, and then applied to the university.
  I promoted my program as hard as I could.
  I wanted to install it in kiosks that now display the library’s site.
  But I faced terrible bureaucracy in our university.
