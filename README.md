@@ -1,6 +1,5 @@
 # AriadnesThread
 
-Ariadne's Thread is the desktop indoor navigation application.
-It was written in 2010-2011 when I was in the 11th grade of school specially for "Step Into The Future" Olympiad (I won the first prize).
+Indoor navigation: display a floor plan of a building, find it's different parts and shortcuts between them. I've made this as a entarance project to Bauman Moscow State Technical University (http://en.wikipedia.org/wiki/BMSTU). I won the first prize.
 
 See documentation written mostly in Russian in `Docs` directory.
