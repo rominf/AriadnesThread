@@ -26,12 +26,12 @@ private:
     QLabel *m_lblMSizeY;
     QDialogButtonBox *m_buttonBox;
 
-    static const qreal cMSizeX = 500;
-    static const qreal cMSizeY = 300;
-    static const qreal cMinMSizeX = 1;
-    static const qreal cMaxMSizeX = 10000;
-    static const qreal cMinMSizeY = 1;
-    static const qreal cMaxMSizeY = 10000;
+    static constexpr qreal cMSizeX = 500;
+    static constexpr qreal cMSizeY = 300;
+    static constexpr qreal cMinMSizeX = 1;
+    static constexpr qreal cMaxMSizeX = 10000;
+    static constexpr qreal cMinMSizeY = 1;
+    static constexpr qreal cMaxMSizeY = 10000;
 };
 
 #endif // DIALOGMAPSIZE_H

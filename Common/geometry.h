@@ -11,11 +11,11 @@ public:
     Geometry();
 
     enum Straight {None, SaveX, SaveY};
-    static const qreal SnapingDistToLine = 25.0;
-    static const qreal SnapingDistToNode = 15.0;
-    static const qreal SnapingDistToNodeLine = 10.0;
-    static const qreal SnapingDistToTop = 10.0;
-    static const qreal Error = 0.001;
+    static constexpr qreal SnapingDistToLine = 25.0;
+    static constexpr qreal SnapingDistToNode = 15.0;
+    static constexpr qreal SnapingDistToNodeLine = 10.0;
+    static constexpr qreal SnapingDistToTop = 10.0;
+    static constexpr qreal Error = 0.001;
 
     static Straight straighten(QLineF &line);
     static qreal dist(QPointF m, QPointF n);

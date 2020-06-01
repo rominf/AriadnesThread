@@ -169,8 +169,8 @@ private slots:
 private:
     ///////////////////////////////Constants////////////////////////////////////
     static const qint32 cMagicNumber = 0xA246B56D;
-    static const qreal cPixPerRealM = 10;
-    static const qreal cZoom = 1.1;
+    static constexpr qreal cPixPerRealM = 10;
+    static constexpr qreal cZoom = 1.1;
     static const int cDockWidth = 160;
     static const bool isExtraShortcutsEnabled = false;
     static const QString cNewFileName;
